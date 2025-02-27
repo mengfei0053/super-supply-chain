@@ -1,0 +1,53 @@
+package middleware
+
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
+	"net/http"
+	"strings"
+	"super-supply-chain/configs"
+	"super-supply-chain/controllers"
+	"time"
+)
+
+func handleNoAuth(c *gin.Context) {
+	// 重定向
+	c.SetCookie(configs.AuthKey, "", 60*60*24, "/", configs.DOMAIN, false, true)
+}
+
+func AuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+
+		if authHeader == "" {
+			handleNoAuth(c)
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
+			c.Abort()
+			return
+		}
+
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+		claims := &controllers.Claims{}
+
+		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+			return controllers.JwtKey, nil
+		})
+
+		if err != nil || !token.Valid {
+			handleNoAuth(c)
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			c.Abort()
+			return
+		}
+
+		if claims.ExpiresAt.Time.Before(time.Now()) {
+			handleNoAuth(c)
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Token expired"})
+			c.Abort()
+			return
+		}
+
+		c.Set("username", claims.Username)
+		c.Next()
+	}
+}
