@@ -10,6 +10,7 @@ import { Route } from "react-router-dom";
 import ExcelPage from "./pages/excels";
 import dictManage from "./pages/tool-pages/dict-manage";
 import ExcelEditPage from "./pages/excels/Edit";
+import YifanCostCalculation from "./pages/yifan/cost-calculation";
 
 export const App = () => (
   <Admin
@@ -22,6 +23,10 @@ export const App = () => (
     <Resource name="excel-mapping-rule" {...toolPages}></Resource>
     <Resource name="excel-read-rules" {...ExcelReadRules}></Resource>
     <Resource name="dict-manage" {...dictManage}></Resource>
+    <Resource
+      name="yifan/cost-calculation"
+      {...YifanCostCalculation}
+    ></Resource>
     <Resource name="excel">
       <Route path=":tableName" element={<ExcelPage></ExcelPage>}></Route>
       <Route

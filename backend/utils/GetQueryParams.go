@@ -18,6 +18,7 @@ type ListQueryParams struct {
 func GetListQueryParams(c *gin.Context) (ListQueryParams, error) {
 	var sliceRange []int
 	range_ := c.Query("range")
+	
 	err := json.Unmarshal([]byte(range_), &sliceRange)
 	if err != nil {
 		log.Fatal(err)

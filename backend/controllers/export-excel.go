@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"super-supply-chain/models"
 	"super-supply-chain/utils"
+	excel_template_engines "super-supply-chain/utils/excel-template-engines"
 )
 
 type ExportExcelReq struct {
@@ -50,11 +51,24 @@ func SingleExportExcel(c *gin.Context) {
 		return
 	}
 
-	filePath, err := utils.CreateFile(&excelData.Datas, excelData.FileName)
+	var filePath string
+	var err error
+
+	switch tableName {
+	case "dynamic_settlement_statement_fenchang":
+		filePath, err = excel_template_engines.CreateFeiChangFeiyong(&excelData.Datas, excelData.FileName)
+	case "dynamic_yifan_cost_cal":
+		filePath, err = excel_template_engines.CreateCostCalculation(&excelData.Datas, excelData.FileName)
+		c.JSON(http.StatusOK, gin.H{"message": filePath})
+		return
+	default:
+
+	}
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.Header("Content-Disposition", "attachment; filename=example.zip")
+	c.Header("Content-Disposition", "attachment; filename="+fmt.Sprintf("分厂开票模板_%s", excelData.FileName))
 	c.File(filePath)
 }

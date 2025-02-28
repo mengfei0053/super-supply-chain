@@ -28,4 +28,6 @@ type FreightBase struct {
 	Tax float64 `gorm:"type:float; comment:税金"`
 	// 税率
 	TaxRate float64 `gorm:"type:float; comment:税率"`
+	// 年份
+	Year string `gorm:"type:varchar(100); comment:年份"`
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"os"
@@ -13,11 +14,27 @@ import (
 
 func main() {
 
+	fmt.Println(os.Getenv(""))
+
 	configs.LoadConfigFile()
+	if configs.IsDev() {
+		gin.SetMode(gin.DebugMode)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+	}
 
 	models.InitDB()
+	//models.UpdateDb()
 
 	r := gin.Default()
+	logger := middleware.InitZapLogger()
+	defer logger.Sync()
+
+	r.Use(middleware.GinZapLogger(logger))
+	// 替换默认 Recovery 中间件
+	r.Use(middleware.GinZapRecovery(logger, true))
+
+	controllers.LoadStatic(r)
 
 	// Custom CORS configuration
 	r.Use(cors.New(cors.Config{
@@ -49,6 +66,12 @@ func main() {
 		protected.PUT("/excel-mapping-rule/:id", controllers.UpdateExcelMappingRules)
 		protected.DELETE("/excel-mapping-rule/:id", controllers.DeleteExcelMappingRules)
 
+		protected.GET("/yifan/cost-calculation", controllers.GetExcelMappingRules)
+		protected.GET("/yifan/cost-calculation/:id", controllers.GetExcelMappingRuleDetail)
+		protected.POST("/yifan/cost-calculation", controllers.CreateExcelMappingRules)
+		protected.PUT("/yifan/cost-calculation/:id", controllers.UpdateExcelMappingRules)
+		protected.DELETE("/yifan/cost-calculation/:id", controllers.DeleteExcelMappingRules)
+
 		protected.GET("/excel-read-rules", controllers.GetExcelReadRulesList)
 		protected.GET("/excel-read-rules/:id", controllers.GetExcelReadRule)
 		protected.POST("/excel-read-rules", controllers.CreateExcelReadRules)
@@ -63,6 +86,7 @@ func main() {
 		protected.GET("/dict-manage/map/:type", controllers.GetDictMap)
 
 		protected.GET("/excel/:tableName", controllers.GetDynamicExcelTableList)
+		protected.GET("/excel/:tableName/exports", controllers.ExportDynamicExcel)
 		protected.GET("/excel/:tableName/:id", controllers.GetDynamicExcelTableDetail)
 		protected.POST("/excel/:tableName", controllers.CreateDynamicExcelTable)
 		protected.PUT("/excel/:tableName/:id", controllers.UpdateDynamicExcelTable)

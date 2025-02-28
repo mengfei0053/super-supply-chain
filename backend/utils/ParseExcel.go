@@ -18,15 +18,6 @@ func GetUploadTmpDir() string {
 	return tmpPath
 }
 
-func getRuleItem(key string, rules []models.MappingRule) *models.MappingRule {
-	for _, itemRule := range rules {
-		if itemRule.ExcelKey == key {
-			return &itemRule
-		}
-	}
-	return nil
-}
-
 func GetExcelData(path string, mapRules MapRuleInfo) (models.ExcelData, error) {
 	var data = models.ExcelData{}
 	var base = make(map[string]string)
@@ -74,9 +65,9 @@ func GetExcelData(path string, mapRules MapRuleInfo) (models.ExcelData, error) {
 		if len(rowData) == 0 {
 			break
 		}
-		if len(rowData) > 0 && rowData[0] == "" {
-			break
-		}
+		//if len(rowData) > 0 && rowData[0] == "" {
+		//	break
+		//}
 		if rowIndex >= startRow-1 {
 			var chooseRowData = make(map[string]string)
 			for _, mappingRule := range IterateRule.Rules {

@@ -1,6 +1,7 @@
 package configs
 
 import (
+	"fmt"
 	"github.com/joho/godotenv"
 	"os"
 	"path/filepath"
@@ -15,10 +16,13 @@ var AuthKey string
 var WEB_DAV_USER string
 var WEB_DAV_PASSWORD string
 var WEB_DAV_URL string
+var ENVIRONMENT string
 
 func LoadConfigFile() {
 	var err error
 	pwd, err := os.Getwd()
+	fmt.Println("pwd", pwd)
+
 	if err != nil {
 		panic(err)
 	}
@@ -37,5 +41,10 @@ func LoadConfigFile() {
 	WEB_DAV_USER = os.Getenv("WEB_DAV_USER")
 	WEB_DAV_PASSWORD = os.Getenv("WEB_DAV_PASSWORD")
 	WEB_DAV_URL = os.Getenv("WEB_DAV_URL")
+	ENVIRONMENT = os.Getenv("ENVIRONMENT")
+	fmt.Println("ENVIRONMENT", ENVIRONMENT)
+}
 
+func IsDev() bool {
+	return ENVIRONMENT != "production"
 }

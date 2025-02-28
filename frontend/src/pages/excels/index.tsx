@@ -1,15 +1,12 @@
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import * as React from "react";
 import {
   Datagrid,
   List,
   TextField,
   TopToolbar,
-  ArrayField,
-  FunctionField,
-  WrapperField,
-  TextInput,
   EditButton,
+  DeleteButton,
 } from "react-admin";
 import { useParams } from "react-router-dom";
 import DataField from "./DataField";
@@ -17,7 +14,7 @@ import Upload from "./Upload";
 import ManageExportRule from "./ManageExportRule";
 import Export from "./Export";
 import SingleExport from "./SingleExport";
-import { JsonInput } from "react-admin-json-view";
+import BatchExport from "./BatchExport";
 
 const Empty = () => {
   return (
@@ -38,6 +35,14 @@ const ListAction = () => {
   );
 };
 
+const BulkActions = () => {
+  return (
+    <>
+      <BatchExport></BatchExport>
+    </>
+  );
+};
+
 const ExcelPage: React.FunctionComponent = () => {
   const { tableName } = useParams();
 
@@ -46,8 +51,13 @@ const ExcelPage: React.FunctionComponent = () => {
       resource={`excel/${tableName}`}
       actions={<ListAction></ListAction>}
       empty={<Empty></Empty>}
+      exporter={async (r) => {
+        console.log(r);
+
+        // httpClient();
+      }}
     >
-      <Datagrid>
+      <Datagrid bulkActionButtons={<BulkActions></BulkActions>}>
         <TextField source="id"></TextField>
         <TextField source="fileName"></TextField>
         <TextField source="uploadFilePath"></TextField>
@@ -55,6 +65,7 @@ const ExcelPage: React.FunctionComponent = () => {
         <>
           <EditButton></EditButton>
           <SingleExport></SingleExport>
+          <DeleteButton></DeleteButton>
         </>
       </Datagrid>
     </List>

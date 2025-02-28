@@ -52,10 +52,16 @@ export default defineConfig(({ mode }) => ({
   plugins: [react()],
   server: {
     host: true,
+    proxy:{
+        "/api": {
+            target: "http://localhost:8081",
+            changeOrigin: true,
+        },
+    }
   },
   build: {
     sourcemap: mode === "developement",
   },
   resolve: { alias },
-  base: "./",
+  base: "/super-supply-chain",
 }));

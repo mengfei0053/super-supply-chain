@@ -8,11 +8,8 @@ const SingleExport: React.FunctionComponent = () => {
   const { tableName } = useParams();
 
   const exportExcel = () => {
-    httpClient(
+    window.open(
       `${import.meta.env.VITE_JSON_SERVER_URL}/excel-export-rule/${tableName}/export/${record?.id}`,
-      {
-        method: "POST",
-      },
     );
   };
 

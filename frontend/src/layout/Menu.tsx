@@ -62,6 +62,23 @@ const Menu: React.FunctionComponent<IMenuProps> = ({ dense = false }) => {
       <SubMenu
         handleToggle={() => handleToggle("menuCatalog")}
         isOpen={state.menuCatalog}
+        name="翊帆"
+        icon={<ProductIcon />}
+        dense={dense}
+      >
+        <MenuItemLink
+          to={`/yifan/cost-calculation`}
+          state={{ _scrollToTop: true }}
+          primaryText={translate("费用结算", {
+            smart_count: 2,
+          })}
+          leftIcon={<OrderIcon />}
+          dense={dense}
+        />
+      </SubMenu>
+      <SubMenu
+        handleToggle={() => handleToggle("menuCatalog")}
+        isOpen={state.menuCatalog}
         name="Excel处理"
         icon={<ProductIcon />}
         dense={dense}

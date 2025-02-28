@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
@@ -47,7 +48,15 @@ func GetDynamicExcelTableDetail(c *gin.Context) {
 }
 
 func DeleteDynamicExcelTable(c *gin.Context) {
-	c.JSON(200, gin.H{})
+	id := c.Param("id")
+	tableName := c.Param("tableName")
+
+	sqlQuery := models.DB.Unscoped().Table(tableName).Where("id = ?", id).Delete(&models.DynamicExcelTable{})
+	if sqlQuery.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": sqlQuery.Error})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Delete successfully"})
 }
 
 func UpdateDynamicExcelTable(c *gin.Context) {
@@ -122,4 +131,14 @@ func CreateDynamicExcelTable(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, data)
+}
+
+func ExportDynamicExcel(c *gin.Context) {
+	query := c.QueryArray("ids")
+	fmt.Println("query1211", query)
+
+	c.JSON(200, gin.H{
+		"message": "ExportDynamicExcel",
+	})
+
 }
