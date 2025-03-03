@@ -12,6 +12,7 @@ type FreightBase struct {
 	Port string `gorm:"type:varchar(100); comment:港口"`
 	// 送货基地
 	TargetBase string `gorm:"type:varchar(100); comment:送货基地"`
+	TargetAddr string `gorm:"type:varchar(50); comment:送货地址"`
 	// 货物名称
 	GoodsName string `gorm:"type:varchar(100); comment:货物名称"`
 	// 里程

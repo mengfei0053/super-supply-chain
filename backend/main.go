@@ -1,34 +1,30 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+	"net/http"
 	"os"
+	"os/signal"
 	"super-supply-chain/configs"
 	"super-supply-chain/controllers"
 	"super-supply-chain/middleware"
 	"super-supply-chain/models"
+	"super-supply-chain/utils"
 	"time"
 )
 
 func main() {
 
-	fmt.Println(os.Getenv(""))
-
 	configs.LoadConfigFile()
-	if configs.IsDev() {
-		gin.SetMode(gin.DebugMode)
-	} else {
-		gin.SetMode(gin.ReleaseMode)
-	}
+	gin.SetMode(gin.ReleaseMode)
 
 	models.InitDB()
-	//models.UpdateDb()
 
 	r := gin.Default()
-	logger := middleware.InitZapLogger()
-	defer logger.Sync()
+	logger := utils.InitLogger()
 
 	r.Use(middleware.GinZapLogger(logger))
 	// 替换默认 Recovery 中间件
@@ -86,7 +82,7 @@ func main() {
 		protected.GET("/dict-manage/map/:type", controllers.GetDictMap)
 
 		protected.GET("/excel/:tableName", controllers.GetDynamicExcelTableList)
-		protected.GET("/excel/:tableName/exports", controllers.ExportDynamicExcel)
+		protected.GET("/excel-exports/:tableName", controllers.ExportDynamicExcel)
 		protected.GET("/excel/:tableName/:id", controllers.GetDynamicExcelTableDetail)
 		protected.POST("/excel/:tableName", controllers.CreateDynamicExcelTable)
 		protected.PUT("/excel/:tableName/:id", controllers.UpdateDynamicExcelTable)
@@ -105,5 +101,29 @@ func main() {
 
 	}
 
-	r.Run(":" + configs.PORT)
+	srv := &http.Server{
+		Addr:    ":" + configs.PORT,
+		Handler: r,
+	}
+
+	go func() {
+		// 服务连接
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logger.Fatal("服务器启动失败", zap.String("address", srv.Addr), zap.Error(err))
+		}
+	}()
+	logger.Info("服务器已启动", zap.String("address", srv.Addr))
+
+	// 等待中断信号以优雅地关闭服务器（设置 5 秒的超时时间）
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
+	<-quit
+	logger.Info("正在关闭服务器...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		logger.Error("服务器关闭异常", zap.String("reason", err.Error()))
+	}
+	logger.Info("服务器已关闭")
 }

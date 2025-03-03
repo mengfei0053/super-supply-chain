@@ -59,7 +59,7 @@ const Menu: React.FunctionComponent<IMenuProps> = ({ dense = false }) => {
     >
       <DashboardMenuItem></DashboardMenuItem>
 
-      <SubMenu
+      {/* <SubMenu
         handleToggle={() => handleToggle("menuCatalog")}
         isOpen={state.menuCatalog}
         name="翊帆"
@@ -75,7 +75,7 @@ const Menu: React.FunctionComponent<IMenuProps> = ({ dense = false }) => {
           leftIcon={<OrderIcon />}
           dense={dense}
         />
-      </SubMenu>
+      </SubMenu> */}
       <SubMenu
         handleToggle={() => handleToggle("menuCatalog")}
         isOpen={state.menuCatalog}

@@ -27,6 +27,7 @@ func InitDB() {
 		&FreightBase{},
 		&ClearancePriceBase{},
 		&BaseDict{},
+		&ProductInfoBase{},
 		&UploadFile{})
 
 }

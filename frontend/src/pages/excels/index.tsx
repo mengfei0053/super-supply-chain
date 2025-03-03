@@ -11,8 +11,6 @@ import {
 import { useParams } from "react-router-dom";
 import DataField from "./DataField";
 import Upload from "./Upload";
-import ManageExportRule from "./ManageExportRule";
-import Export from "./Export";
 import SingleExport from "./SingleExport";
 import BatchExport from "./BatchExport";
 
@@ -28,8 +26,8 @@ const Empty = () => {
 const ListAction = () => {
   return (
     <TopToolbar>
-      <Export></Export>
-      <ManageExportRule></ManageExportRule>
+      {/* <Export></Export>
+      <ManageExportRule></ManageExportRule> */}
       <Upload type="excel"></Upload>
     </TopToolbar>
   );
@@ -51,11 +49,6 @@ const ExcelPage: React.FunctionComponent = () => {
       resource={`excel/${tableName}`}
       actions={<ListAction></ListAction>}
       empty={<Empty></Empty>}
-      exporter={async (r) => {
-        console.log(r);
-
-        // httpClient();
-      }}
     >
       <Datagrid bulkActionButtons={<BulkActions></BulkActions>}>
         <TextField source="id"></TextField>
@@ -64,7 +57,10 @@ const ExcelPage: React.FunctionComponent = () => {
         <DataField source="datas"></DataField>
         <>
           <EditButton></EditButton>
-          <SingleExport></SingleExport>
+          {tableName !== "dynamic_settlement_statement_suqian" && (
+            <SingleExport></SingleExport>
+          )}
+
           <DeleteButton></DeleteButton>
         </>
       </Datagrid>

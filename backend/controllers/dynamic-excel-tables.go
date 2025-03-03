@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-
 	"net/http"
 	"path/filepath"
 	"super-supply-chain/models"
 	"super-supply-chain/utils"
+	excel_template_engines "super-supply-chain/utils/excel-template-engines"
 )
 
 func GetDynamicExcelTableList(c *gin.Context) {
@@ -124,6 +124,7 @@ func CreateDynamicExcelTable(c *gin.Context) {
 		UploadFilePath: fileUrl,
 		FileName:       file.Filename,
 		Datas:          data,
+		NasFileName:    newFileName,
 	})
 	if query.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": query.Error})
@@ -134,11 +135,20 @@ func CreateDynamicExcelTable(c *gin.Context) {
 }
 
 func ExportDynamicExcel(c *gin.Context) {
-	query := c.QueryArray("ids")
-	fmt.Println("query1211", query)
+	ids := c.QueryArray("ids")
+	queryType := c.Query("type")
+	tableName := c.Param("tableName")
+	fmt.Sprint("ids", ids)
+	fmt.Sprint("queryType", queryType)
+	fmt.Sprint("tableName", tableName)
 
-	c.JSON(200, gin.H{
-		"message": "ExportDynamicExcel",
-	})
+	filePath, err := excel_template_engines.GetExcelExportFilePath(tableName, ids, queryType)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Header("Content-Disposition", "attachment; filename="+uuid.New().String()+".xlsx")
+	c.File(filePath)
 
 }

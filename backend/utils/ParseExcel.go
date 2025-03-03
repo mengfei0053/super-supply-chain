@@ -2,9 +2,11 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"github.com/xuri/excelize/v2"
 	"log"
 	"os"
+	"strconv"
 	"super-supply-chain/models"
 )
 
@@ -16,6 +18,23 @@ func GetUploadTmpDir() string {
 		os.Mkdir(tmpPath, os.ModePerm)
 	}
 	return tmpPath
+}
+
+func GetToTalRowIndexs(rows [][]string, base map[string]string) {
+	totalCount := 1
+
+	for rowIndex := 0; rowIndex < len(rows); rowIndex++ {
+		row := rows[rowIndex]
+		if len(row) > 0 {
+			for j := 0; j < len(row); j++ {
+				cell := row[j]
+				if cell == "合计" {
+					base[fmt.Sprint("total_", totalCount)] = strconv.Itoa(rowIndex)
+					totalCount += 1
+				}
+			}
+		}
+	}
 }
 
 func GetExcelData(path string, mapRules MapRuleInfo) (models.ExcelData, error) {
@@ -77,8 +96,11 @@ func GetExcelData(path string, mapRules MapRuleInfo) (models.ExcelData, error) {
 				if cellIndex <= len(rowData)-1 {
 					cellValue := rowData[cellIndex]
 					chooseRowData[JsonKey] = cellValue
+				} else {
+					chooseRowData[JsonKey] = ""
 				}
 			}
+			chooseRowData["__ROW_INDEX__"] = strconv.Itoa(rowIndex)
 			res = append(res, chooseRowData)
 		}
 
@@ -92,6 +114,9 @@ func GetExcelData(path string, mapRules MapRuleInfo) (models.ExcelData, error) {
 		}
 		base[rule.JsonKey] = value
 	}
+
+	GetToTalRowIndexs(rows, base)
+
 	data.BaseData = base
 	data.List = res
 

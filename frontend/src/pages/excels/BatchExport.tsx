@@ -1,34 +1,101 @@
 import * as React from "react";
-import { BulkExportButton, useListContext } from "react-admin";
+import {
+  BulkExportButton,
+  useListContext,
+  Button,
+  useNotify,
+} from "react-admin";
 import { useParams } from "react-router-dom";
+import Download from "@mui/icons-material/Download";
 import qs from "qs";
 
 const BatchExport: React.FunctionComponent = () => {
   const { tableName } = useParams();
   const { selectedIds } = useListContext();
+  const notice = useNotify();
+
+  const validate = React.useCallback(() => {
+    if (selectedIds.length === 0) {
+      notice("请至少选择一条记录", { type: "error" });
+      return false;
+    }
+    return true;
+  }, [notice, selectedIds.length]);
 
   return (
     <>
-      <BulkExportButton
+      <Button
+        label="导出发票-运费"
+        startIcon={<Download></Download>}
         onClick={(e) => {
           e.stopPropagation();
           e.preventDefault();
-          const query = qs.stringify(
-            {
-              ids: selectedIds,
-            },
-            {
-              encode: false,
-              arrayFormat: "comma",
-            },
-          );
-          console.log(query);
+          if (validate()) {
+            const query = qs.stringify(
+              {
+                ids: selectedIds,
+                type: "invoice_freight",
+              },
+              {
+                encode: false,
+                arrayFormat: "comma",
+              },
+            );
 
-          window.open(
-            `${import.meta.env.VITE_JSON_SERVER_URL}/excel/${tableName}/exports?${query}`,
-          );
+            window.open(
+              `${import.meta.env.VITE_JSON_SERVER_URL}/excel-exports/${tableName}?${query}`,
+            );
+          }
         }}
-      ></BulkExportButton>
+      ></Button>
+      <Button
+        label="导出发票-清关-掏箱"
+        startIcon={<Download></Download>}
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          if (validate()) {
+            const query = qs.stringify(
+              {
+                ids: selectedIds,
+                type: "invoice_clearance",
+              },
+              {
+                encode: false,
+                arrayFormat: "comma",
+              },
+            );
+
+            window.open(
+              `${import.meta.env.VITE_JSON_SERVER_URL}/excel-exports/${tableName}?${query}`,
+            );
+          }
+        }}
+      ></Button>
+      <Button
+        label="导出-短驳费表"
+        startIcon={<Download></Download>}
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          if (validate()) {
+            const query = qs.stringify(
+              {
+                ids: selectedIds,
+                type: "shortHaul",
+              },
+              {
+                encode: false,
+                arrayFormat: "comma",
+              },
+            );
+
+            window.open(
+              `${import.meta.env.VITE_JSON_SERVER_URL}/excel-exports/${tableName}?${query}`,
+            );
+          }
+        }}
+      ></Button>
     </>
   );
 };

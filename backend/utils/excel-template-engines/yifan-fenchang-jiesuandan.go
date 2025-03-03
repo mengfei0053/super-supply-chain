@@ -55,7 +55,7 @@ func GetArrivalPort(c string) string {
 
 }
 
-func getInvoiceTmpPath() string {
+func GetInvoiceTmpPath() string {
 	pwd, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
@@ -64,7 +64,7 @@ func getInvoiceTmpPath() string {
 }
 
 func CreateFeiChangFeiyong(data *models.ExcelData, fileName string) (string, error) {
-	filePath := getInvoiceTmpPath()
+	filePath := GetInvoiceTmpPath()
 	uploadDir := utils.GetUploadTmpDir()
 	outPath := filepath.Join(uploadDir, fmt.Sprintf("分厂开票模板_%s", fileName))
 	// 1. 加载模板

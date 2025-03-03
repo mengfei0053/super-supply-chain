@@ -1,9 +1,10 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"net/http"
+	"path/filepath"
 	"super-supply-chain/models"
 	"super-supply-chain/utils"
 	excel_template_engines "super-supply-chain/utils/excel-template-engines"
@@ -14,7 +15,6 @@ type ExportExcelReq struct {
 }
 
 func ExportExcel(c *gin.Context) {
-	tableName := c.Param("tableName")
 	var req ExportExcelReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -33,9 +33,6 @@ func ExportExcel(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(tableName)
-
-	fmt.Println(downloadFile)
 	c.JSON(http.StatusOK, gin.H{"message": downloadFile})
 }
 
@@ -58,9 +55,7 @@ func SingleExportExcel(c *gin.Context) {
 	case "dynamic_settlement_statement_fenchang":
 		filePath, err = excel_template_engines.CreateFeiChangFeiyong(&excelData.Datas, excelData.FileName)
 	case "dynamic_yifan_cost_cal":
-		filePath, err = excel_template_engines.CreateCostCalculation(&excelData.Datas, excelData.FileName)
-		c.JSON(http.StatusOK, gin.H{"message": filePath})
-		return
+		filePath, err = excel_template_engines.CreateCostCalculation(&excelData, tableName)
 	default:
 
 	}
@@ -69,6 +64,7 @@ func SingleExportExcel(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.Header("Content-Disposition", "attachment; filename="+fmt.Sprintf("分厂开票模板_%s", excelData.FileName))
+	ext := filepath.Ext(excelData.FileName)
+	c.Header("Content-Disposition", "attachment; filename="+uuid.New().String()+ext)
 	c.File(filePath)
 }
