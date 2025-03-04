@@ -49,5 +49,5 @@ func LoadConfigFile() {
 }
 
 func IsDev() bool {
-	return ENVIRONMENT != "production"
+	return os.Getenv("ENVIRONMENT") != "production"
 }
