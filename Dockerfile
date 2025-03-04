@@ -8,7 +8,7 @@ COPY ./frontend .
 RUN yarn
 RUN npm run build
 
-FROM golang
+FROM golang:1.23.6-alpine
 
 WORKDIR /usr/src/app
 
