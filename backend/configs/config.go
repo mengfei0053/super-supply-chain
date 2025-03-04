@@ -43,6 +43,11 @@ func LoadConfigFile() {
 	WEB_DAV_URL = os.Getenv("UPLOAD_SERVER")
 	ENVIRONMENT = os.Getenv("ENVIRONMENT")
 	fmt.Println("ENVIRONMENT", ENVIRONMENT)
+	fmt.Println("WEB_DAV_URL", WEB_DAV_URL)
+	fmt.Println("WEB_DAV_USER", WEB_DAV_USER)
+	fmt.Println("WEB_DAV_PASSWORD", WEB_DAV_PASSWORD)
+	fmt.Println("PORT", PORT)
+	
 }
 
 func IsDev() bool {
