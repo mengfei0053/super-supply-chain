@@ -1,5 +1,5 @@
 # 第一阶段：构建阶段
-FROM node:22 AS builder
+FROM registry.cn-hangzhou.aliyuncs.com/mengfei0053/node:22-alpine AS builder
 
 WORKDIR /usr/src/app
 
