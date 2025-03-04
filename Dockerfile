@@ -25,6 +25,4 @@ EXPOSE 8081
 
 ENV ENVIRONMENT="production"
 
-WORKDIR /usr/src/app
-
-CMD ["ls -al ./", "ls -al ./configs"]
+CMD ["./app"]
