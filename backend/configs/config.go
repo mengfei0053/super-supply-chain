@@ -26,6 +26,7 @@ func LoadConfigFile() {
 		panic(err)
 	}
 
+	fmt.Println("ENVIRONMENT", os.Getenv("ENVIRONMENT"))
 	if IsDev() {
 		envDir := filepath.Join(filepath.Dir(pwd), "configs")
 		envFile := filepath.Join(envDir, ".env")
