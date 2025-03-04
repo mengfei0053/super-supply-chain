@@ -41,6 +41,9 @@ func main() {
 	//	MaxAge:           12 * time.Hour,
 	//}))
 
+	r.GET("/", func(c *gin.Context) {
+		c.Redirect(http.StatusPermanentRedirect, "/super-supply-chain")
+	})
 	api := r.Group("/api")
 
 	api.POST("/register", controllers.Register)

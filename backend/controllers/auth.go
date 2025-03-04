@@ -97,7 +97,14 @@ func Login(c *gin.Context) {
 
 	Authorization := "Bearer " + tokenString
 
-	c.SetCookie(configs.AuthKey, Authorization, 60*60*24, "/", configs.HOST, false, true)
+	cookie := &http.Cookie{
+		Name:     configs.AuthKey,
+		Value:    Authorization,
+		Path:     "/",
+		HttpOnly: true,
+		MaxAge:   60 * 60 * 24,
+	}
+	http.SetCookie(c.Writer, cookie)
 
 	c.JSON(http.StatusOK, userRes)
 
