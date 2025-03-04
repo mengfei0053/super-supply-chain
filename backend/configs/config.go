@@ -27,7 +27,9 @@ func LoadConfigFile() {
 	}
 
 	fmt.Println("ENVIRONMENT", os.Getenv("ENVIRONMENT"))
+	fmt.Println("IsDev", IsDev())
 	if IsDev() {
+
 		envDir := filepath.Join(filepath.Dir(pwd), "configs")
 		envFile := filepath.Join(envDir, ".env")
 		err = godotenv.Load(envFile)
