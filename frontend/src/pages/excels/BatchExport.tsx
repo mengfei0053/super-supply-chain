@@ -57,7 +57,7 @@ const BatchExport: React.FunctionComponent = () => {
               },
               {
                 encode: false,
-                arrayFormat: "comma",
+                arrayFormat: "repeat",
               },
             );
 
@@ -81,7 +81,7 @@ const BatchExport: React.FunctionComponent = () => {
               },
               {
                 encode: false,
-                arrayFormat: "comma",
+                arrayFormat: "repeat",
               },
             );
 

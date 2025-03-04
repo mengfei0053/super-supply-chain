@@ -9,7 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"strconv"
+	"strings"
 	"super-supply-chain/models"
 	"super-supply-chain/utils"
 )
@@ -38,16 +38,18 @@ func GetFreightInvoiceFile(datas []models.DynamicExcelTable, newFilePath string)
 
 	for index, data := range datas {
 		excelData := data.Datas
+		sap_number := strings.TrimSpace(excelData.BaseData["sap_number"])
 		companyInfo := GetCompanyInfoByName("浙江迅尔智链货运有限公司")
 		rowIndex := index + 4
 		arrivalPort := data.Datas.BaseData["arrival_port"]
 		comment := fmt.Sprintf(`%s
-进口原料费`, excelData.BaseData["sap_number"])
+进口原料运费`, excelData.BaseData["sap_number"])
 		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("A%d", rowIndex), &[]interface{}{
-			strconv.Itoa(int(data.ID)),
+			sap_number,
 			"增值税专用发票",
 			"货物运输服务",
 			"是",
+			"",
 			companyInfo.Name,
 			companyInfo.UnifiedSocialCreditCode,
 		})
@@ -63,20 +65,45 @@ func GetFreightInvoiceFile(datas []models.DynamicExcelTable, newFilePath string)
 			unit_price, err := decimal.NewFromString(item["unit_price"])
 			itemCompanyInifo := GetCompanyInfoByName(item["company_name"])
 			car_num := item["car_num"]
+			//pkg_num, err := decimal.NewFromString(strings.TrimSpace(item["pkg_num"]))
+			price, err := decimal.NewFromString(strings.TrimSpace(item["price"]))
 
-			invoce_details = append(invoce_details, []string{
-				strconv.Itoa(int(data.ID)),
-				"公路运输",
-				"3010102020100000000",
-				"",
-				"吨",
-				count.String(),
-				unit_price.String(),
-				count.Mul(unit_price).Round(2).String(),
-				"0.09",
-			})
+			if strings.TrimSpace(item["pkg_num"]) != "" {
+				invoce_details = append(invoce_details, []string{
+					sap_number,
+					"公路运输",
+					"3010102020100000000",
+					"",
+					"吨",
+					count.String(),
+					"",
+					price.String(),
+					"0.09",
+				})
+			} else {
+				var err error
+				trucking_unit_price, err := decimal.NewFromString(strings.TrimSpace(item["trucking_unit_price"]))
+
+				unitPrice := unit_price.Add(trucking_unit_price)
+
+				invoce_details = append(invoce_details, []string{
+					sap_number,
+					"公路运输",
+					"3010102020100000000",
+					"",
+					"吨",
+					count.String(),
+					unitPrice.String(),
+					count.Mul(unitPrice).Round(2).String(),
+					"0.09",
+				})
+				if err != nil {
+					return err
+				}
+			}
+
 			extra_details = append(extra_details, []string{
-				strconv.Itoa(int(data.ID)),
+				sap_number,
 				"",
 				"",
 				"",
@@ -135,22 +162,24 @@ func GetClearanceInvoiceFile(datas []models.DynamicExcelTable, newFilePath strin
 
 	for index, data := range datas {
 		excelData := data.Datas
+		sap_number := strings.TrimSpace(excelData.BaseData["sap_number"])
 		companyInfo := GetCompanyInfoByName(excelData.BaseData["invoice_company"])
 		rowIndex := index + 4
 		arrivalPort := data.Datas.BaseData["arrival_port"]
 		comment := fmt.Sprintf(`业务编号: %s
 货物名称: %s
-数量: %s
+数量: %s 吨
 到港口岸: %s`, excelData.BaseData["sap_number"],
 			excelData.BaseData["product_name"],
 			excelData.BaseData["total_count"],
 			arrivalPort,
 		)
 		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("A%d", rowIndex), &[]interface{}{
-			strconv.Itoa(int(data.ID)),
+			sap_number,
 			"增值税专用发票",
-			"货物运输服务",
+			"",
 			"是",
+			"",
 			companyInfo.Name,
 			companyInfo.UnifiedSocialCreditCode,
 		})
@@ -160,34 +189,36 @@ func GetClearanceInvoiceFile(datas []models.DynamicExcelTable, newFilePath strin
 		})
 		var err error
 
-		unpacking_fee_unit_count, err := decimal.NewFromString(excelData.BaseData["unpacking_fee_unit_count"])
-		unpacking_fee_unit_price, err := decimal.NewFromString(excelData.BaseData["unpacking_fee_unit_price"])
-
+		clearance_fee_count, err := decimal.NewFromString(excelData.BaseData["clearance_fee_count"])
+		clearance_fee_unit_price, err := decimal.NewFromString(excelData.BaseData["clearance_fee_unit_price"])
 		invoce_details = append(invoce_details, []string{
-			strconv.Itoa(int(data.ID)),
-			"代理清关",
-			"3010102020100000000",
+			sap_number,
+			"代理清关费",
+			"3040802020000000000",
 			"40'",
 			"柜",
-			unpacking_fee_unit_count.String(),
-			unpacking_fee_unit_price.String(),
-			unpacking_fee_unit_count.Mul(unpacking_fee_unit_price).Round(2).String(),
-			"0.09",
+			clearance_fee_count.String(),
+			clearance_fee_unit_price.String(),
+			clearance_fee_count.Mul(clearance_fee_unit_price).Round(2).String(),
+			"0.06",
 		})
-		if excelData.BaseData["clearance_fee_count"] != "" {
+
+		if strings.TrimSpace(excelData.BaseData["unpacking_fee_unit_count"]) != "" && strings.TrimSpace(excelData.BaseData["unpacking_fee_unit_count"]) != "0" {
 			var err error
-			clearance_fee_count, err := decimal.NewFromString(excelData.BaseData["clearance_fee_count"])
-			clearance_fee_unit_price, err := decimal.NewFromString(excelData.BaseData["clearance_fee_unit_price"])
+
+			unpacking_fee_unit_count, err := decimal.NewFromString(excelData.BaseData["unpacking_fee_unit_count"])
+			unpacking_fee_unit_price, err := decimal.NewFromString(excelData.BaseData["unpacking_fee_unit_price"])
+
 			invoce_details = append(invoce_details, []string{
-				strconv.Itoa(int(data.ID)),
-				"代理掏箱",
-				"3010102020100000000",
+				sap_number,
+				"代理掏箱费",
+				"3040802990000000000",
 				"40'",
 				"柜",
-				clearance_fee_count.String(),
-				clearance_fee_unit_price.String(),
-				clearance_fee_count.Mul(clearance_fee_unit_price).Round(2).String(),
-				"0.09",
+				unpacking_fee_unit_count.String(),
+				unpacking_fee_unit_price.String(),
+				unpacking_fee_unit_count.Mul(unpacking_fee_unit_price).Round(2).String(),
+				"0.06",
 			})
 			if err != nil {
 				return err
@@ -224,15 +255,19 @@ func GetShortHaulFile(datas []models.DynamicExcelTable, newFilePath string) erro
 
 	for i, data := range datas {
 		var err error
-		err = f.SetSheetRow("Sheet1", fmt.Sprintf("A%d", i+2), &[]interface{}{
-			data.Datas.BaseData["invoice_company"],
-			data.Datas.BaseData["product_name"],
-			"短驳费",
-			data.Datas.BaseData["total_count"],
-			data.Datas.BaseData["short_haul_fee_price"],
-			data.Datas.BaseData["arrival_port"],
-			data.Datas.BaseData["sap_number"],
-		})
+		short_haul_fee_price := strings.TrimSpace(data.Datas.BaseData["short_haul_fee_price"])
+		if short_haul_fee_price != "" && short_haul_fee_price != "0" && short_haul_fee_price != "0.00" {
+			err = f.SetSheetRow("Sheet1", fmt.Sprintf("A%d", i+2), &[]interface{}{
+				data.Datas.BaseData["invoice_company"],
+				data.Datas.BaseData["product_name"],
+				"短驳费",
+				data.Datas.BaseData["total_count"],
+				data.Datas.BaseData["short_haul_fee_price"],
+				data.Datas.BaseData["arrival_port"],
+				data.Datas.BaseData["sap_number"],
+			})
+		}
+
 		if err != nil {
 			log.Fatal(err)
 			return err
