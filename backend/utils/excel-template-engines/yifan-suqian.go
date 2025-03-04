@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"super-supply-chain/models"
 	"super-supply-chain/utils"
@@ -252,10 +253,20 @@ func GetExcelExportFilePath(tableName string, ids []string, queryType string) (s
 	newFilePath := filepath.Join(uploadDir, uuid.New().String()+".xlsx")
 	var err error
 
+	for _, id := range ids {
+		fmt.Println("id", id)
+		fmt.Println("id type", reflect.TypeOf(id))
+	}
+
+	fmt.Println("ids", ids)
 	query := models.DB.Table(tableName).Where("id in (?)", ids).Find(&datas)
 	if query.Error != nil {
 		return "", query.Error
 	}
+
+	utils.LogJson(datas)
+	fmt.Println(len(datas))
+
 	switch queryType {
 	case "invoice_freight":
 		err = GetFreightInvoiceFile(datas, newFilePath)

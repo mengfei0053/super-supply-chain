@@ -1,10 +1,5 @@
 import * as React from "react";
-import {
-  BulkExportButton,
-  useListContext,
-  Button,
-  useNotify,
-} from "react-admin";
+import { useListContext, Button, useNotify } from "react-admin";
 import { useParams } from "react-router-dom";
 import Download from "@mui/icons-material/Download";
 import qs from "qs";
@@ -38,7 +33,7 @@ const BatchExport: React.FunctionComponent = () => {
               },
               {
                 encode: false,
-                arrayFormat: "comma",
+                arrayFormat: "repeat",
               },
             );
 
