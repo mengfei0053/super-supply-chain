@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"net/http"
@@ -33,14 +32,14 @@ func main() {
 	controllers.LoadStatic(r)
 
 	// Custom CORS configuration
-	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{}, // Update with your allowed origins
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "range"},
-		ExposeHeaders:    []string{"Content-Length", "X-Total-Count", "Content-Range", "Authorization", "Content-Disposition"},
-		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
-	}))
+	//r.Use(cors.New(cors.Config{
+	//	AllowOrigins:     []string{}, // Update with your allowed origins
+	//	AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+	//	AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "range"},
+	//	ExposeHeaders:    []string{"Content-Length", "X-Total-Count", "Content-Range", "Authorization", "Content-Disposition"},
+	//	AllowCredentials: true,
+	//	MaxAge:           12 * time.Hour,
+	//}))
 
 	api := r.Group("/api")
 
