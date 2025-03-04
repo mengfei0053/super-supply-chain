@@ -1,19 +1,28 @@
-FROM alpine:latest
+# 第一阶段：构建阶段
+FROM node:22 AS builder
 
-# 安装 Node.js
-RUN apk add --no-cache curl tar && \
-    curl -fsSL https://unofficial-builds.nodejs.org/download/release/v18.17.1/node-v18.17.1-linux-x64-musl.tar.gz | tar -xz -C /usr/local --strip-components=1 && \
-    apk del curl tar
+WORKDIR /usr/src/app
 
-# 安装 Go
-RUN apk add --no-cache bash git gcc musl-dev && \
-    wget https://go.dev/dl/go1.24.0.linux-amd64.tar.gz && \
-    tar -C /usr/local -xzf go1.24.0.linux-amd64.tar.gz && \
-    rm go1.24.0.linux-amd64.tar.gz && \
-    export PATH=$PATH:/usr/local/go/bin
 
-# 设置工作目录
-WORKDIR /app
+COPY ./frontend .
+RUN yarn
+RUN npm run build
 
-# 复制应用程序代码
+FROM golang
+
+WORKDIR /usr/src/app
+
+COPY --from=builder /usr/src/app/dist ./frontend/dist
 COPY . .
+
+WORKDIR /usr/src/app/backend
+
+RUN go mod download
+
+RUN go build -o app .
+
+EXPOSE 8081
+
+ENV ENVIRONMENT="production"
+
+CMD ["./app"]
