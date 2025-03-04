@@ -7,8 +7,6 @@ import (
 	"path/filepath"
 )
 
-var HOST string
-
 var PORT string
 var AuthKey string
 
@@ -38,7 +36,6 @@ func LoadConfigFile() {
 		}
 	}
 
-	HOST = os.Getenv("HOST")
 	PORT = os.Getenv("PORT")
 	AuthKey = "Authorization"
 	WEB_DAV_USER = os.Getenv("UPLOAD_USER")
