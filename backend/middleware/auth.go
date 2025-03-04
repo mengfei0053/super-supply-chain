@@ -12,7 +12,7 @@ import (
 
 func handleNoAuth(c *gin.Context) {
 	// 重定向
-	c.SetCookie(configs.AuthKey, "", 60*60*24, "/", configs.DOMAIN, false, true)
+	c.SetCookie(configs.AuthKey, "", 60*60*24, "/", configs.HOST, false, true)
 }
 
 func AuthMiddleware() gin.HandlerFunc {

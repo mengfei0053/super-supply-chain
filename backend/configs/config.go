@@ -7,8 +7,7 @@ import (
 	"path/filepath"
 )
 
-var DSN string
-var DOMAIN string
+var HOST string
 
 var PORT string
 var AuthKey string
@@ -26,21 +25,22 @@ func LoadConfigFile() {
 	if err != nil {
 		panic(err)
 	}
-	envDir := filepath.Join(filepath.Dir(pwd), "configs")
 
-	envFile := filepath.Join(envDir, ".env")
-	err = godotenv.Load(envFile)
-	if err != nil {
-		panic(err)
+	if IsDev() {
+		envDir := filepath.Join(filepath.Dir(pwd), "configs")
+		envFile := filepath.Join(envDir, ".env")
+		err = godotenv.Load(envFile)
+		if err != nil {
+			panic(err)
+		}
 	}
 
-	DSN = os.Getenv("DSN")
-	DOMAIN = os.Getenv("DOMAIN")
+	HOST = os.Getenv("HOST")
 	PORT = os.Getenv("PORT")
-	AuthKey = os.Getenv("AUTH_KEY")
-	WEB_DAV_USER = os.Getenv("WEB_DAV_USER")
-	WEB_DAV_PASSWORD = os.Getenv("WEB_DAV_PASSWORD")
-	WEB_DAV_URL = os.Getenv("WEB_DAV_URL")
+	AuthKey = "Authorization"
+	WEB_DAV_USER = os.Getenv("UPLOAD_USER")
+	WEB_DAV_PASSWORD = os.Getenv("UPLOAD_PASSWORD")
+	WEB_DAV_URL = os.Getenv("UPLOAD_SERVER")
 	ENVIRONMENT = os.Getenv("ENVIRONMENT")
 	fmt.Println("ENVIRONMENT", ENVIRONMENT)
 }

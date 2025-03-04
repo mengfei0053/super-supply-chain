@@ -34,7 +34,7 @@ func main() {
 
 	// Custom CORS configuration
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{os.Getenv("CORS_ALLOW_ORIGIN")}, // Update with your allowed origins
+		AllowOrigins:     []string{}, // Update with your allowed origins
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "range"},
 		ExposeHeaders:    []string{"Content-Length", "X-Total-Count", "Content-Range", "Authorization", "Content-Disposition"},
