@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: ssc-app
-          image: registry.cn-hangzhou.aliyuncs.com/mengfei0053/ssc:1.0.4
+          image: registry.cn-hangzhou.aliyuncs.com/mengfei0053/ssc:1.0.5
           volumeMounts:
             - mountPath: /mnt/logs
               name: persistent-log
