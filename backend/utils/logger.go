@@ -5,6 +5,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"os"
+	"super-supply-chain/configs"
 )
 
 var Logger *zap.Logger
@@ -16,10 +17,17 @@ func InitZapLogger() *zap.Logger {
 	consoleEncoder := zapcore.NewConsoleEncoder(encoderConfig) // 控制台格式
 	jsonEncoder := zapcore.NewJSONEncoder(encoderConfig)       // 文件格式
 
+	logFile := ""
+	if configs.IsDev() {
+		logFile = "logs/app.log"
+	} else {
+		logFile = "/mnt/logs/app.log"
+	}
+
 	// 2. 定义输出目标（控制台 + 文件）
 	// 文件输出（带日志切割）
 	fileWriter := zapcore.AddSync(&lumberjack.Logger{
-		Filename:   "logs/app.log",
+		Filename:   logFile,
 		MaxSize:    100,  // 单个文件最大100MB
 		MaxBackups: 5,    // 保留5个备份
 		MaxAge:     30,   // 保留30天

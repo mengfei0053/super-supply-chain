@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ssc-deployment
+  namespace: ssc
+  labels:
+    app: ssc-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ssc-app
+  template:
+    metadata:
+      labels:
+        app: ssc-app
+    spec:
+      containers:
+        - name: ssc-app
+          image: registry.cn-hangzhou.aliyuncs.com/mengfei0053/ssc:1.0.4
+          volumeMounts:
+            - mountPath: /mnt/logs
+              name: persistent-log
+          ports:
+            - containerPort: 80
+          env:
+            - name: PORT
+              value: "80"
+            - name: ENVIRONMENT
+              value: "production"
+          envFrom:
+            - secretRef:
+                name: ssc-secret
+      imagePullSecrets:
+        - name: ali-secret
+      volumes:
+        - name: persistent-log
+          persistentVolumeClaim:
+            claimName: local-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ssc-service
+  namespace: ssc
+spec:
+  type: NodePort
+  selector:
+    app: ssc-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+
