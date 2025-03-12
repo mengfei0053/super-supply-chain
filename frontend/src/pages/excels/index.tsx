@@ -7,12 +7,17 @@ import {
   TopToolbar,
   EditButton,
   DeleteButton,
+  BulkDeleteButton,
+  DateInput,
+  SearchInput,
+  FunctionField,
 } from "react-admin";
 import { useParams } from "react-router-dom";
 import DataField from "./DataField";
 import Upload from "./Upload";
 import SingleExport from "./SingleExport";
 import BatchExport from "./BatchExport";
+import dayjs from "dayjs";
 
 const Empty = () => {
   return (
@@ -34,9 +39,16 @@ const ListAction = () => {
 };
 
 const BulkActions = () => {
+  const { tableName } = useParams();
+
   return (
     <>
-      <BatchExport></BatchExport>
+      {(tableName === "dynamic_settlement_statement_suqian" ||
+        tableName === "dynamic_Integrity_packaging_invoice") && (
+        <BatchExport></BatchExport>
+      )}
+      <BulkDeleteButton></BulkDeleteButton>
+      <></>
     </>
   );
 };
@@ -44,27 +56,43 @@ const BulkActions = () => {
 const ExcelPage: React.FunctionComponent = () => {
   const { tableName } = useParams();
 
-  return (
-    <List
-      resource={`excel/${tableName}`}
-      actions={<ListAction></ListAction>}
-      empty={<Empty></Empty>}
-    >
-      <Datagrid bulkActionButtons={<BulkActions></BulkActions>}>
-        <TextField source="id"></TextField>
-        <TextField source="fileName"></TextField>
-        <TextField source="uploadFilePath"></TextField>
-        <DataField source="datas"></DataField>
-        <>
-          <EditButton></EditButton>
-          {tableName !== "dynamic_settlement_statement_suqian" && (
-            <SingleExport></SingleExport>
-          )}
+  const filterts = [
+    <DateInput source="start" alwaysOn key={"start"}></DateInput>,
+    <DateInput source="end" alwaysOn key={"end"}></DateInput>,
+  ];
 
-          <DeleteButton></DeleteButton>
-        </>
-      </Datagrid>
-    </List>
+  return (
+    <>
+      <List
+        resource={`excel/${tableName}`}
+        actions={<ListAction></ListAction>}
+        empty={<Empty></Empty>}
+        filters={filterts}
+        filterDefaultValues={{
+          start: dayjs().format("YYYY-MM-DD"),
+          end: dayjs().format("YYYY-MM-DD"),
+        }}
+      >
+        <Datagrid bulkActionButtons={<BulkActions></BulkActions>}>
+          <TextField source="id"></TextField>
+          <TextField source="fileName"></TextField>
+          <TextField source="uploadFilePath"></TextField>
+          <FunctionField
+            label="Created At"
+            render={(r) => dayjs(r.CreatedAt).format("YYYY-MM-DD HH:mm:ss")}
+          ></FunctionField>
+          <DataField source="datas"></DataField>
+          <>
+            <EditButton></EditButton>
+            {tableName !== "dynamic_settlement_statement_suqian" && (
+              <SingleExport></SingleExport>
+            )}
+
+            <DeleteButton></DeleteButton>
+          </>
+        </Datagrid>
+      </List>
+    </>
   );
 };
 

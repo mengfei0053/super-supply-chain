@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"reflect"
 	"strings"
 	"super-supply-chain/models"
 	"super-supply-chain/utils"
@@ -146,6 +145,13 @@ func GetChangejiuTmpPath() string {
 	}
 	return filepath.Join(pwd, "uploads/changjiu_tmp.xlsx")
 }
+func GetChangejiuFeiChangTmpPath() string {
+	pwd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return filepath.Join(pwd, "uploads/changjiu_fenchang_tmp.xlsx")
+}
 
 // 清关费发票
 func GetClearanceInvoiceFile(datas []models.DynamicExcelTable, newFilePath string) error {
@@ -281,6 +287,67 @@ func GetShortHaulFile(datas []models.DynamicExcelTable, newFilePath string) erro
 	return nil
 }
 
+func GetShortHaulAndFeiChangFile(datas []models.DynamicExcelTable, newFilePath string) error {
+	tmpPath := GetChangejiuFeiChangTmpPath()
+
+	f, err := excelize.OpenFile(tmpPath)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	defer f.Close()
+	details := [][]string{}
+	for _, data := range datas {
+		BaseData := data.Datas.BaseData
+		List := data.Datas.List
+		productName := BaseData["product_name"]
+		arrivalPort := BaseData["arrival_port"]
+		arrivalPortInfo := PortInfoMap[arrivalPort]
+
+		baseInfo := []string{
+			BaseData["invoice_company"],
+			productName,
+			"短驳费",
+			BaseData["total_count"],
+			BaseData["short_haul_fee_price"],
+			arrivalPort,
+			BaseData["sap_number"],
+			BaseData["bus_num"],
+		}
+		details = append(details, baseInfo)
+		for _, item := range List {
+			companyInfo := GetCompanyInfo(item["company_name"])
+
+			details = append(details, []string{
+				item["company_name"],
+				productName,
+				fmt.Sprintf("%s-%s", arrivalPortInfo.Addr, companyInfo.TargetAddr),
+				item["count"],
+				item["price"],
+				arrivalPort,
+				BaseData["sap_number"],
+				BaseData["bus_num"],
+				item["plan_number"],
+			})
+		}
+
+	}
+
+	for index, detail := range details {
+		err := f.SetSheetRow("Sheet1", fmt.Sprintf("A%d", index+2), &detail)
+		if err != nil {
+			panic(err)
+			return err
+		}
+	}
+
+	if err = f.SaveAs(newFilePath); err != nil {
+		panic(err)
+		return err
+	}
+	return nil
+}
+
 func GetExcelExportFilePath(tableName string, ids []string, queryType string) (string, error) {
 
 	var datas []models.DynamicExcelTable
@@ -288,19 +355,10 @@ func GetExcelExportFilePath(tableName string, ids []string, queryType string) (s
 	newFilePath := filepath.Join(uploadDir, uuid.New().String()+".xlsx")
 	var err error
 
-	for _, id := range ids {
-		fmt.Println("id", id)
-		fmt.Println("id type", reflect.TypeOf(id))
-	}
-
-	fmt.Println("ids", ids)
 	query := models.DB.Table(tableName).Where("id in (?)", ids).Find(&datas)
 	if query.Error != nil {
 		return "", query.Error
 	}
-
-	utils.LogJson(datas)
-	fmt.Println(len(datas))
 
 	switch queryType {
 	case "invoice_freight":
@@ -309,6 +367,11 @@ func GetExcelExportFilePath(tableName string, ids []string, queryType string) (s
 		err = GetClearanceInvoiceFile(datas, newFilePath)
 	case "shortHaul":
 		err = GetShortHaulFile(datas, newFilePath)
+	case "shortHaulAndFeiChang":
+		fmt.Println("shortHaulAndFeiChang")
+		err = GetShortHaulAndFeiChangFile(datas, newFilePath)
+	case "dynamic_Integrity_packaging_invoice":
+		err = GetChengxinInvoiceFile(datas, newFilePath)
 	}
 	if err != nil {
 		return "", err

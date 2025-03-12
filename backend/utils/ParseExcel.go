@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"super-supply-chain/models"
 )
 
@@ -37,7 +38,7 @@ func GetToTalRowIndexs(rows [][]string, base map[string]string) {
 	}
 }
 
-func GetExcelData(path string, mapRules MapRuleInfo) (models.ExcelData, error) {
+func GetExcelData(path string, mapRules MapRuleInfo, tableName string) (models.ExcelData, error) {
 	var data = models.ExcelData{}
 	var base = make(map[string]string)
 
@@ -76,6 +77,8 @@ func GetExcelData(path string, mapRules MapRuleInfo) (models.ExcelData, error) {
 	for i := 0; i < 26; i++ {
 		targetColIndex[string('A'+i)] = i
 	}
+	isCustomDeclation := tableName == "dynamic_customs_declaration_form"
+	isIntegrity := tableName == "dynamic_Integrity_packaging_invoice"
 
 	var res = make([]map[string]string, 0)
 	startRow := IterateRule.StartRow
@@ -84,9 +87,7 @@ func GetExcelData(path string, mapRules MapRuleInfo) (models.ExcelData, error) {
 		if len(rowData) == 0 {
 			break
 		}
-		//if len(rowData) > 0 && rowData[0] == "" {
-		//	break
-		//}
+
 		if rowIndex >= startRow-1 {
 			var chooseRowData = make(map[string]string)
 			for _, mappingRule := range IterateRule.Rules {
@@ -112,7 +113,33 @@ func GetExcelData(path string, mapRules MapRuleInfo) (models.ExcelData, error) {
 			log.Fatal(err)
 			return data, err
 		}
-		base[rule.JsonKey] = value
+		if isCustomDeclation {
+			if value != "" {
+				parts := strings.Split(value, "\n")
+				base[rule.JsonKey] = parts[1]
+			} else {
+				base[rule.JsonKey] = value
+			}
+
+		} else if isIntegrity {
+			if value != "" {
+				parts := strings.Split(value, ":")
+				parts2 := strings.Split(value, "：")
+				if len(parts) == 2 {
+					base[rule.JsonKey] = strings.TrimSpace(parts[1])
+				} else if len(parts2) == 2 {
+					base[rule.JsonKey] = strings.TrimSpace(parts2[1])
+				} else {
+					base[rule.JsonKey] = value
+				}
+
+			} else {
+				base[rule.JsonKey] = value
+			}
+		} else {
+			base[rule.JsonKey] = value
+		}
+
 	}
 
 	GetToTalRowIndexs(rows, base)

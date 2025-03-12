@@ -33,9 +33,16 @@ type IterationInfo struct {
 }
 
 func GetCompanyInfo(c string) models.BaseCompaniesInfos {
-	var res models.BaseCompaniesInfos
-	models.DB.Model(&models.BaseCompaniesInfos{}).Where("alias = ?", c).First(&res)
-
+	res := models.BaseCompaniesInfos{
+		Name:                    "",
+		UnifiedSocialCreditCode: "",
+		TargetAddr:              "",
+		Alias:                   "",
+	}
+	q := models.DB.Model(&models.BaseCompaniesInfos{}).Where("alias = ? OR name = ?", c, c).First(&res)
+	if q.Error != nil {
+		panic(q.Error)
+	}
 	return res
 }
 

@@ -1,10 +1,7 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/goccy/go-json"
-	"log"
 	"net/http"
 	"super-supply-chain/models"
 	"super-supply-chain/utils"
@@ -12,33 +9,18 @@ import (
 
 func GetExcelMappingRules(c *gin.Context) {
 
-	filter := c.Query("filter")
-	range_ := c.Query("range")
-	sort := c.Query("sort")
-
-	fmt.Print(filter, "filter")
-	fmt.Print(range_, "range")
-	fmt.Print(sort, "sort")
-
-	var sliceRange []int
-	err := json.Unmarshal([]byte(range_), &sliceRange)
+	params, err := utils.GetListQueryParams(c)
 	if err != nil {
-		log.Fatal(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to unmarshal range"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	fmt.Print(sliceRange[0], "sliceRange")
-	fmt.Print(sliceRange[1], "sliceRange")
-
-	limit := sliceRange[1] - sliceRange[0] + 1
-	offset := sliceRange[0]
 
 	var rules []models.ExcelMappingRules
 	// 查询总条数
 	var total int64
 
 	query := models.DB.Model(&models.ExcelMappingRules{}).Count(&total)
-	query = query.Limit(limit).Offset(offset).Order("id").Find(&rules)
+	query = query.Limit(params.Limit).Offset(params.Offset).Order("id").Find(&rules)
 
 	utils.SetContentRange(c, total)
 	c.JSON(http.StatusOK, rules)

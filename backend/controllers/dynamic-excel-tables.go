@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
@@ -25,7 +24,10 @@ func GetDynamicExcelTableList(c *gin.Context) {
 
 	res := []models.DynamicExcelTable{}
 
-	sqlQuery := models.DB.Table(tableName).Count(&total)
+	sqlQuery := models.DB.Table(tableName).Where("created_at between ? and ?",
+		query.Filter.Start+" 00:00:00",
+		query.Filter.End+" 23:59:59",
+	).Count(&total)
 	sqlQuery = sqlQuery.Limit(query.Limit).Offset(query.Offset).Find(&res)
 
 	utils.SetContentRange(c, total)
@@ -90,7 +92,7 @@ func CreateDynamicExcelTable(c *gin.Context) {
 	// Retrieve the file from the request
 	file, err := c.FormFile("file")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to retrieve file"})
+		panic(err)
 		return
 	}
 
@@ -108,16 +110,16 @@ func CreateDynamicExcelTable(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
 		return
 	}
-	data, err := utils.GetExcelData(filePath, mapRules)
+	data, err := utils.GetExcelData(filePath, mapRules, tableName)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		panic(err)
 		return
 	}
 
 	fileUrl, err := utils.UploadToNas(filePath, newFileName)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload file to NAS"})
+		panic(err)
 		return
 	}
 	query := models.DB.Table(tableName).Model(&models.DynamicExcelTable{}).Create(&models.DynamicExcelTable{
@@ -127,7 +129,7 @@ func CreateDynamicExcelTable(c *gin.Context) {
 		NasFileName:    newFileName,
 	})
 	if query.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": query.Error})
+		panic(query.Error)
 		return
 	}
 
@@ -138,9 +140,6 @@ func ExportDynamicExcel(c *gin.Context) {
 	ids := c.QueryArray("ids")
 	queryType := c.Query("type")
 	tableName := c.Param("tableName")
-	fmt.Sprint("ids", ids)
-	fmt.Sprint("queryType", queryType)
-	fmt.Sprint("tableName", tableName)
 
 	filePath, err := excel_template_engines.GetExcelExportFilePath(tableName, ids, queryType)
 	if err != nil {
