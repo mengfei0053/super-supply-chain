@@ -318,15 +318,6 @@ func CreateCostCalculation(data *models.DynamicExcelTable, tableName string) (st
 
 	f.UpdateLinkedValue()
 
-	var readRule models.ExcelReadRules
-
-	q := models.DB.Preload("IterateRule").Model(&models.ExcelReadRules{}).Where("dynamic_table_name = ?", tableName).First(&readRule)
-
-	if q.Error != nil {
-		log.Fatal(q.Error)
-		return "", q.Error
-	}
-
 	for i := 0; i < len(data.Datas.List); i++ {
 		item := data.Datas.List[i]
 		var planned_count float64

@@ -38,14 +38,21 @@ func GetToTalRowIndexs(rows [][]string, base map[string]string) {
 	}
 }
 
-func GetExcelData(path string, mapRules MapRuleInfo, tableName string) (models.ExcelData, error) {
+func GetExcelData(path string, tableName string) (models.ExcelData, error) {
 	var data = models.ExcelData{}
 	var base = make(map[string]string)
+	mapRules := models.ExcelReadRuleInfos{}
+
+	q := models.DB.Model(&models.ExcelReadRuleInfos{}).Where("dynamic_table_name = ?", tableName).First(&mapRules)
+	if q.Error != nil {
+		log.Fatal(q.Error)
+		return data, q.Error
+	}
 
 	f, err := excelize.OpenFile(path)
 	sheetIndex := mapRules.SheetIndex
-	mapRule := mapRules.MapRule
-	IterateRule := mapRules.IterateRule
+	mapRule := mapRules.Rules.MapRule
+	IterateRule := mapRules.Rules.IterateRule
 
 	if err != nil {
 		log.Fatal(err)
@@ -107,7 +114,7 @@ func GetExcelData(path string, mapRules MapRuleInfo, tableName string) (models.E
 
 	}
 
-	for _, rule := range mapRule.Rules {
+	for _, rule := range mapRule {
 		value, err := f.GetCellValue(sheets[sheetIndex], rule.ExcelKey)
 		if err != nil {
 			log.Fatal(err)

@@ -8,19 +8,6 @@ import (
 	"super-supply-chain/models"
 )
 
-func GetCompanyInfoByContract(contract_num string) (models.BaseCompaniesInfos, error) {
-	dynamicBaoguandanInfo := models.DynamicExcelTable{}
-
-	q := models.DB.Table("dynamic_customs_declaration_form").Where("datas->>'$.baseData.contract_num' = ?", contract_num).First(&dynamicBaoguandanInfo)
-	if q.Error != nil {
-		panic(q.Error)
-		return models.BaseCompaniesInfos{}, q.Error
-	}
-
-	companyName := dynamicBaoguandanInfo.Datas.BaseData["domestic_consignee"]
-	return GetCompanyInfo(companyName), nil
-}
-
 func GetBaoguandanInfo(contract_num string) (models.DynamicExcelTable, error) {
 	dynamicBaoguandanInfo := models.DynamicExcelTable{}
 

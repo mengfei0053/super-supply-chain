@@ -31,15 +31,7 @@ func main() {
 
 	controllers.LoadStatic(r)
 
-	// Custom CORS configuration
-	//r.Use(cors.New(cors.Config{
-	//	AllowOrigins:     []string{}, // Update with your allowed origins
-	//	AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
-	//	AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "range"},
-	//	ExposeHeaders:    []string{"Content-Length", "X-Total-Count", "Content-Range", "Authorization", "Content-Disposition"},
-	//	AllowCredentials: true,
-	//	MaxAge:           12 * time.Hour,
-	//}))
+	//utils.InitReadRules()
 
 	r.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusPermanentRedirect, "/super-supply-chain")
@@ -57,18 +49,6 @@ func main() {
 		protected.POST("/settlement-form-entries", controllers.CreateSettlementFormEntry)
 		protected.PUT("/settlement-form-entry/:id", controllers.UpdateSettlementFormEntry)
 		protected.DELETE("/settlement-form-entry/:id", controllers.DeleteSettlementFormEntry)
-
-		protected.GET("/excel-mapping-rule", controllers.GetExcelMappingRules)
-		protected.GET("/excel-mapping-rule/:id", controllers.GetExcelMappingRuleDetail)
-		protected.POST("/excel-mapping-rule", controllers.CreateExcelMappingRules)
-		protected.PUT("/excel-mapping-rule/:id", controllers.UpdateExcelMappingRules)
-		protected.DELETE("/excel-mapping-rule/:id", controllers.DeleteExcelMappingRules)
-
-		protected.GET("/yifan/cost-calculation", controllers.GetExcelMappingRules)
-		protected.GET("/yifan/cost-calculation/:id", controllers.GetExcelMappingRuleDetail)
-		protected.POST("/yifan/cost-calculation", controllers.CreateExcelMappingRules)
-		protected.PUT("/yifan/cost-calculation/:id", controllers.UpdateExcelMappingRules)
-		protected.DELETE("/yifan/cost-calculation/:id", controllers.DeleteExcelMappingRules)
 
 		protected.GET("/excel-read-rules", controllers.GetExcelReadRulesList)
 		protected.GET("/excel-read-rules/:id", controllers.GetExcelReadRule)

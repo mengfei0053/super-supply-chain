@@ -4,12 +4,11 @@ import {
   TextField,
   TopToolbar,
   CreateButton,
-  ArrayField,
   DeleteButton,
   EditButton,
-  FunctionField,
 } from "react-admin";
 import * as React from "react";
+import DataField from "../../excels/DataField";
 
 export const ListActions = () => {
   return <TopToolbar>{<CreateButton></CreateButton>}</TopToolbar>;
@@ -18,22 +17,15 @@ export const ListActions = () => {
 const ListPage: React.FunctionComponent = () => {
   return (
     <List actions={<ListActions></ListActions>}>
-      <Datagrid>
+      <Datagrid rowClick={false}>
         <TextField source="id"></TextField>
         <TextField source="menuName"></TextField>
-        <TextField source="desc"></TextField>
+        <TextField source="dynamicTableName"></TextField>
         <TextField source="sheetIndex"></TextField>
-        <FunctionField
-          label="MapRule"
-          render={(r) => r.mapRule?.name}
-        ></FunctionField>
-        <FunctionField
-          label="iterateRule"
-          render={(r) => r.iterateRule?.name}
-        ></FunctionField>
+
+        <DataField source="rules"></DataField>
 
         <>
-          <DeleteButton></DeleteButton>
           <EditButton></EditButton>
         </>
       </Datagrid>

@@ -15,8 +15,6 @@ type ExcelMappingRuleOptions struct {
 func GetOptions(c *gin.Context) {
 	key := c.Param("key")
 	switch key {
-	case "excel-mapping-rule":
-		GetExcelMappingRuleOptions(c)
 	case "export-templates":
 		GetExportTemplates(c)
 	default:
@@ -40,17 +38,4 @@ func GetExportTemplates(c *gin.Context) {
 			"name": i.Alias,
 		}
 	}))
-}
-
-func GetExcelMappingRuleOptions(c *gin.Context) {
-
-	result := []ExcelMappingRuleOptions{}
-
-	err := models.DB.Model(&models.ExcelMappingRules{}).Select("id, name").Find(&result)
-	if err.Error != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error})
-		return
-	}
-
-	c.JSON(http.StatusOK, result)
 }

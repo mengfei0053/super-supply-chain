@@ -9,7 +9,6 @@ import {
   DeleteButton,
   BulkDeleteButton,
   DateInput,
-  SearchInput,
   FunctionField,
 } from "react-admin";
 import { useParams } from "react-router-dom";

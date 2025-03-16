@@ -1,7 +1,7 @@
 import localforage from "localforage";
 import simpleRestProvider from "ra-data-simple-rest";
 import { CreateParams, DataProvider, fetchUtils } from "react-admin";
-import { User } from "./authProvider";
+import authProvider, { User } from "./authProvider";
 import { CreateTemplateParams } from "./pages/excels/CreateTemplate";
 import qs from "qs";
 
@@ -15,10 +15,18 @@ export const httpClient = async (
     Authorization: `Bearer ${user?.token || ""}`,
   });
 
-  return fetchUtils.fetchJson(url, {
-    ...options,
-    headers: headers,
-  });
+  return fetchUtils
+    .fetchJson(url, {
+      ...options,
+      headers: headers,
+    })
+    .catch((err) => {
+      if (err.status === 401) {
+        localforage.removeItem("user");
+        authProvider.checkAuth({});
+      }
+      throw err;
+    });
 };
 
 const baseDataProvider = simpleRestProvider(

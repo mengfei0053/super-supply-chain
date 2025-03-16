@@ -44,6 +44,8 @@ export const authProvider: AuthProvider = {
       return Promise.resolve();
     }
 
+    window.location.href = "/super-supply-chain/#/login";
+
     return Promise.reject();
   },
   getPermissions: () => {

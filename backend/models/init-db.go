@@ -28,13 +28,12 @@ func InitDB() {
 		&BaseCompaniesInfos{},
 		&Order{},
 		&ShippingOrder{},
-		&ExcelMappingRules{},
-		&ExcelReadRules{},
 		&ExcelExportTemplates{},
 		&FreightBase{},
 		&ClearancePriceBase{},
 		&BaseDict{},
 		&ProductInfoBase{},
+		&ExcelReadRuleInfos{},
 		&UploadFile{})
 
 }

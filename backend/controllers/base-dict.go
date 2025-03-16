@@ -32,6 +32,8 @@ func GetDicts(c *gin.Context) {
 	sqlQuery := models.DB.Model(&models.BaseDict{}).Count(&total)
 	sqlQuery = sqlQuery.Limit(query.Limit).Offset(query.Offset).Find(&res)
 	utils.SetContentRange(c, total)
+
+	//utils.GetGrpcRes()
 	c.JSON(http.StatusOK, res)
 }
 

@@ -4,6 +4,8 @@ import {
   TextInput,
   useStore,
   NumberInput,
+  ArrayInput,
+  SimpleFormIterator,
 } from "react-admin";
 import * as React from "react";
 import { useNavigate } from "react-router";
@@ -36,17 +38,29 @@ const ToolPageCreate: React.FunctionComponent = () => {
     >
       <SimpleForm>
         <TextInput source="menuName"></TextInput>
-        <TextInput source="desc"></TextInput>
         <TextInput source="dynamicTableName"></TextInput>
         <NumberInput min={0} step={1} source="sheetIndex"></NumberInput>
-        <AdSelectInput
-          source="mapRuleId"
-          URL="excel-mapping-rule"
-        ></AdSelectInput>
-        <AdSelectInput
-          source="iterateRuleId"
-          URL="excel-mapping-rule"
-        ></AdSelectInput>
+        <ArrayInput source="rules.mapRule">
+          <SimpleFormIterator inline>
+            <TextInput source="desc" helperText={false}></TextInput>
+            <TextInput source="excelKey" helperText={false}></TextInput>
+            <TextInput source="jsonKey" helperText={false}></TextInput>
+          </SimpleFormIterator>
+        </ArrayInput>
+
+        <NumberInput
+          min={0}
+          step={1}
+          source="rules.iterateRule.startRow"
+        ></NumberInput>
+
+        <ArrayInput source="rules.iterateRule.rules">
+          <SimpleFormIterator inline>
+            <TextInput source="desc" helperText={false}></TextInput>
+            <TextInput source="excelKey" helperText={false}></TextInput>
+            <TextInput source="jsonKey" helperText={false}></TextInput>
+          </SimpleFormIterator>
+        </ArrayInput>
       </SimpleForm>
     </Create>
   );

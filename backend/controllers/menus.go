@@ -15,7 +15,7 @@ type DynamicExcelMenu struct {
 func GetDynamicExcelMenus(c *gin.Context) {
 	result := []DynamicExcelMenu{}
 
-	err := models.DB.Model(&models.ExcelReadRules{}).Select("id, menu_name, dynamic_table_name").Find(&result)
+	err := models.DB.Model(&models.ExcelReadRuleInfos{}).Select("id, menu_name, dynamic_table_name").Find(&result)
 	if err.Error != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error})
 		return

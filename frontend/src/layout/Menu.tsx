@@ -123,16 +123,6 @@ const Menu: React.FunctionComponent<IMenuProps> = ({ dense = false }) => {
           leftIcon={<OrderIcon />}
           dense={dense}
         />
-
-        <MenuItemLink
-          to="/excel-mapping-rule"
-          state={{ _scrollToTop: true }}
-          primaryText={translate(`Excel映射规则`, {
-            smart_count: 2,
-          })}
-          leftIcon={<OrderIcon />}
-          dense={dense}
-        />
       </SubMenu>
     </Box>
   );

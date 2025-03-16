@@ -82,12 +82,6 @@ func UpdateDynamicExcelTable(c *gin.Context) {
 func CreateDynamicExcelTable(c *gin.Context) {
 
 	tableName := c.Param("tableName")
-	mapRules, err := utils.GetMappingRules(tableName)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
 
 	// Retrieve the file from the request
 	file, err := c.FormFile("file")
@@ -110,12 +104,11 @@ func CreateDynamicExcelTable(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
 		return
 	}
-	data, err := utils.GetExcelData(filePath, mapRules, tableName)
+	data, err := utils.GetExcelData(filePath, tableName)
 	if err != nil {
 		panic(err)
 		return
 	}
-
 	fileUrl, err := utils.UploadToNas(filePath, newFileName)
 
 	if err != nil {
@@ -134,6 +127,7 @@ func CreateDynamicExcelTable(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, data)
+	//c.JSON(http.StatusOK, gin.H{})
 }
 
 func ExportDynamicExcel(c *gin.Context) {
