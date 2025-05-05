@@ -13,15 +13,6 @@ import (
 	"super-supply-chain/utils"
 )
 
-func GetCompanyInfoByName(name string) models.BaseCompaniesInfos {
-	companyInfo := models.BaseCompaniesInfos{}
-	q := models.DB.Model(models.BaseCompaniesInfos{}).Where("alias = ?", name).First(&companyInfo)
-	if q.Error != nil {
-		utils.Logger.Error(q.Error.Error())
-	}
-	return companyInfo
-}
-
 // 运费发票
 func GetFreightInvoiceFile(datas []models.DynamicExcelTable, newFilePath string) error {
 	invoice_tmp_path := GetInvoiceTmpPath()
@@ -38,7 +29,7 @@ func GetFreightInvoiceFile(datas []models.DynamicExcelTable, newFilePath string)
 	for index, data := range datas {
 		excelData := data.Datas
 		sap_number := strings.TrimSpace(excelData.BaseData["sap_number"])
-		companyInfo := GetCompanyInfoByName("浙江迅尔智链货运有限公司")
+		companyInfo := GetCompanyInfo("浙江迅尔智链货运有限公司")
 		rowIndex := index + 4
 		arrivalPort := data.Datas.BaseData["arrival_port"]
 		comment := fmt.Sprintf(`%s
@@ -62,7 +53,7 @@ func GetFreightInvoiceFile(datas []models.DynamicExcelTable, newFilePath string)
 			var err error
 			count, err := decimal.NewFromString(item["count"])
 			unit_price, err := decimal.NewFromString(item["unit_price"])
-			itemCompanyInifo := GetCompanyInfoByName(item["company_name"])
+			itemCompanyInifo := GetCompanyInfo(item["company_name"])
 			car_num := item["car_num"]
 			//pkg_num, err := decimal.NewFromString(strings.TrimSpace(item["pkg_num"]))
 			price, err := decimal.NewFromString(strings.TrimSpace(item["price"]))
@@ -169,13 +160,15 @@ func GetClearanceInvoiceFile(datas []models.DynamicExcelTable, newFilePath strin
 	for index, data := range datas {
 		excelData := data.Datas
 		sap_number := strings.TrimSpace(excelData.BaseData["sap_number"])
-		companyInfo := GetCompanyInfoByName(excelData.BaseData["invoice_company"])
+		companyInfo := GetCompanyInfo(excelData.BaseData["invoice_company"])
 		rowIndex := index + 4
 		arrivalPort := data.Datas.BaseData["arrival_port"]
-		comment := fmt.Sprintf(`业务编号: %s
+		comment := fmt.Sprintf(`订单号：%s  业务编号: %s
 货物名称: %s
 数量: %s 吨
-到港口岸: %s`, excelData.BaseData["sap_number"],
+到港口岸: %s`,
+			excelData.BaseData["sap_number"],
+			excelData.BaseData["bus_num"],
 			excelData.BaseData["product_name"],
 			excelData.BaseData["total_count"],
 			arrivalPort,
@@ -259,11 +252,14 @@ func GetShortHaulFile(datas []models.DynamicExcelTable, newFilePath string) erro
 	}
 	defer f.Close()
 
-	for i, data := range datas {
+	var extra_details [][]string
+
+	for _, data := range datas {
 		var err error
 		short_haul_fee_price := strings.TrimSpace(data.Datas.BaseData["short_haul_fee_price"])
 		if short_haul_fee_price != "" && short_haul_fee_price != "0" && short_haul_fee_price != "0.00" {
-			err = f.SetSheetRow("Sheet1", fmt.Sprintf("A%d", i+2), &[]interface{}{
+
+			extra_details = append(extra_details, []string{
 				data.Datas.BaseData["invoice_company"],
 				data.Datas.BaseData["product_name"],
 				"短驳费",
@@ -279,6 +275,16 @@ func GetShortHaulFile(datas []models.DynamicExcelTable, newFilePath string) erro
 			return err
 		}
 	}
+
+	for i, detail := range extra_details {
+		err = f.SetSheetRow("Sheet1", fmt.Sprintf("A%d", i+2), &detail)
+		if err != nil {
+			log.Fatal(err)
+			panic(err)
+			return err
+		}
+	}
+
 	if err = f.SaveAs(newFilePath); err != nil {
 		log.Fatal(err)
 		return err

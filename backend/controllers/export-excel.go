@@ -2,9 +2,7 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"net/http"
-	"path/filepath"
 	"super-supply-chain/models"
 	"super-supply-chain/utils"
 	excel_template_engines "super-supply-chain/utils/excel-template-engines"
@@ -64,7 +62,6 @@ func SingleExportExcel(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	ext := filepath.Ext(excelData.FileName)
-	c.Header("Content-Disposition", "attachment; filename="+uuid.New().String()+ext)
+	c.Header("Content-Disposition", "attachment; filename="+excelData.FileName)
 	c.File(filePath)
 }

@@ -23,17 +23,16 @@ func InitDB() {
 	}
 
 	// 迁移 schema
-	DB.AutoMigrate(
-		&BaseAccountsInfos{},
-		&BaseCompaniesInfos{},
-		&Order{},
-		&ShippingOrder{},
-		&ExcelExportTemplates{},
-		&FreightBase{},
-		&ClearancePriceBase{},
-		&BaseDict{},
-		&ProductInfoBase{},
-		&ExcelReadRuleInfos{},
-		&UploadFile{})
-
+	//DB.AutoMigrate(
+	//	&BaseAccountsInfos{},
+	//	&BaseCompaniesInfos{},
+	//	&Order{},
+	//	&ShippingOrder{},
+	//	&ExcelExportTemplates{},
+	//	&FreightBase{},
+	//	&ClearancePriceBase{},
+	//	&BaseDict{},
+	//	&ProductInfoBase{},
+	//	&ExcelReadRuleInfos{},
+	//	&UploadFile{})
 }

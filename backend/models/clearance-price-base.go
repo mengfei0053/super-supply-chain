@@ -63,21 +63,24 @@ const (
 	ContainerType20GPFoodBeverage
 	// 40'普通柜食品饮料成品出口
 	ContainerType40GPFoodBeverage
+	// 框架箱（用于进口设备）
+	ContainerTypeFrameBox
 )
 
 var MapContainerType = map[string]int{
-	"20'普通柜塑料粒子":       ContainerType20GPPlasticParticles,
-	"40'普通柜塑料粒子":       ContainerType40GPPlasticParticles,
+	"20'普通柜塑料粒子":          ContainerType20GPPlasticParticles,
+	"40'普通柜塑料粒子":          ContainerType40GPPlasticParticles,
 	"20'普通柜食品（原料、预包装）": ContainerType20GPFood,
 	"40'普通柜食品（原料、预包装）": ContainerType40GPFood,
-	"20'普通柜机械设备仪器":     ContainerType20GPMachineryEquipment,
-	"40'普通柜机械设备仪器":     ContainerType40GPMachineryEquipment,
-	"20'冷冻柜食品原料":       ContainerType20GPFoodRawMaterials,
-	"40'冷冻柜食品原料":       ContainerType40GPFoodRawMaterials,
-	"保税区散货":            ContainerTypeBondedAreaBulk,
-	"空运或海运拼箱散货":        ContainerTypeAirOrSeaBulk,
-	"20'普通柜食品饮料成品出口":   ContainerType20GPFoodBeverage,
-	"40'普通柜食品饮料成品出口":   ContainerType40GPFoodBeverage,
+	"20'普通柜机械设备仪器":      ContainerType20GPMachineryEquipment,
+	"40'普通柜机械设备仪器":      ContainerType40GPMachineryEquipment,
+	"20'冷冻柜食品原料":          ContainerType20GPFoodRawMaterials,
+	"40'冷冻柜食品原料":          ContainerType40GPFoodRawMaterials,
+	"保税区散货":                 ContainerTypeBondedAreaBulk,
+	"空运或海运拼箱散货":         ContainerTypeAirOrSeaBulk,
+	"20'普通柜食品饮料成品出口":  ContainerType20GPFoodBeverage,
+	"40'普通柜食品饮料成品出口":  ContainerType40GPFoodBeverage,
+	"框架箱（用于进口设备）":       ContainerTypeFrameBox,
 }
 
 // Slice

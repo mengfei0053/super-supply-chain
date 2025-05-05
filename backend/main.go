@@ -32,6 +32,7 @@ func main() {
 	controllers.LoadStatic(r)
 
 	//utils.InitReadRules()
+	//models.UpdateDb()
 
 	r.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusPermanentRedirect, "/super-supply-chain")

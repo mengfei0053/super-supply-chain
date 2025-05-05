@@ -18,20 +18,33 @@ import (
 
 func GetProductName(name string) string {
 	re := regexp.MustCompile(`.*全脂(奶|乳)粉.*`)
+	re2 := regexp.MustCompile(`.*脱脂(奶|乳)粉.*`)
+	re3 := regexp.MustCompile(`.*(橙|葡萄)汁.*`)
 
 	if re.MatchString(name) {
 		return re.ReplaceAllString(name, "全脂奶粉")
+	}
+	if re2.MatchString(name) {
+		return re2.ReplaceAllString(name, "脱脂奶粉")
+	}
+	if re3.MatchString(name) {
+		return re3.ReplaceAllString(name, "果汁")
 	}
 
 	return ""
 }
 
 var PortMap = map[string]string{
-	"上海洋山": "上海口岸",
-	"天津东疆": "天津口岸",
-	"天津新港": "天津口岸",
-	"广州黄埔": "广州口岸",
+	"上海洋山":  "上海口岸",
+	"天津东疆":  "天津口岸",
+	"天津新港":  "天津口岸",
+	"广州黄埔":  "广州口岸",
+	"上海外高桥": "上海口岸",
 }
+
+const (
+	YEAR = "2025"
+)
 
 func GetClearanceFeeByPort(port string, costType models.CostType, containerType int) float64 {
 	portName := PortMap[port]
@@ -40,10 +53,14 @@ func GetClearanceFeeByPort(port string, costType models.CostType, containerType 
 	fmt.Println("port", port)
 	fmt.Println("portName", portName)
 
-	models.DB.Model(&models.ClearancePriceBase{}).Where(
-		"port = ? and cost_type = ? and container_type_enum = ?",
-		portName, costType, containerType).
+	q := models.DB.Model(&models.ClearancePriceBase{}).Where(
+		"port = ? and cost_type = ? and container_type_enum = ? and year = ?",
+		portName, costType, containerType, YEAR).
 		First(&clearancePrice)
+
+	if q.Error != nil {
+		panic(q.Error)
+	}
 
 	return clearancePrice.Price
 
@@ -77,7 +94,7 @@ func GetProductInfo(productName string) (models.ProductInfoBase, error) {
 	if name != "" {
 		q := models.DB.Model(&models.ProductInfoBase{}).Where("product_name = ?", name).First(&productInfo)
 		if q.Error != nil {
-			log.Fatal(q.Error)
+			panic(q.Error)
 			return productInfo, q.Error
 		}
 		return productInfo, nil
@@ -90,11 +107,9 @@ func GetZhengXiangTotal(data *models.DynamicExcelTable, productInfo models.Produ
 	for _, item := range data.Datas.List {
 		var err error
 		var containerCount int64
-		planned_count, err := strconv.ParseFloat(item["planned_count"], 64)
-		containerCountStr := GetContainerCount(planned_count, productInfo.ContainerTypeWeight)
 
-		if containerCountStr != "" {
-			containerCount, err = strconv.ParseInt(containerCountStr, 10, 64)
+		if item["pkg_count"] != "" {
+			containerCount, err = strconv.ParseInt(item["pkg_count"], 10, 64)
 		}
 		if err != nil {
 			log.Fatal(err)
@@ -132,9 +147,10 @@ type FreightInfo struct {
 }
 
 type PortInfo struct {
-	PortName string
-	ExtraPay string
-	Addr     string
+	PortName   string
+	ExtraPay   string
+	Addr       string
+	TargetBase string
 }
 
 var PortInfoMap = map[string]PortInfo{
@@ -150,7 +166,7 @@ var PortInfoMap = map[string]PortInfo{
 	},
 	"天津东疆": {
 		PortName: "天津口岸",
-		ExtraPay: "东疆补差",
+		ExtraPay: "补差",
 		Addr:     "天津",
 	},
 	"天津新港": {
@@ -160,38 +176,67 @@ var PortInfoMap = map[string]PortInfo{
 	},
 	"广州黄埔": {
 		PortName: "广州口岸",
-		ExtraPay: "南沙补差",
+		ExtraPay: "补差",
 		Addr:     "广州",
+	},
+	"重庆果园": {
+		PortName: "重庆口岸",
+		ExtraPay: "",
+		Addr:     "重庆",
 	},
 }
 
-func GetUnitFreight(port string, containerCount string, company_name string) FreightInfo {
-	var freight models.FreightBase
-	var extraPay models.FreightBase
+func GetTrans(productInfo models.ProductInfoBase, containerCount string) string {
 	var trans string
-	var companyInfo models.BaseCompaniesInfos
-
-	portInfo := PortInfoMap[port]
 	if containerCount != "" {
 		trans = wholeCabinet
 	} else {
 		trans = transportationMode
 	}
 
-	const (
-		YEAR = "2024"
-	)
+	if productInfo.ProductName == "果汁" {
+		if containerCount != "" {
+			trans = coldWholeCabinet
+		} else {
+			trans = coldTransportationMode
+		}
+	}
 
-	models.DB.Model(&models.BaseCompaniesInfos{}).Where("alias = ?", company_name).First(&companyInfo)
+	return trans
+}
 
-	models.DB.Model(&models.FreightBase{}).Where(
+func GetUnitFreight(port string, trans string, company_name string) FreightInfo {
+	var freight models.FreightBase
+	var extraPay models.FreightBase
+
+	companyInfo := GetCompanyInfo(company_name)
+
+	portInfo := PortInfoMap[port]
+
+	var targetAddr string
+	if companyInfo.TargetAddr == "海宁" {
+		targetAddr = "下沙"
+	} else {
+		targetAddr = companyInfo.TargetAddr
+	}
+
+	q2 := models.DB.Model(&models.FreightBase{}).Where(
 		"year = ? and port = ? and transportation_mode = ? and target_addr = ?",
-		YEAR, portInfo.PortName, trans, companyInfo.TargetAddr).First(&freight)
+		YEAR, portInfo.PortName, trans, targetAddr).First(&freight)
+
+	if q2.Error != nil {
+		panic(q2.Error)
+	}
 
 	if portInfo.ExtraPay != "" {
-		models.DB.Model(&models.FreightBase{}).Where(
+
+		q := models.DB.Model(&models.FreightBase{}).Where(
 			"year = ? and port = ? and transportation_mode = ? and target_addr = ?",
 			YEAR, portInfo.PortName, trans, portInfo.ExtraPay).First(&extraPay)
+
+		if q.Error != nil {
+			panic(q.Error)
+		}
 	}
 
 	return FreightInfo{
@@ -228,8 +273,19 @@ func CreateCostCalculation(data *models.DynamicExcelTable, tableName string) (st
 	endRow, err := strconv.ParseInt(data.Datas.List[len(data.Datas.List)-1]["__ROW_INDEX__"], 10, 64)
 
 	productInfo, err := GetProductInfo(productName)
+	fmt.Println("productInfo", productInfo)
 	// 箱量
-	totalContainers := decimal.NewFromFloat(count).Div(decimal.NewFromFloat(productInfo.ContainerTypeWeight)).Round(0).IntPart()
+	pkgCount := data.Datas.BaseData["pkg_count"]
+	var totalContainers int64
+	if pkgCount == "" {
+		totalContainers = decimal.NewFromFloat(count).Div(decimal.NewFromFloat(productInfo.ContainerTypeWeight)).Round(0).IntPart()
+	} else {
+		pkgDec, err := decimal.NewFromString(pkgCount)
+		if err != nil {
+			panic(err)
+		}
+		totalContainers = pkgDec.IntPart()
+	}
 
 	totalZhengXiang, err := GetZhengXiangTotal(data, productInfo)
 
@@ -249,6 +305,10 @@ func CreateCostCalculation(data *models.DynamicExcelTable, tableName string) (st
 	err = f.SetCellFormula(sheetName, "I6", fmt.Sprintf("=%d*%f", totalContainers, clearanceFeeUnitPrice))
 	err = f.SetCellFormula(sheetName, "K6", fmt.Sprintf("=(%d-%d)*%f", totalContainers, totalZhengXiang, shortHaulFeeUnitPrice))
 	err = f.SetCellFormula(sheetName, "M6", fmt.Sprintf("=(%d-%d)*%f", totalContainers, totalZhengXiang, unpackingFeeUnitPrice))
+
+	err = f.SetCellFormula(sheetName, "I7", fmt.Sprintf("=I6/1.06"))
+	err = f.SetCellFormula(sheetName, "K7", fmt.Sprintf("=K6/1.09"))
+	err = f.SetCellFormula(sheetName, "M7", fmt.Sprintf("=M6/1.09"))
 
 	err = f.SetCellFormula(sheetName,
 		fmt.Sprintf("J%d", totalRow+1),
@@ -336,10 +396,11 @@ func CreateCostCalculation(data *models.DynamicExcelTable, tableName string) (st
 		}
 
 		// 箱数
-		containerCount := GetContainerCount(planned_count, productInfo.ContainerTypeWeight)
+		containerCount := item["pkg_count"]
 		realCount := (planned_count*1000 - math.Abs(fewer_packages)*productInfo.PackingSpecification) / 1000
 
-		freightInfo := GetUnitFreight(port, containerCount, item["company_name"])
+		trans := GetTrans(productInfo, containerCount)
+		freightInfo := GetUnitFreight(port, trans, item["company_name"])
 
 		if containerCount != "" {
 			f.SetCellFormula(sheetName,

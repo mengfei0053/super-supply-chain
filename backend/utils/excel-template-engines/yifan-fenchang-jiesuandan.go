@@ -39,7 +39,7 @@ func GetCompanyInfo(c string) models.BaseCompaniesInfos {
 		TargetAddr:              "",
 		Alias:                   "",
 	}
-	q := models.DB.Model(&models.BaseCompaniesInfos{}).Where("alias = ? OR name = ?", c, c).First(&res)
+	q := models.DB.Model(&models.BaseCompaniesInfos{}).Where("INSTR(alias, ?) > 0 OR name = ?", c, c).First(&res)
 	if q.Error != nil {
 		panic(q.Error)
 	}

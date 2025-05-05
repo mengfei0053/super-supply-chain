@@ -4,3 +4,4 @@ node_modules/
 configs/**/*.env
 ssc-deployment.yam
 logs/
+py-backend/files/**/*
