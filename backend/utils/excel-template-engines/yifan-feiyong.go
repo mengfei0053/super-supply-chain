@@ -184,6 +184,11 @@ var PortInfoMap = map[string]PortInfo{
 		ExtraPay: "",
 		Addr:     "重庆",
 	},
+	"重庆果园港": {
+		PortName: "重庆口岸",
+		ExtraPay: "",
+		Addr:     "重庆",
+	},
 }
 
 func GetTrans(productInfo models.ProductInfoBase, containerCount string) string {

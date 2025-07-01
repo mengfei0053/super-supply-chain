@@ -17,7 +17,6 @@ const BatchExport: React.FunctionComponent = () => {
     return true;
   }, [notice, selectedIds.length]);
   const isIntegrity = tableName === "dynamic_Integrity_packaging_invoice";
-  const isSettlement = tableName === "dynamic_settlement_statement_suqian";
 
   if (isIntegrity) {
     return (
@@ -87,6 +86,30 @@ const BatchExport: React.FunctionComponent = () => {
               {
                 ids: selectedIds,
                 type: "invoice_clearance",
+              },
+              {
+                encode: false,
+                arrayFormat: "repeat",
+              },
+            );
+
+            window.open(
+              `${import.meta.env.VITE_JSON_SERVER_URL}/excel-exports/${tableName}?${query}`,
+            );
+          }
+        }}
+      ></Button>
+      <Button
+        label="导出-短驳费-发票"
+        startIcon={<Download></Download>}
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          if (validate()) {
+            const query = qs.stringify(
+              {
+                ids: selectedIds,
+                type: "shortHaulInvoice",
               },
               {
                 encode: false,

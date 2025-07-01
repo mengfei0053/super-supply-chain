@@ -104,7 +104,14 @@ func CreateDynamicExcelTable(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
 		return
 	}
-	data, err := utils.GetExcelData(filePath, tableName)
+
+	var data models.ExcelData
+
+	if tableName == "dynamic_customs_declaration_form" {
+		data, err = utils.GetBaoguanDan(filePath, tableName)
+	} else {
+		data, err = utils.GetExcelData(filePath, tableName)
+	}
 	if err != nil {
 		panic(err)
 		return

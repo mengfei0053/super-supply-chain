@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"super-supply-chain/models"
@@ -32,6 +33,15 @@ type IterationInfo struct {
 	ItemKey  string `json:"itemKey"`
 }
 
+func TrimNum(s string) string {
+	re := regexp.MustCompile(`\d+$`)
+	matched, _ := regexp.MatchString(`\d+$`, s)
+	if matched {
+		return re.ReplaceAllString(s, "")
+	}
+	return s
+}
+
 func GetCompanyInfo(c string) models.BaseCompaniesInfos {
 	res := models.BaseCompaniesInfos{
 		Name:                    "",
@@ -39,7 +49,16 @@ func GetCompanyInfo(c string) models.BaseCompaniesInfos {
 		TargetAddr:              "",
 		Alias:                   "",
 	}
-	q := models.DB.Model(&models.BaseCompaniesInfos{}).Where("INSTR(alias, ?) > 0 OR name = ?", c, c).First(&res)
+	log.Println("GetCompanyInfo", c)
+
+	var name = TrimNum(c)
+
+	newName := strings.ReplaceAll(name, "有限公司", "")
+	newName = strings.ReplaceAll(newName, "公司", "")
+
+	log.Println("GetCompanyInfo", newName)
+
+	q := models.DB.Model(&models.BaseCompaniesInfos{}).Where("INSTR(alias, ?) > 0 OR name = ?", newName, name).First(&res)
 	if q.Error != nil {
 		panic(q.Error)
 	}

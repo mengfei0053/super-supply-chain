@@ -3,36 +3,14 @@ import {
   SimpleForm,
   TextInput,
   TopToolbar,
-  SelectArrayInput,
   NumberInput,
   ArrayInput,
   SimpleFormIterator,
 } from "react-admin";
 import * as React from "react";
 import { Button } from "@mui/material";
-import { httpClient } from "../../../dataProvider";
-import AdSelectInput from "../../../components/AdSelectInput";
-import RuleInput from "./RuleInput";
 
 const ToolPagesEdit: React.FunctionComponent = () => {
-  const [options, setOptions] = React.useState<
-    {
-      id: number;
-      name: string;
-    }[]
-  >([]);
-
-  const getOptions = async () => {
-    const res = await httpClient(
-      import.meta.env.VITE_JSON_SERVER_URL + "/options/excel-mapping-rule",
-    );
-    setOptions(res.json);
-  };
-
-  React.useEffect(() => {
-    getOptions();
-  }, []);
-
   return (
     <Edit
       onSubmit={() => {

@@ -91,7 +91,7 @@ func GetExcelData(path string, tableName string) (models.ExcelData, error) {
 	startRow := IterateRule.StartRow
 	for rowIndex := startRow - 1; rowIndex < len(rows); rowIndex++ {
 		rowData := rows[rowIndex]
-		if len(rowData) == 0 {
+		if len(rowData) == 0 || SliceContainsString(rowData, "合计") {
 			break
 		}
 

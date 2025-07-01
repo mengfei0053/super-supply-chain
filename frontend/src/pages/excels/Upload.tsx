@@ -26,16 +26,48 @@ export default function Upload({
   const refresh = useRefresh();
 
   const uploadFile = async (files: FileList) => {
-    const file = files[0];
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("name", file.name);
-    httpClient(`${import.meta.env.VITE_JSON_SERVER_URL}/${type}/${tableName}`, {
-      method: "POST",
-      body: formData,
-    }).then(() => {
-      refresh();
-    });
+    Promise.all(
+      Array.from(files).map(
+        (i) =>
+          new Promise((resolve, reject) => {
+            const formData = new FormData();
+            formData.append("file", i);
+            formData.append("name", i.name);
+            httpClient(
+              `${import.meta.env.VITE_JSON_SERVER_URL}/${type}/${tableName}`,
+              {
+                method: "POST",
+                body: formData,
+              },
+            )
+              .then(() => {
+                resolve(true);
+              })
+              .catch((e) => {
+                console.error(new Error("上传失败:" + i.name));
+                reject(e);
+              });
+          }),
+      ),
+    )
+      .then(() => {
+        refresh();
+      })
+      .catch(() => {
+        refresh();
+      });
+
+    // const file = files[0];
+    // Promise.all(files.map(i => ))
+    // const formData = new FormData();
+    // formData.append("file", file);
+    // formData.append("name", file.name);
+    // httpClient(`${import.meta.env.VITE_JSON_SERVER_URL}/${type}/${tableName}`, {
+    //   method: "POST",
+    //   body: formData,
+    // }).then(() => {
+    //   refresh();
+    // });
   };
 
   return (
@@ -51,6 +83,7 @@ export default function Upload({
       <VisuallyHiddenInput
         ref={ref}
         type="file"
+        multiple
         onChange={(event) => {
           uploadFile(event.target.files as FileList);
         }}

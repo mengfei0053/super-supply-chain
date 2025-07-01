@@ -1,6 +1,7 @@
 package excel_template_engines
 
 import (
+	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
@@ -163,16 +164,32 @@ func GetClearanceInvoiceFile(datas []models.DynamicExcelTable, newFilePath strin
 		companyInfo := GetCompanyInfo(excelData.BaseData["invoice_company"])
 		rowIndex := index + 4
 		arrivalPort := data.Datas.BaseData["arrival_port"]
-		comment := fmt.Sprintf(`订单号：%s  业务编号: %s
+
+		var comment string
+
+		if excelData.BaseData["sap_number"] == excelData.BaseData["bus_num"] {
+			comment = fmt.Sprintf(`订单号：%s  
 货物名称: %s
 数量: %s 吨
 到港口岸: %s`,
-			excelData.BaseData["sap_number"],
-			excelData.BaseData["bus_num"],
-			excelData.BaseData["product_name"],
-			excelData.BaseData["total_count"],
-			arrivalPort,
-		)
+				excelData.BaseData["sap_number"],
+				excelData.BaseData["product_name"],
+				excelData.BaseData["total_count"],
+				arrivalPort,
+			)
+		} else {
+			comment = fmt.Sprintf(`订单号：%s  业务编号: %s
+货物名称: %s
+数量: %s 吨
+到港口岸: %s`,
+				excelData.BaseData["sap_number"],
+				excelData.BaseData["bus_num"],
+				excelData.BaseData["product_name"],
+				excelData.BaseData["total_count"],
+				arrivalPort,
+			)
+		}
+
 		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("A%d", rowIndex), &[]interface{}{
 			sap_number,
 			"增值税专用发票",
@@ -293,6 +310,125 @@ func GetShortHaulFile(datas []models.DynamicExcelTable, newFilePath string) erro
 	return nil
 }
 
+func GetShortHaulInvoce(datas []models.DynamicExcelTable, newFilePath string) error {
+	invoice_tmp_path := GetInvoiceTmpPath()
+	var err error
+	f, err := excelize.OpenFile(invoice_tmp_path)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	defer f.Close()
+
+	var base_details [][]string
+
+	var invoce_details [][]string
+	var extra_details [][]string
+	companyInfo := GetCompanyInfo("宿迁市宏胜供应链管理有限公司")
+
+	for _, data := range datas {
+		var err error
+		short_haul_fee_price := strings.TrimSpace(data.Datas.BaseData["short_haul_fee_price"])
+		if short_haul_fee_price != "" && short_haul_fee_price != "0" && short_haul_fee_price != "0.00" {
+
+			short_car_num := data.Datas.BaseData["short_car_num"]
+			arrival_port := data.Datas.BaseData["arrival_port"]
+			product_name := data.Datas.BaseData["product_name"]
+
+			base_details = append(base_details, []string{
+				data.Datas.BaseData["invoice_company"],
+				data.Datas.BaseData["product_name"],
+				"短驳费",
+				data.Datas.BaseData["total_count"],
+				data.Datas.BaseData["short_haul_fee_price"],
+				data.Datas.BaseData["arrival_port"],
+				data.Datas.BaseData["sap_number"],
+				short_car_num,
+			})
+
+			invoce_details = append(invoce_details, []string{
+				data.Datas.BaseData["sap_number"],
+				"公路运输",
+				"3010102020100000000",
+				"",
+				"吨",
+				data.Datas.BaseData["total_count"],
+				"",
+				data.Datas.BaseData["short_haul_fee_price"],
+				"0.09",
+			})
+
+			extra_details = append(extra_details, []string{
+				data.Datas.BaseData["sap_number"],
+				"",
+				"",
+				"",
+				"",
+				"",
+				"",
+				PortInfoMap[arrival_port].Addr,
+				PortInfoMap[arrival_port].Addr,
+				"公路运输",
+				short_car_num,
+				product_name,
+			})
+		}
+
+		if err != nil {
+			log.Fatal(err)
+			return err
+		}
+	}
+
+	for index, detail := range base_details {
+		port := detail[5]
+		portInfo := PortInfoMap[port]
+		rowIndex := index + 4
+
+		if portInfo.Addr == "" {
+			return errors.New("港口信息错误")
+		}
+
+		line1 := portInfo.Addr + "到" + portInfo.Addr + " " + port + " " + "短驳费"
+
+		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("A%d", rowIndex), &[]interface{}{
+			detail[6],
+			"增值税专用发票",
+			"货物运输服务",
+			"是",
+			"",
+			companyInfo.Name,
+			companyInfo.UnifiedSocialCreditCode,
+		})
+		comment := fmt.Sprintf(`%s
+品名：%s 重量: %s吨
+车号: %s  车船吨位: 30吨  车种: 货车 汽车
+工作编号: %s `, line1, detail[1], detail[3], detail[7], detail[6])
+
+		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("R%d", rowIndex), &[]interface{}{comment})
+		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("Y%d", rowIndex), &[]interface{}{
+			"展示开户银行、银行账号",
+		})
+
+	}
+
+	for index, detail := range invoce_details {
+		rowIndex := index + 4
+		err = f.SetSheetRow("2-发票明细信息", fmt.Sprintf("A%d", rowIndex), &detail)
+	}
+	for i, detail := range extra_details {
+		rowIndex := i + 4
+		err = f.SetSheetRow("3-特定业务信息", fmt.Sprintf("A%d", rowIndex), &detail)
+	}
+
+	if err = f.SaveAs(newFilePath); err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	return nil
+}
+
 func GetShortHaulAndFeiChangFile(datas []models.DynamicExcelTable, newFilePath string) error {
 	tmpPath := GetChangejiuFeiChangTmpPath()
 
@@ -373,8 +509,9 @@ func GetExcelExportFilePath(tableName string, ids []string, queryType string) (s
 		err = GetClearanceInvoiceFile(datas, newFilePath)
 	case "shortHaul":
 		err = GetShortHaulFile(datas, newFilePath)
+	case "shortHaulInvoice":
+		err = GetShortHaulInvoce(datas, newFilePath)
 	case "shortHaulAndFeiChang":
-		fmt.Println("shortHaulAndFeiChang")
 		err = GetShortHaulAndFeiChangFile(datas, newFilePath)
 	case "dynamic_Integrity_packaging_invoice":
 		err = GetChengxinInvoiceFile(datas, newFilePath)
