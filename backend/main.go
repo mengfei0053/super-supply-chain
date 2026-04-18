@@ -2,17 +2,19 @@ package main
 
 import (
 	"context"
-	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"net/http"
 	"os"
 	"os/signal"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+
 	"super-supply-chain/configs"
 	"super-supply-chain/controllers"
 	"super-supply-chain/middleware"
 	"super-supply-chain/models"
 	"super-supply-chain/utils"
-	"time"
 )
 
 func main() {

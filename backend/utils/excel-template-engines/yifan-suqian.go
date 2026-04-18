@@ -3,16 +3,23 @@ package excel_template_engines
 import (
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
-	"github.com/xuri/excelize/v2"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
+	"github.com/xuri/excelize/v2"
+
 	"super-supply-chain/models"
 	"super-supply-chain/utils"
 )
+
+func logError(err error, sap_number string) {
+	log.Println(sap_number)
+	log.Fatal(err)
+}
 
 // 运费发票
 func GetFreightInvoiceFile(datas []models.DynamicExcelTable, newFilePath string) error {
@@ -20,7 +27,7 @@ func GetFreightInvoiceFile(datas []models.DynamicExcelTable, newFilePath string)
 	var err error
 	f, err := excelize.OpenFile(invoice_tmp_path)
 	if err != nil {
-		log.Fatal(err)
+		logError(err, "")
 		return err
 	}
 	defer f.Close()
@@ -44,20 +51,23 @@ func GetFreightInvoiceFile(datas []models.DynamicExcelTable, newFilePath string)
 			companyInfo.Name,
 			companyInfo.UnifiedSocialCreditCode,
 		})
-		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("R%d", rowIndex), &[]interface{}{comment})
-		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("Y%d", rowIndex), &[]interface{}{
+		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("W%d", rowIndex), &[]interface{}{comment})
+		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("AD%d", rowIndex), &[]interface{}{
 			"展示开户银行、银行账号",
 		})
 		productName := excelData.BaseData["product_name"]
 
 		for _, item := range data.Datas.List {
 			var err error
-			count, err := decimal.NewFromString(item["count"])
-			unit_price, err := decimal.NewFromString(item["unit_price"])
+			count, err := decimal.NewFromString(strings.TrimSpace(item["count"]))
+			unit_price, err := decimal.NewFromString(strings.TrimSpace(item["unit_price"]))
 			itemCompanyInifo := GetCompanyInfo(item["company_name"])
 			car_num := item["car_num"]
 			//pkg_num, err := decimal.NewFromString(strings.TrimSpace(item["pkg_num"]))
 			price, err := decimal.NewFromString(strings.TrimSpace(item["price"]))
+			if err != nil {
+				logError(err, sap_number)
+			}
 
 			if strings.TrimSpace(item["pkg_num"]) != "" {
 				invoce_details = append(invoce_details, []string{
@@ -74,9 +84,7 @@ func GetFreightInvoiceFile(datas []models.DynamicExcelTable, newFilePath string)
 			} else {
 				var err error
 				trucking_unit_price, err := decimal.NewFromString(strings.TrimSpace(item["trucking_unit_price"]))
-
 				unitPrice := unit_price.Add(trucking_unit_price)
-
 				invoce_details = append(invoce_details, []string{
 					sap_number,
 					"公路运输",
@@ -89,6 +97,7 @@ func GetFreightInvoiceFile(datas []models.DynamicExcelTable, newFilePath string)
 					"0.09",
 				})
 				if err != nil {
+					logError(err, sap_number)
 					return err
 				}
 			}
@@ -108,6 +117,7 @@ func GetFreightInvoiceFile(datas []models.DynamicExcelTable, newFilePath string)
 				productName,
 			})
 			if err != nil {
+				logError(err, sap_number)
 				return err
 			}
 		}
@@ -124,7 +134,7 @@ func GetFreightInvoiceFile(datas []models.DynamicExcelTable, newFilePath string)
 	}
 
 	if err = f.SaveAs(newFilePath); err != nil {
-		log.Fatal(err)
+		logError(err, "")
 		return err
 	}
 	return nil
@@ -199,8 +209,8 @@ func GetClearanceInvoiceFile(datas []models.DynamicExcelTable, newFilePath strin
 			companyInfo.Name,
 			companyInfo.UnifiedSocialCreditCode,
 		})
-		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("R%d", rowIndex), &[]interface{}{comment})
-		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("Y%d", rowIndex), &[]interface{}{
+		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("W%d", rowIndex), &[]interface{}{comment})
+		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("AD%d", rowIndex), &[]interface{}{
 			"展示开户银行、银行账号",
 		})
 		var err error
@@ -324,7 +334,7 @@ func GetShortHaulInvoce(datas []models.DynamicExcelTable, newFilePath string) er
 
 	var invoce_details [][]string
 	var extra_details [][]string
-	companyInfo := GetCompanyInfo("宿迁市宏胜供应链管理有限公司")
+	//companyInfo := GetCompanyInfo("宿迁市宏胜供应链管理有限公司")
 
 	for _, data := range datas {
 		var err error
@@ -384,6 +394,7 @@ func GetShortHaulInvoce(datas []models.DynamicExcelTable, newFilePath string) er
 		port := detail[5]
 		portInfo := PortInfoMap[port]
 		rowIndex := index + 4
+		companyInfo := GetCompanyInfo(detail[0])
 
 		if portInfo.Addr == "" {
 			return errors.New("港口信息错误")
@@ -405,8 +416,8 @@ func GetShortHaulInvoce(datas []models.DynamicExcelTable, newFilePath string) er
 车号: %s  车船吨位: 30吨  车种: 货车 汽车
 工作编号: %s `, line1, detail[1], detail[3], detail[7], detail[6])
 
-		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("R%d", rowIndex), &[]interface{}{comment})
-		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("Y%d", rowIndex), &[]interface{}{
+		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("W%d", rowIndex), &[]interface{}{comment})
+		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("AD%d", rowIndex), &[]interface{}{
 			"展示开户银行、银行账号",
 		})
 

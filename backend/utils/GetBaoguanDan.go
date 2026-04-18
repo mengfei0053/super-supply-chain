@@ -44,6 +44,16 @@ func SliceContainsString(slice []string, str string) bool {
 	return false
 }
 
+func isRowDataEmpty(slice []string) bool {
+	for _, s := range slice {
+		if strings.TrimSpace(s) != "" {
+			return false
+		}
+	}
+
+	return true
+}
+
 func GetPrice(input string) (string, string, error) {
 	var units = map[string]string{
 		"美元": "USD",

@@ -49,14 +49,14 @@ func GetCompanyInfo(c string) models.BaseCompaniesInfos {
 		TargetAddr:              "",
 		Alias:                   "",
 	}
-	log.Println("GetCompanyInfo", c)
+	//log.Println("GetCompanyInfo", c)
 
 	var name = TrimNum(c)
 
 	newName := strings.ReplaceAll(name, "有限公司", "")
 	newName = strings.ReplaceAll(newName, "公司", "")
 
-	log.Println("GetCompanyInfo", newName)
+	//log.Println("GetCompanyInfo", newName)
 
 	q := models.DB.Model(&models.BaseCompaniesInfos{}).Where("INSTR(alias, ?) > 0 OR name = ?", newName, name).First(&res)
 	if q.Error != nil {
@@ -109,7 +109,7 @@ func CreateFeiChangFeiyong(data *models.ExcelData, fileName string) (string, err
 		carNum := strings.TrimSpace(itemData["car_num"])
 		comment := fmt.Sprintf(`品名:%s    重量: %s吨
 车号:%s  车船吨位:33吨  车种: 货车 汽车
-订单号:%s  分订单号:%s `, data.BaseData["name"], itemData["count"], carNum, data.BaseData["sap_number"], itemData["plan_number"])
+订单号:%s  业务编号:%s `, data.BaseData["name"], itemData["count"], carNum, data.BaseData["sap_number"], data.BaseData["yewu_number"])
 		cellNum := j + 4
 		cell := fmt.Sprintf("A%d", cellNum)
 
@@ -131,12 +131,12 @@ func CreateFeiChangFeiyong(data *models.ExcelData, fileName string) (string, err
 			log.Fatal(err)
 		}
 
-		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("R%d", cellNum), &[]interface{}{comment})
+		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("W%d", cellNum), &[]interface{}{comment})
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("Y%d", cellNum), &[]interface{}{
+		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("AD%d", cellNum), &[]interface{}{
 			"展示开户银行、银行账号",
 		})
 		if err != nil {
