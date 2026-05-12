@@ -27,12 +27,9 @@ func AuthMiddleware() gin.HandlerFunc {
 		authHeader := c.GetHeader("Authorization")
 		// 从cookie 获取 Authorization
 		Authorization, err := c.Cookie("Authorization")
-		if err != nil {
-			handleNoAuth(c)
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
-			c.Abort()
+		if err == nil {
+			authHeader = Authorization
 		}
-		authHeader = Authorization
 
 		if authHeader == "" {
 			handleNoAuth(c)

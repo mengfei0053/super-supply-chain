@@ -1,9 +1,10 @@
 package utils
 
 import (
+	"encoding/json"
+	"errors"
 	"github.com/gin-gonic/gin"
-	"log"
-	"net/http"
+	"strconv"
 )
 
 type ListQueryParams struct {
@@ -32,21 +33,58 @@ type QueryMap struct {
 }
 
 func GetListQueryParams(c *gin.Context) (ListQueryParams, error) {
-	var err error
+	filter := FilterType{}
+	filterQuery := c.Query("filter")
+	if filterQuery != "" {
+		if err := json.Unmarshal([]byte(filterQuery), &filter); err != nil {
+			return ListQueryParams{}, err
+		}
+	}
+	if filter.Start == "" {
+		filter.Start = c.Query("filter.start")
+	}
+	if filter.End == "" {
+		filter.End = c.Query("filter.end")
+	}
 
-	query := QueryMap{}
-	err = c.ShouldBindQuery(&query)
+	queryRange, err := parseRangeQuery(c)
 	if err != nil {
-		log.Fatal(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to bind query"})
-
+		return ListQueryParams{}, err
 	}
 
 	return ListQueryParams{
-		Filter: query.Filter,
+		Filter: filter,
 		Range:  c.Query("range"),
 		Sort:   c.Query("sort"),
-		Limit:  query.Range[1] - query.Range[0],
-		Offset: query.Range[0],
+		Limit:  queryRange[1] - queryRange[0],
+		Offset: queryRange[0],
 	}, nil
+}
+
+func parseRangeQuery(c *gin.Context) (Range, error) {
+	rangeValues := c.QueryArray("range")
+	if len(rangeValues) == 0 {
+		return nil, errors.New("range query is required")
+	}
+
+	if len(rangeValues) == 1 {
+		var queryRange Range
+		if err := json.Unmarshal([]byte(rangeValues[0]), &queryRange); err != nil {
+			return nil, err
+		}
+		if len(queryRange) < 2 {
+			return nil, errors.New("range query must include start and end")
+		}
+		return queryRange, nil
+	}
+
+	start, err := strconv.Atoi(rangeValues[0])
+	if err != nil {
+		return nil, err
+	}
+	end, err := strconv.Atoi(rangeValues[1])
+	if err != nil {
+		return nil, err
+	}
+	return Range{start, end}, nil
 }

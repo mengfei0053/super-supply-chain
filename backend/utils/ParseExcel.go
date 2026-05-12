@@ -78,11 +78,11 @@ func GetExcelData(path string, tableName string) (models.ExcelData, error) {
 
 	targetCols := make(map[int]string)
 	for i := 0; i < 26; i++ {
-		targetCols[i] = string('A' + i)
+		targetCols[i] = string(rune('A' + i))
 	}
 	targetColIndex := make(map[string]int)
 	for i := 0; i < 26; i++ {
-		targetColIndex[string('A'+i)] = i
+		targetColIndex[string(rune('A'+i))] = i
 	}
 	isCustomDeclation := tableName == "dynamic_customs_declaration_form"
 	isIntegrity := tableName == "dynamic_Integrity_packaging_invoice"
