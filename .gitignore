@@ -5,3 +5,4 @@ configs/**/*.env
 ssc-deployment.yam
 logs/
 py-backend/files/**/*
+backend/tmp/

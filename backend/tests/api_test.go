@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -10,6 +11,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"super-supply-chain/controllers"
 	"super-supply-chain/middleware"
+	"super-supply-chain/models"
 )
 
 func signedToken(t *testing.T, username string, expiresAt time.Time) string {
@@ -76,6 +78,7 @@ func setupProtectedAPIRouter() *gin.Engine {
 	return r
 }
 
+// 测试所有后台管理接口在未携带 token 时都会被认证中间件拦截。
 func TestProtectedAPIRequiresAuthorization(t *testing.T) {
 	router := setupProtectedAPIRouter()
 	cases := []struct {
@@ -129,6 +132,7 @@ func TestProtectedAPIRequiresAuthorization(t *testing.T) {
 	}
 }
 
+// 测试前端通过 Authorization header 传递 Bearer token 时可以通过认证。
 func TestAuthMiddlewareAcceptsAuthorizationBearerHeader(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
@@ -148,6 +152,7 @@ func TestAuthMiddlewareAcceptsAuthorizationBearerHeader(t *testing.T) {
 	}
 }
 
+// 测试过期 token 会被拒绝，避免失效登录态继续访问后台接口。
 func TestAuthMiddlewareRejectsExpiredToken(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
@@ -164,5 +169,38 @@ func TestAuthMiddlewareRejectsExpiredToken(t *testing.T) {
 
 	if w.Code != http.StatusUnauthorized {
 		t.Fatalf("status = %d, body = %s; want 401", w.Code, w.Body.String())
+	}
+}
+
+// 测试字典列表接口能从测试数据库读取数据，并返回 React Admin 需要的总数 header。
+func TestGetDictsReturnsListFromTestDB(t *testing.T) {
+	setupTestDB(t, &models.BaseDict{})
+	models.DB.Create(&models.BaseDict{Key: "enabled", Value: "启用", Type: "status"})
+	models.DB.Create(&models.BaseDict{Key: "disabled", Value: "停用", Type: "status"})
+
+	router := setupProtectedAPIRouter()
+	token := signedToken(t, "alice", time.Now().Add(time.Hour))
+	req := httptest.NewRequest(http.MethodGet, "/api/admin/dict-manage?range=%5B0,10%5D", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("status = %d, body = %s; want 200", w.Code, w.Body.String())
+	}
+	if got := w.Header().Get("Content-Range"); got != "2" {
+		t.Fatalf("Content-Range = %q, want 2", got)
+	}
+
+	var body []models.BaseDict
+	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
+		t.Fatalf("response body is not valid BaseDict JSON: %v", err)
+	}
+	if len(body) != 2 {
+		t.Fatalf("body length = %d, want 2; body = %s", len(body), w.Body.String())
+	}
+	if body[0].Key != "enabled" || body[0].Value != "启用" || body[0].Type != "status" {
+		t.Fatalf("first dict = %#v, want enabled status dict", body[0])
 	}
 }

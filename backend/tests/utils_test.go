@@ -10,6 +10,7 @@ import (
 	excel_template_engines "super-supply-chain/utils/excel-template-engines"
 )
 
+// 测试列表查询参数能解析 React Admin 默认传入的 JSON 格式 range/filter/sort。
 func TestGetListQueryParamsParsesReactAdminQuery(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
@@ -32,6 +33,7 @@ func TestGetListQueryParamsParsesReactAdminQuery(t *testing.T) {
 	}
 }
 
+// 测试列表查询参数仍兼容重复 range 参数和 filter.start/filter.end 形式。
 func TestGetListQueryParamsKeepsRepeatedRangeCompatibility(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
@@ -51,6 +53,7 @@ func TestGetListQueryParamsKeepsRepeatedRangeCompatibility(t *testing.T) {
 	}
 }
 
+// 测试列表接口响应会写入 React Admin 读取总数所需的 Content-Range header。
 func TestSetContentRangeSetsTotalHeader(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
@@ -63,6 +66,7 @@ func TestSetContentRangeSetsTotalHeader(t *testing.T) {
 	}
 }
 
+// 测试报关单文本中能提取集装箱标箱数。
 func TestGetPkgCountExtractsContainerCount(t *testing.T) {
 	got, err := utils.GetPkgCount("集装箱标箱数及号码：12\nABCD1234567")
 	if err != nil {
@@ -73,6 +77,7 @@ func TestGetPkgCountExtractsContainerCount(t *testing.T) {
 	}
 }
 
+// 测试报关单三行商品单元格能提取最后一个商品名称字段。
 func TestGetProductNameExtractsLastFieldFromThreeLineCell(t *testing.T) {
 	got, err := utils.GetProductName("1 22029900 全脂奶粉\n规格型号\n其他")
 	if err != nil {
@@ -83,6 +88,7 @@ func TestGetProductNameExtractsLastFieldFromThreeLineCell(t *testing.T) {
 	}
 }
 
+// 测试报关单价格单元格能同时提取价格和币种代码。
 func TestGetPriceExtractsCurrencyCode(t *testing.T) {
 	price, unit, err := utils.GetPrice("成交方式\n123.45\n美元")
 	if err != nil {
@@ -93,12 +99,14 @@ func TestGetPriceExtractsCurrencyCode(t *testing.T) {
 	}
 }
 
+// 测试字符串切片匹配使用包含关系，而不是完全相等。
 func TestSliceContainsStringUsesSubstringMatch(t *testing.T) {
 	if !utils.SliceContainsString([]string{"商品编号", "商品名称及规格型号"}, "规格型号") {
 		t.Fatal("SliceContainsString should match substrings")
 	}
 }
 
+// 测试 Excel 行扫描能记录每个“合计”行的行号。
 func TestGetToTalRowIndexsRecordsEachTotalRow(t *testing.T) {
 	base := map[string]string{}
 	rows := [][]string{
@@ -115,6 +123,7 @@ func TestGetToTalRowIndexsRecordsEachTotalRow(t *testing.T) {
 	}
 }
 
+// 测试通用泛型 helper 的基础行为。
 func TestGenericHelpers(t *testing.T) {
 	mapped := utils.Map([]int{1, 2, 3}, func(v int) string {
 		return string(rune('a' + v - 1))
@@ -132,6 +141,7 @@ func TestGenericHelpers(t *testing.T) {
 	}
 }
 
+// 测试一帆费用模板中商品名称的业务归一化规则。
 func TestYifanFeiyongProductNameNormalization(t *testing.T) {
 	if got := excel_template_engines.GetProductName("进口全脂奶粉(>=26%)"); got != "全脂奶粉" {
 		t.Fatalf("GetProductName() = %q, want 全脂奶粉", got)
