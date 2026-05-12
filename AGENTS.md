@@ -13,15 +13,11 @@ This repository contains Super Supply Chain, a supply-chain admin system with:
 
 `node-backend/` was removed in commit `98dd5c9` and should not be reintroduced unless explicitly requested.
 
-## Current Git State Notes
+## Repository Notes
 
-At initialization time, the worktree still had pre-existing uncommitted changes outside the node-backend removal:
+`batch-print/` and `py-backend/` were removed in commit `ebb0b43`.
 
-- deleted `batch-print/*`
-- deleted `py-backend/*`
-- modified `backend/tmp/main`
-
-Do not stage, restore, or otherwise modify those paths unless the user explicitly asks.
+Detailed local guidance lives in nested `AGENTS.md` files under `backend/` and `frontend/`. Read the closest one before editing files in those directories.
 
 ## Backend
 
