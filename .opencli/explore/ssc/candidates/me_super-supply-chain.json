@@ -1,0 +1,38 @@
+{
+  "site": "ssc",
+  "name": "me_super-supply-chain",
+  "description": "ssc me_super-supply-chain (auto-generated)",
+  "domain": "localhost",
+  "strategy": "cookie",
+  "browser": true,
+  "args": {
+    "limit": {
+      "type": "int",
+      "default": 20,
+      "description": "Number of items to return"
+    }
+  },
+  "pipeline": [
+    {
+      "navigate": "http://localhost:5173/super-supply-chain/#/excel/dynamic_settlement_statement_suqian"
+    },
+    {
+      "evaluate": "(async () => {\n  const res = await fetch(\"http://localhost:5173/super-supply-chain/manifest.json\", {\n    credentials: 'include'\n  });\n  const data = await res.json();\n  return (data?.data?.data?.list || []);\n})()\n"
+    },
+    {
+      "map": {
+        "rank": "${{ index + 1 }}",
+        "title": "${{ item.title }}",
+        "url": "${{ item.url }}"
+      }
+    },
+    {
+      "limit": "${{ args.limit | default(20) }}"
+    }
+  ],
+  "columns": [
+    "rank",
+    "title",
+    "url"
+  ]
+}

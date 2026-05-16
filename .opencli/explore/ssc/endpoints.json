@@ -1,0 +1,49 @@
+[
+  {
+    "pattern": "localhost:5173/api/admin/menus",
+    "method": "GET",
+    "url": "http://localhost:5173/api/admin/menus",
+    "status": 200,
+    "contentType": "application/json",
+    "queryParams": [],
+    "itemPath": null,
+    "itemCount": 5,
+    "detectedFields": {
+      "id": "id"
+    },
+    "authIndicators": [
+      "bearer"
+    ]
+  },
+  {
+    "pattern": "localhost:5173/api/admin/excel/dynamic_settlement_statement_suqian?filter={}&range={}&range={}&sort={}",
+    "method": "GET",
+    "url": "http://localhost:5173/api/admin/excel/dynamic_settlement_statement_suqian?filter=%7B%22start%22%3A%222026-05-12%22%2C%22end%22%3A%222026-05-12%22%7D&sort=%7B%22field%22%3A%22id%22%2C%22order%22%3A%22ASC%22%7D&range=0&range=50",
+    "status": 200,
+    "contentType": "application/json",
+    "queryParams": [
+      "filter",
+      "sort",
+      "range",
+      "range"
+    ],
+    "itemPath": null,
+    "itemCount": 0,
+    "detectedFields": {},
+    "authIndicators": [
+      "bearer"
+    ]
+  },
+  {
+    "pattern": "localhost:5173/super-supply-chain/manifest.json",
+    "method": "GET",
+    "url": "http://localhost:5173/super-supply-chain/manifest.json",
+    "status": 200,
+    "contentType": "application/json",
+    "queryParams": [],
+    "itemPath": null,
+    "itemCount": 0,
+    "detectedFields": {},
+    "authIndicators": []
+  }
+]

@@ -1,0 +1,59 @@
+[
+  {
+    "name": "me",
+    "description": "ssc me",
+    "strategy": "header",
+    "endpoint": "localhost:5173/api/admin/menus",
+    "itemPath": null,
+    "recommendedColumns": [
+      "title",
+      "url"
+    ],
+    "recommendedArgs": [
+      {
+        "name": "limit",
+        "type": "int",
+        "required": false,
+        "default": 20
+      }
+    ]
+  },
+  {
+    "name": "me_dynamic_settlement_statement_suqian?filter={}&range={}&range={}&sort={}",
+    "description": "ssc me_dynamic_settlement_statement_suqian?filter={}&range={}&range={}&sort={}",
+    "strategy": "header",
+    "endpoint": "localhost:5173/api/admin/excel/dynamic_settlement_statement_suqian?filter={}&range={}&range={}&sort={}",
+    "itemPath": null,
+    "recommendedColumns": [
+      "title",
+      "url"
+    ],
+    "recommendedArgs": [
+      {
+        "name": "limit",
+        "type": "int",
+        "required": false,
+        "default": 20
+      }
+    ]
+  },
+  {
+    "name": "me_super-supply-chain",
+    "description": "ssc me_super-supply-chain",
+    "strategy": "cookie",
+    "endpoint": "localhost:5173/super-supply-chain/manifest.json",
+    "itemPath": null,
+    "recommendedColumns": [
+      "title",
+      "url"
+    ],
+    "recommendedArgs": [
+      {
+        "name": "limit",
+        "type": "int",
+        "required": false,
+        "default": 20
+      }
+    ]
+  }
+]
