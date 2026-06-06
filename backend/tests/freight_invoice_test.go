@@ -214,7 +214,7 @@ func TestGetShortHaulInvoceGeneratesWorkbook(t *testing.T) {
 	assertCell(t, workbook, "1-发票基本信息", "AD4", "展示开户银行、银行账号")
 
 	assertCell(t, workbook, "2-发票明细信息", "A4", "SHI-001")
-	assertCell(t, workbook, "2-发票明细信息", "B4", "公路运输")
+	assertCell(t, workbook, "2-发票明细信息", "B4", "公路运费")
 	assertCell(t, workbook, "2-发票明细信息", "F4", "8")
 	assertCell(t, workbook, "2-发票明细信息", "G4", "")
 	assertCell(t, workbook, "2-发票明细信息", "H4", "128.50")

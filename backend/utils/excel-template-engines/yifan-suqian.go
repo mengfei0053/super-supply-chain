@@ -151,6 +151,18 @@ func GetChangejiuFeiChangTmpPath() string {
 
 // 清关费发票
 func GetClearanceInvoiceFile(datas []models.DynamicExcelTable, newFilePath string) error {
+	return getClearanceInvoiceFile(datas, newFilePath, true, true)
+}
+
+func GetClearanceOnlyInvoiceFile(datas []models.DynamicExcelTable, newFilePath string) error {
+	return getClearanceInvoiceFile(datas, newFilePath, true, false)
+}
+
+func GetUnpackingInvoiceFile(datas []models.DynamicExcelTable, newFilePath string) error {
+	return getClearanceInvoiceFile(datas, newFilePath, false, true)
+}
+
+func getClearanceInvoiceFile(datas []models.DynamicExcelTable, newFilePath string, includeClearance bool, includeUnpacking bool) error {
 	return generateFileFromInvoiceTemplate(newFilePath, func(f *excelize.File) error {
 		var err error
 		var invoce_details [][]string
@@ -200,27 +212,41 @@ func GetClearanceInvoiceFile(datas []models.DynamicExcelTable, newFilePath strin
 			err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("AD%d", rowIndex), &[]interface{}{
 				"展示开户银行、银行账号",
 			})
-			var err error
+			if err != nil {
+				return err
+			}
 
-			clearance_fee_count, err := decimal.NewFromString(excelData.BaseData["clearance_fee_count"])
-			clearance_fee_unit_price, err := decimal.NewFromString(excelData.BaseData["clearance_fee_unit_price"])
-			invoce_details = append(invoce_details, []string{
-				sap_number,
-				"代理清关费",
-				"3040802020000000000",
-				"40'",
-				"柜",
-				clearance_fee_count.String(),
-				clearance_fee_unit_price.String(),
-				clearance_fee_count.Mul(clearance_fee_unit_price).Round(2).String(),
-				"0.06",
-			})
+			if includeClearance {
+				clearance_fee_count, err := decimal.NewFromString(excelData.BaseData["clearance_fee_count"])
+				if err != nil {
+					return err
+				}
+				clearance_fee_unit_price, err := decimal.NewFromString(excelData.BaseData["clearance_fee_unit_price"])
+				if err != nil {
+					return err
+				}
+				invoce_details = append(invoce_details, []string{
+					sap_number,
+					"代理清关费",
+					"3040802020000000000",
+					"40'",
+					"柜",
+					clearance_fee_count.String(),
+					clearance_fee_unit_price.String(),
+					clearance_fee_count.Mul(clearance_fee_unit_price).Round(2).String(),
+					"0.06",
+				})
+			}
 
-			if strings.TrimSpace(excelData.BaseData["unpacking_fee_unit_count"]) != "" && strings.TrimSpace(excelData.BaseData["unpacking_fee_unit_count"]) != "0" {
-				var err error
-
+			if includeUnpacking && strings.TrimSpace(excelData.BaseData["unpacking_fee_unit_count"]) != "" && strings.TrimSpace(excelData.BaseData["unpacking_fee_unit_count"]) != "0" {
 				unpacking_fee_unit_count, err := decimal.NewFromString(excelData.BaseData["unpacking_fee_unit_count"])
+				if err != nil {
+					return err
+				}
 				unpacking_fee_unit_price, err := decimal.NewFromString(excelData.BaseData["unpacking_fee_unit_price"])
+				if err != nil {
+					return err
+				}
 
 				invoce_details = append(invoce_details, []string{
 					sap_number,
@@ -233,13 +259,6 @@ func GetClearanceInvoiceFile(datas []models.DynamicExcelTable, newFilePath strin
 					unpacking_fee_unit_count.Mul(unpacking_fee_unit_price).Round(2).String(),
 					"0.06",
 				})
-				if err != nil {
-					return err
-				}
-			}
-
-			if err != nil {
-				return err
 			}
 
 		}
@@ -486,6 +505,10 @@ func GetExcelExportFilePath(tableName string, ids []string, queryType string) (s
 		err = GetFreightInvoiceFile(datas, newFilePath)
 	case "invoice_clearance":
 		err = GetClearanceInvoiceFile(datas, newFilePath)
+	case "invoice_clearance_only":
+		err = GetClearanceOnlyInvoiceFile(datas, newFilePath)
+	case "invoice_unpacking":
+		err = GetUnpackingInvoiceFile(datas, newFilePath)
 	case "shortHaul":
 		err = GetShortHaulFile(datas, newFilePath)
 	case "shortHaulInvoice":

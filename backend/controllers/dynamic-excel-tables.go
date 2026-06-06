@@ -1,10 +1,14 @@
 package controllers
 
 import (
+	"net/http"
+	"net/url"
+	"path/filepath"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"net/http"
-	"path/filepath"
+
 	"super-supply-chain/models"
 	"super-supply-chain/utils"
 	excel_template_engines "super-supply-chain/utils/excel-template-engines"
@@ -148,7 +152,32 @@ func ExportDynamicExcel(c *gin.Context) {
 		return
 	}
 
-	c.Header("Content-Disposition", "attachment; filename="+uuid.New().String()+".xlsx")
+	c.Header("Content-Disposition", buildExcelExportContentDisposition(queryType))
 	c.File(filePath)
 
+}
+
+func buildExcelExportContentDisposition(queryType string) string {
+	fileName := buildExcelExportFileName(queryType)
+	return "attachment; filename=\"export.xlsx\"; filename*=UTF-8''" + url.PathEscape(fileName)
+}
+
+func buildExcelExportFileName(queryType string) string {
+	labels := map[string]string{
+		"invoice_freight":                     "导出发票-运费",
+		"invoice_clearance_only":             "导出发票-清关",
+		"invoice_unpacking":                  "导出发票-掏箱",
+		"invoice_clearance":                  "导出发票-清关-掏箱",
+		"shortHaulInvoice":                   "导出-短驳费-发票",
+		"shortHaul":                          "导出-短驳费表",
+		"shortHaulAndFeiChang":               "导出-短驳费表(含分厂)",
+		"dynamic_Integrity_packaging_invoice": "导出发票",
+	}
+
+	label, ok := labels[queryType]
+	if !ok {
+		label = "导出文件"
+	}
+
+	return label + "_" + time.Now().Format("2006_01_02_15_04_05") + ".xlsx"
 }

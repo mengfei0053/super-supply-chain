@@ -76,6 +76,54 @@ const BatchExport: React.FunctionComponent = () => {
         }}
       ></Button>
       <Button
+        label="导出发票-清关"
+        startIcon={<Download></Download>}
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          if (validate()) {
+            const query = qs.stringify(
+              {
+                ids: selectedIds,
+                type: "invoice_clearance_only",
+              },
+              {
+                encode: false,
+                arrayFormat: "repeat",
+              },
+            );
+
+            window.open(
+              `${import.meta.env.VITE_JSON_SERVER_URL}/excel-exports/${tableName}?${query}`,
+            );
+          }
+        }}
+      ></Button>
+      <Button
+        label="导出发票-掏箱"
+        startIcon={<Download></Download>}
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          if (validate()) {
+            const query = qs.stringify(
+              {
+                ids: selectedIds,
+                type: "invoice_unpacking",
+              },
+              {
+                encode: false,
+                arrayFormat: "repeat",
+              },
+            );
+
+            window.open(
+              `${import.meta.env.VITE_JSON_SERVER_URL}/excel-exports/${tableName}?${query}`,
+            );
+          }
+        }}
+      ></Button>
+      <Button
         label="导出发票-清关-掏箱"
         startIcon={<Download></Download>}
         onClick={(e) => {
