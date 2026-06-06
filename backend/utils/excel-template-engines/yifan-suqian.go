@@ -23,78 +23,92 @@ func logError(err error, sap_number string) {
 
 // 运费发票
 func GetFreightInvoiceFile(datas []models.DynamicExcelTable, newFilePath string) error {
-	invoice_tmp_path := GetInvoiceTmpPath()
-	var err error
-	f, err := excelize.OpenFile(invoice_tmp_path)
-	if err != nil {
-		logError(err, "")
-		return err
-	}
-	defer f.Close()
-	var invoce_details [][]string
-	var extra_details [][]string
+	return generateFileFromInvoiceTemplate(newFilePath, func(f *excelize.File) error {
+		var err error
+		var invoce_details [][]string
+		var extra_details [][]string
 
-	for index, data := range datas {
-		excelData := data.Datas
-		sap_number := strings.TrimSpace(excelData.BaseData["sap_number"])
-		companyInfo := GetCompanyInfo("浙江迅尔智链货运有限公司")
-		rowIndex := index + 4
-		arrivalPort := data.Datas.BaseData["arrival_port"]
-		comment := fmt.Sprintf(`%s
+		for index, data := range datas {
+			excelData := data.Datas
+			sap_number := strings.TrimSpace(excelData.BaseData["sap_number"])
+			companyInfo := GetCompanyInfo("浙江迅尔智链货运有限公司")
+			rowIndex := index + 4
+			arrivalPort := data.Datas.BaseData["arrival_port"]
+			comment := fmt.Sprintf(`%s
 进口原料运费`, excelData.BaseData["sap_number"])
-		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("A%d", rowIndex), &[]interface{}{
-			sap_number,
-			"增值税专用发票",
-			"货物运输服务",
-			"是",
-			"",
-			companyInfo.Name,
-			companyInfo.UnifiedSocialCreditCode,
-		})
-		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("W%d", rowIndex), &[]interface{}{comment})
-		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("AD%d", rowIndex), &[]interface{}{
-			"展示开户银行、银行账号",
-		})
-		productName := excelData.BaseData["product_name"]
+			err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("A%d", rowIndex), &[]interface{}{
+				sap_number,
+				"增值税专用发票",
+				"货物运输服务",
+				"是",
+				"",
+				companyInfo.Name,
+				companyInfo.UnifiedSocialCreditCode,
+			})
+			err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("W%d", rowIndex), &[]interface{}{comment})
+			err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("AD%d", rowIndex), &[]interface{}{
+				"展示开户银行、银行账号",
+			})
+			productName := excelData.BaseData["product_name"]
 
-		for _, item := range data.Datas.List {
-			var err error
-			count, err := decimal.NewFromString(strings.TrimSpace(item["count"]))
-			unit_price, err := decimal.NewFromString(strings.TrimSpace(item["unit_price"]))
-			itemCompanyInifo := GetCompanyInfo(item["company_name"])
-			car_num := item["car_num"]
-			//pkg_num, err := decimal.NewFromString(strings.TrimSpace(item["pkg_num"]))
-			price, err := decimal.NewFromString(strings.TrimSpace(item["price"]))
-			if err != nil {
-				logError(err, sap_number)
-			}
-
-			if strings.TrimSpace(item["pkg_num"]) != "" {
-				invoce_details = append(invoce_details, []string{
-					sap_number,
-					"公路运输",
-					"3010102020100000000",
-					"",
-					"吨",
-					count.String(),
-					"",
-					price.String(),
-					"0.09",
-				})
-			} else {
+			for _, item := range data.Datas.List {
 				var err error
-				trucking_unit_price, err := decimal.NewFromString(strings.TrimSpace(item["trucking_unit_price"]))
-				unitPrice := unit_price.Add(trucking_unit_price)
-				invoce_details = append(invoce_details, []string{
+				count, err := decimal.NewFromString(strings.TrimSpace(item["count"]))
+				unit_price, err := decimal.NewFromString(strings.TrimSpace(item["unit_price"]))
+				itemCompanyInifo := GetCompanyInfo(item["company_name"])
+				car_num := item["car_num"]
+				//pkg_num, err := decimal.NewFromString(strings.TrimSpace(item["pkg_num"]))
+				price, err := decimal.NewFromString(strings.TrimSpace(item["price"]))
+				if err != nil {
+					logError(err, sap_number)
+				}
+
+				if strings.TrimSpace(item["pkg_num"]) != "" {
+					invoce_details = append(invoce_details, []string{
+						sap_number,
+						"公路运输",
+						"3010102020100000000",
+						"",
+						"吨",
+						count.String(),
+						"",
+						price.String(),
+						"0.09",
+					})
+				} else {
+					var err error
+					trucking_unit_price, err := decimal.NewFromString(strings.TrimSpace(item["trucking_unit_price"]))
+					unitPrice := unit_price.Add(trucking_unit_price)
+					invoce_details = append(invoce_details, []string{
+						sap_number,
+						"公路运输",
+						"3010102020100000000",
+						"",
+						"吨",
+						count.String(),
+						unitPrice.String(),
+						count.Mul(unitPrice).Round(2).String(),
+						"0.09",
+					})
+					if err != nil {
+						logError(err, sap_number)
+						return err
+					}
+				}
+
+				extra_details = append(extra_details, []string{
 					sap_number,
-					"公路运输",
-					"3010102020100000000",
 					"",
-					"吨",
-					count.String(),
-					unitPrice.String(),
-					count.Mul(unitPrice).Round(2).String(),
-					"0.09",
+					"",
+					"",
+					"",
+					"",
+					"",
+					PortInfoMap[arrivalPort].Addr,
+					itemCompanyInifo.TargetAddr,
+					"公路运输",
+					car_num,
+					productName,
 				})
 				if err != nil {
 					logError(err, sap_number)
@@ -102,42 +116,22 @@ func GetFreightInvoiceFile(datas []models.DynamicExcelTable, newFilePath string)
 				}
 			}
 
-			extra_details = append(extra_details, []string{
-				sap_number,
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				PortInfoMap[arrivalPort].Addr,
-				itemCompanyInifo.TargetAddr,
-				"公路运输",
-				car_num,
-				productName,
-			})
-			if err != nil {
-				logError(err, sap_number)
-				return err
-			}
 		}
 
-	}
+		for index, detail := range invoce_details {
+			rowIndex := index + 4
+			err = f.SetSheetRow("2-发票明细信息", fmt.Sprintf("A%d", rowIndex), &detail)
+		}
+		for i, detail := range extra_details {
+			rowIndex := i + 4
+			err = f.SetSheetRow("3-特定业务信息", fmt.Sprintf("A%d", rowIndex), &detail)
+		}
+		if err != nil {
+			return err
+		}
 
-	for index, detail := range invoce_details {
-		rowIndex := index + 4
-		err = f.SetSheetRow("2-发票明细信息", fmt.Sprintf("A%d", rowIndex), &detail)
-	}
-	for i, detail := range extra_details {
-		rowIndex := i + 4
-		err = f.SetSheetRow("3-特定业务信息", fmt.Sprintf("A%d", rowIndex), &detail)
-	}
-
-	if err = f.SaveAs(newFilePath); err != nil {
-		logError(err, "")
-		return err
-	}
-	return nil
+		return nil
+	})
 }
 
 func GetChangejiuTmpPath() string {
@@ -157,287 +151,261 @@ func GetChangejiuFeiChangTmpPath() string {
 
 // 清关费发票
 func GetClearanceInvoiceFile(datas []models.DynamicExcelTable, newFilePath string) error {
-	invoice_tmp_path := GetInvoiceTmpPath()
-
-	var err error
-	f, err := excelize.OpenFile(invoice_tmp_path)
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-	defer f.Close()
-	var invoce_details [][]string
-
-	for index, data := range datas {
-		excelData := data.Datas
-		sap_number := strings.TrimSpace(excelData.BaseData["sap_number"])
-		companyInfo := GetCompanyInfo(excelData.BaseData["invoice_company"])
-		rowIndex := index + 4
-		arrivalPort := data.Datas.BaseData["arrival_port"]
-
-		var comment string
-
-		if excelData.BaseData["sap_number"] == excelData.BaseData["bus_num"] {
-			comment = fmt.Sprintf(`订单号：%s  
-货物名称: %s
-数量: %s 吨
-到港口岸: %s`,
-				excelData.BaseData["sap_number"],
-				excelData.BaseData["product_name"],
-				excelData.BaseData["total_count"],
-				arrivalPort,
-			)
-		} else {
-			comment = fmt.Sprintf(`订单号：%s  业务编号: %s
-货物名称: %s
-数量: %s 吨
-到港口岸: %s`,
-				excelData.BaseData["sap_number"],
-				excelData.BaseData["bus_num"],
-				excelData.BaseData["product_name"],
-				excelData.BaseData["total_count"],
-				arrivalPort,
-			)
-		}
-
-		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("A%d", rowIndex), &[]interface{}{
-			sap_number,
-			"增值税专用发票",
-			"",
-			"是",
-			"",
-			companyInfo.Name,
-			companyInfo.UnifiedSocialCreditCode,
-		})
-		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("W%d", rowIndex), &[]interface{}{comment})
-		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("AD%d", rowIndex), &[]interface{}{
-			"展示开户银行、银行账号",
-		})
+	return generateFileFromInvoiceTemplate(newFilePath, func(f *excelize.File) error {
 		var err error
+		var invoce_details [][]string
 
-		clearance_fee_count, err := decimal.NewFromString(excelData.BaseData["clearance_fee_count"])
-		clearance_fee_unit_price, err := decimal.NewFromString(excelData.BaseData["clearance_fee_unit_price"])
-		invoce_details = append(invoce_details, []string{
-			sap_number,
-			"代理清关费",
-			"3040802020000000000",
-			"40'",
-			"柜",
-			clearance_fee_count.String(),
-			clearance_fee_unit_price.String(),
-			clearance_fee_count.Mul(clearance_fee_unit_price).Round(2).String(),
-			"0.06",
-		})
+		for index, data := range datas {
+			excelData := data.Datas
+			sap_number := strings.TrimSpace(excelData.BaseData["sap_number"])
+			companyInfo := GetCompanyInfo(excelData.BaseData["invoice_company"])
+			rowIndex := index + 4
+			arrivalPort := data.Datas.BaseData["arrival_port"]
 
-		if strings.TrimSpace(excelData.BaseData["unpacking_fee_unit_count"]) != "" && strings.TrimSpace(excelData.BaseData["unpacking_fee_unit_count"]) != "0" {
+			var comment string
+
+			if excelData.BaseData["sap_number"] == excelData.BaseData["bus_num"] {
+				comment = fmt.Sprintf(`订单号：%s  
+货物名称: %s
+数量: %s 吨
+到港口岸: %s`,
+					excelData.BaseData["sap_number"],
+					excelData.BaseData["product_name"],
+					excelData.BaseData["total_count"],
+					arrivalPort,
+				)
+			} else {
+				comment = fmt.Sprintf(`订单号：%s  业务编号: %s
+货物名称: %s
+数量: %s 吨
+到港口岸: %s`,
+					excelData.BaseData["sap_number"],
+					excelData.BaseData["bus_num"],
+					excelData.BaseData["product_name"],
+					excelData.BaseData["total_count"],
+					arrivalPort,
+				)
+			}
+
+			err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("A%d", rowIndex), &[]interface{}{
+				sap_number,
+				"增值税专用发票",
+				"",
+				"是",
+				"",
+				companyInfo.Name,
+				companyInfo.UnifiedSocialCreditCode,
+			})
+			err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("W%d", rowIndex), &[]interface{}{comment})
+			err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("AD%d", rowIndex), &[]interface{}{
+				"展示开户银行、银行账号",
+			})
 			var err error
 
-			unpacking_fee_unit_count, err := decimal.NewFromString(excelData.BaseData["unpacking_fee_unit_count"])
-			unpacking_fee_unit_price, err := decimal.NewFromString(excelData.BaseData["unpacking_fee_unit_price"])
-
+			clearance_fee_count, err := decimal.NewFromString(excelData.BaseData["clearance_fee_count"])
+			clearance_fee_unit_price, err := decimal.NewFromString(excelData.BaseData["clearance_fee_unit_price"])
 			invoce_details = append(invoce_details, []string{
 				sap_number,
-				"代理掏箱费",
-				"3040802990000000000",
+				"代理清关费",
+				"3040802020000000000",
 				"40'",
 				"柜",
-				unpacking_fee_unit_count.String(),
-				unpacking_fee_unit_price.String(),
-				unpacking_fee_unit_count.Mul(unpacking_fee_unit_price).Round(2).String(),
+				clearance_fee_count.String(),
+				clearance_fee_unit_price.String(),
+				clearance_fee_count.Mul(clearance_fee_unit_price).Round(2).String(),
 				"0.06",
 			})
+
+			if strings.TrimSpace(excelData.BaseData["unpacking_fee_unit_count"]) != "" && strings.TrimSpace(excelData.BaseData["unpacking_fee_unit_count"]) != "0" {
+				var err error
+
+				unpacking_fee_unit_count, err := decimal.NewFromString(excelData.BaseData["unpacking_fee_unit_count"])
+				unpacking_fee_unit_price, err := decimal.NewFromString(excelData.BaseData["unpacking_fee_unit_price"])
+
+				invoce_details = append(invoce_details, []string{
+					sap_number,
+					"代理掏箱费",
+					"3040802990000000000",
+					"40'",
+					"柜",
+					unpacking_fee_unit_count.String(),
+					unpacking_fee_unit_price.String(),
+					unpacking_fee_unit_count.Mul(unpacking_fee_unit_price).Round(2).String(),
+					"0.06",
+				})
+				if err != nil {
+					return err
+				}
+			}
+
 			if err != nil {
+				return err
+			}
+
+		}
+
+		for index, detail := range invoce_details {
+			rowIndex := index + 4
+			err = f.SetSheetRow("2-发票明细信息", fmt.Sprintf("A%d", rowIndex), &detail)
+		}
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
+func GetShortHaulFile(datas []models.DynamicExcelTable, newFilePath string) error {
+	return generateFileFromChangjiuTemplate(newFilePath, func(f *excelize.File) error {
+		var err error
+		var extra_details [][]string
+
+		for _, data := range datas {
+			var err error
+			short_haul_fee_price := strings.TrimSpace(data.Datas.BaseData["short_haul_fee_price"])
+			if short_haul_fee_price != "" && short_haul_fee_price != "0" && short_haul_fee_price != "0.00" {
+
+				extra_details = append(extra_details, []string{
+					data.Datas.BaseData["invoice_company"],
+					data.Datas.BaseData["product_name"],
+					"短驳费",
+					data.Datas.BaseData["total_count"],
+					data.Datas.BaseData["short_haul_fee_price"],
+					data.Datas.BaseData["arrival_port"],
+					data.Datas.BaseData["sap_number"],
+				})
+			}
+
+			if err != nil {
+				log.Fatal(err)
 				return err
 			}
 		}
 
-		if err != nil {
-			return err
+		for i, detail := range extra_details {
+			err = f.SetSheetRow("Sheet1", fmt.Sprintf("A%d", i+2), &detail)
+			if err != nil {
+				log.Fatal(err)
+				panic(err)
+				return err
+			}
 		}
 
-	}
-
-	for index, detail := range invoce_details {
-		rowIndex := index + 4
-		err = f.SetSheetRow("2-发票明细信息", fmt.Sprintf("A%d", rowIndex), &detail)
-	}
-
-	if err = f.SaveAs(newFilePath); err != nil {
-		log.Fatal(err)
-		return err
-	}
-	return nil
-}
-
-func GetShortHaulFile(datas []models.DynamicExcelTable, newFilePath string) error {
-	invoice_tmp_path := GetChangejiuTmpPath()
-
-	f, err := excelize.OpenFile(invoice_tmp_path)
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-	defer f.Close()
-
-	var extra_details [][]string
-
-	for _, data := range datas {
-		var err error
-		short_haul_fee_price := strings.TrimSpace(data.Datas.BaseData["short_haul_fee_price"])
-		if short_haul_fee_price != "" && short_haul_fee_price != "0" && short_haul_fee_price != "0.00" {
-
-			extra_details = append(extra_details, []string{
-				data.Datas.BaseData["invoice_company"],
-				data.Datas.BaseData["product_name"],
-				"短驳费",
-				data.Datas.BaseData["total_count"],
-				data.Datas.BaseData["short_haul_fee_price"],
-				data.Datas.BaseData["arrival_port"],
-				data.Datas.BaseData["sap_number"],
-			})
-		}
-
-		if err != nil {
-			log.Fatal(err)
-			return err
-		}
-	}
-
-	for i, detail := range extra_details {
-		err = f.SetSheetRow("Sheet1", fmt.Sprintf("A%d", i+2), &detail)
-		if err != nil {
-			log.Fatal(err)
-			panic(err)
-			return err
-		}
-	}
-
-	if err = f.SaveAs(newFilePath); err != nil {
-		log.Fatal(err)
-		return err
-	}
-
-	return nil
+		return nil
+	})
 }
 
 func GetShortHaulInvoce(datas []models.DynamicExcelTable, newFilePath string) error {
-	invoice_tmp_path := GetInvoiceTmpPath()
-	var err error
-	f, err := excelize.OpenFile(invoice_tmp_path)
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-	defer f.Close()
-
-	var base_details [][]string
-
-	var invoce_details [][]string
-	var extra_details [][]string
-	//companyInfo := GetCompanyInfo("宿迁市宏胜供应链管理有限公司")
-
-	for _, data := range datas {
+	return generateFileFromInvoiceTemplate(newFilePath, func(f *excelize.File) error {
 		var err error
-		short_haul_fee_price := strings.TrimSpace(data.Datas.BaseData["short_haul_fee_price"])
-		if short_haul_fee_price != "" && short_haul_fee_price != "0" && short_haul_fee_price != "0.00" {
+		var base_details [][]string
 
-			short_car_num := data.Datas.BaseData["short_car_num"]
-			arrival_port := data.Datas.BaseData["arrival_port"]
-			product_name := data.Datas.BaseData["product_name"]
+		var invoce_details [][]string
+		var extra_details [][]string
+		//companyInfo := GetCompanyInfo("宿迁市宏胜供应链管理有限公司")
 
-			base_details = append(base_details, []string{
-				data.Datas.BaseData["invoice_company"],
-				data.Datas.BaseData["product_name"],
-				"短驳费",
-				data.Datas.BaseData["total_count"],
-				data.Datas.BaseData["short_haul_fee_price"],
-				data.Datas.BaseData["arrival_port"],
-				data.Datas.BaseData["sap_number"],
-				short_car_num,
-			})
+		for _, data := range datas {
+			var err error
+			short_haul_fee_price := strings.TrimSpace(data.Datas.BaseData["short_haul_fee_price"])
+			if short_haul_fee_price != "" && short_haul_fee_price != "0" && short_haul_fee_price != "0.00" {
 
-			invoce_details = append(invoce_details, []string{
-				data.Datas.BaseData["sap_number"],
-				"公路运输",
-				"3010102020100000000",
-				"",
-				"吨",
-				data.Datas.BaseData["total_count"],
-				"",
-				data.Datas.BaseData["short_haul_fee_price"],
-				"0.09",
-			})
+				short_car_num := data.Datas.BaseData["short_car_num"]
+				arrival_port := data.Datas.BaseData["arrival_port"]
+				product_name := data.Datas.BaseData["product_name"]
 
-			extra_details = append(extra_details, []string{
-				data.Datas.BaseData["sap_number"],
-				"",
-				"",
-				"",
-				"",
-				"",
-				"",
-				PortInfoMap[arrival_port].Addr,
-				PortInfoMap[arrival_port].Addr,
-				"公路运输",
-				short_car_num,
-				product_name,
-			})
+				base_details = append(base_details, []string{
+					data.Datas.BaseData["invoice_company"],
+					data.Datas.BaseData["product_name"],
+					"短驳费",
+					data.Datas.BaseData["total_count"],
+					data.Datas.BaseData["short_haul_fee_price"],
+					data.Datas.BaseData["arrival_port"],
+					data.Datas.BaseData["sap_number"],
+					short_car_num,
+				})
+
+				invoce_details = append(invoce_details, []string{
+					data.Datas.BaseData["sap_number"],
+					"公路运费",
+					"3010102020100000000",
+					"",
+					"吨",
+					data.Datas.BaseData["total_count"],
+					"",
+					data.Datas.BaseData["short_haul_fee_price"],
+					"0.09",
+				})
+
+				extra_details = append(extra_details, []string{
+					data.Datas.BaseData["sap_number"],
+					"",
+					"",
+					"",
+					"",
+					"",
+					"",
+					PortInfoMap[arrival_port].Addr,
+					PortInfoMap[arrival_port].Addr,
+					"公路运输",
+					short_car_num,
+					product_name,
+				})
+			}
+
+			if err != nil {
+				log.Fatal(err)
+				return err
+			}
 		}
 
-		if err != nil {
-			log.Fatal(err)
-			return err
-		}
-	}
+		for index, detail := range base_details {
+			port := detail[5]
+			portInfo := PortInfoMap[port]
+			rowIndex := index + 4
+			companyInfo := GetCompanyInfo(detail[0])
 
-	for index, detail := range base_details {
-		port := detail[5]
-		portInfo := PortInfoMap[port]
-		rowIndex := index + 4
-		companyInfo := GetCompanyInfo(detail[0])
+			if portInfo.Addr == "" {
+				return errors.New("港口信息错误")
+			}
 
-		if portInfo.Addr == "" {
-			return errors.New("港口信息错误")
-		}
+			line1 := portInfo.Addr + "到" + portInfo.Addr + " " + port + " " + "短驳费"
 
-		line1 := portInfo.Addr + "到" + portInfo.Addr + " " + port + " " + "短驳费"
-
-		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("A%d", rowIndex), &[]interface{}{
-			detail[6],
-			"增值税专用发票",
-			"货物运输服务",
-			"是",
-			"",
-			companyInfo.Name,
-			companyInfo.UnifiedSocialCreditCode,
-		})
-		comment := fmt.Sprintf(`%s
+			err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("A%d", rowIndex), &[]interface{}{
+				detail[6],
+				"增值税专用发票",
+				"货物运输服务",
+				"是",
+				"",
+				companyInfo.Name,
+				companyInfo.UnifiedSocialCreditCode,
+			})
+			comment := fmt.Sprintf(`%s
 品名：%s 重量: %s吨
 车号: %s  车船吨位: 30吨  车种: 货车 汽车
 工作编号: %s `, line1, detail[1], detail[3], detail[7], detail[6])
 
-		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("W%d", rowIndex), &[]interface{}{comment})
-		err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("AD%d", rowIndex), &[]interface{}{
-			"展示开户银行、银行账号",
-		})
+			err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("W%d", rowIndex), &[]interface{}{comment})
+			err = f.SetSheetRow("1-发票基本信息", fmt.Sprintf("AD%d", rowIndex), &[]interface{}{
+				"展示开户银行、银行账号",
+			})
 
-	}
+		}
 
-	for index, detail := range invoce_details {
-		rowIndex := index + 4
-		err = f.SetSheetRow("2-发票明细信息", fmt.Sprintf("A%d", rowIndex), &detail)
-	}
-	for i, detail := range extra_details {
-		rowIndex := i + 4
-		err = f.SetSheetRow("3-特定业务信息", fmt.Sprintf("A%d", rowIndex), &detail)
-	}
+		for index, detail := range invoce_details {
+			rowIndex := index + 4
+			err = f.SetSheetRow("2-发票明细信息", fmt.Sprintf("A%d", rowIndex), &detail)
+		}
+		for i, detail := range extra_details {
+			rowIndex := i + 4
+			err = f.SetSheetRow("3-特定业务信息", fmt.Sprintf("A%d", rowIndex), &detail)
+		}
+		if err != nil {
+			return err
+		}
 
-	if err = f.SaveAs(newFilePath); err != nil {
-		log.Fatal(err)
-		return err
-	}
-
-	return nil
+		return nil
+	})
 }
 
 func GetShortHaulAndFeiChangFile(datas []models.DynamicExcelTable, newFilePath string) error {

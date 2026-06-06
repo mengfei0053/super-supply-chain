@@ -1,0 +1,662 @@
+{
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/.claude/settings.local.json": {
+    "mtime": 1779028177.0905094,
+    "ast_hash": "81af61e5e436a1793f863bf63836622b",
+    "semantic_hash": "81af61e5e436a1793f863bf63836622b"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/configs/config.go": {
+    "mtime": 1779001818.0496635,
+    "ast_hash": "05c5b2c85d499a0d2b0b45603d3d2db0",
+    "semantic_hash": "05c5b2c85d499a0d2b0b45603d3d2db0"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/controllers/auth.go": {
+    "mtime": 1779001818.0498514,
+    "ast_hash": "95f50018d1b26be1229486bdbdd02a90",
+    "semantic_hash": "95f50018d1b26be1229486bdbdd02a90"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/controllers/base-dict.go": {
+    "mtime": 1779001818.0499237,
+    "ast_hash": "470ff5639a3d65df80b38f3fe77a5fd3",
+    "semantic_hash": "470ff5639a3d65df80b38f3fe77a5fd3"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/controllers/companies.go": {
+    "mtime": 1779001818.0499883,
+    "ast_hash": "c22a28186dc4a0d98dfc688ba07b79a4",
+    "semantic_hash": "c22a28186dc4a0d98dfc688ba07b79a4"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/controllers/dynamic-excel-tables.go": {
+    "mtime": 1779001818.0500572,
+    "ast_hash": "f23b61b30fd77ab9b10138236fba8b3d",
+    "semantic_hash": "f23b61b30fd77ab9b10138236fba8b3d"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/controllers/excel-export-rule.go": {
+    "mtime": 1779001818.0501382,
+    "ast_hash": "b059bcfefa0ae3ff89a77ff6cbf46e4f",
+    "semantic_hash": "b059bcfefa0ae3ff89a77ff6cbf46e4f"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/controllers/excel-read-rules.go": {
+    "mtime": 1779001818.050225,
+    "ast_hash": "28497cd448987a6273db2ba6fd9ae645",
+    "semantic_hash": "28497cd448987a6273db2ba6fd9ae645"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/controllers/export-excel.go": {
+    "mtime": 1779001818.05031,
+    "ast_hash": "f874ee93d2b064351b0140fcb5eaf2bd",
+    "semantic_hash": "f874ee93d2b064351b0140fcb5eaf2bd"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/controllers/menus.go": {
+    "mtime": 1779001818.0503993,
+    "ast_hash": "003a515f5337725883db4b770bd0ba40",
+    "semantic_hash": "003a515f5337725883db4b770bd0ba40"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/controllers/select-options.go": {
+    "mtime": 1779001818.050476,
+    "ast_hash": "a089ad1bb02a7666297f654e0221a748",
+    "semantic_hash": "a089ad1bb02a7666297f654e0221a748"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/controllers/settlement-form-entry.go": {
+    "mtime": 1779001818.0505607,
+    "ast_hash": "ea7872d0d1da744731cd48dd34d88b29",
+    "semantic_hash": "ea7872d0d1da744731cd48dd34d88b29"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/controllers/static.go": {
+    "mtime": 1779001818.0506394,
+    "ast_hash": "85b859eb584013fa0ed79e42b662fa77",
+    "semantic_hash": "85b859eb584013fa0ed79e42b662fa77"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/main.go": {
+    "mtime": 1779001818.0509212,
+    "ast_hash": "c729832e411ffa0a5f4effdc4c91a926",
+    "semantic_hash": "c729832e411ffa0a5f4effdc4c91a926"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/middleware/auth.go": {
+    "mtime": 1779001818.0511007,
+    "ast_hash": "eb3a7ed9ea58361e999b995dc1b0f42a",
+    "semantic_hash": "eb3a7ed9ea58361e999b995dc1b0f42a"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/middleware/logger.go": {
+    "mtime": 1779001818.0511737,
+    "ast_hash": "579c82736826635437a26ab274a83a29",
+    "semantic_hash": "579c82736826635437a26ab274a83a29"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/models/base-accounts-infos.go": {
+    "mtime": 1779001818.051357,
+    "ast_hash": "8e385b66ffe3b737a6fef953031a97c6",
+    "semantic_hash": "8e385b66ffe3b737a6fef953031a97c6"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/models/base-companies-infos.go": {
+    "mtime": 1779001818.0514266,
+    "ast_hash": "c68186535a2fdc750d8904d60bc4b066",
+    "semantic_hash": "c68186535a2fdc750d8904d60bc4b066"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/models/base-dict.go": {
+    "mtime": 1779001818.0514913,
+    "ast_hash": "ce029b25b8c430ec3e22ab96f3d3c9c6",
+    "semantic_hash": "ce029b25b8c430ec3e22ab96f3d3c9c6"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/models/clearance-price-base.go": {
+    "mtime": 1779001818.0515695,
+    "ast_hash": "525912dffefd4e1d6eb08278927c8b73",
+    "semantic_hash": "525912dffefd4e1d6eb08278927c8b73"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/models/dynamic-excel-table.go": {
+    "mtime": 1779001818.0516272,
+    "ast_hash": "8fdbf4576356b18acedaaee20e3f7cea",
+    "semantic_hash": "8fdbf4576356b18acedaaee20e3f7cea"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/models/excel-export-templates.go": {
+    "mtime": 1779001818.051686,
+    "ast_hash": "c6e890df3ea9a453774e9a986371f0d9",
+    "semantic_hash": "c6e890df3ea9a453774e9a986371f0d9"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/models/excel-read-rule-infos.go": {
+    "mtime": 1779001818.0517483,
+    "ast_hash": "d3c2f2bc5bc20bc81f59f6805d3821f4",
+    "semantic_hash": "d3c2f2bc5bc20bc81f59f6805d3821f4"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/models/freight-base.go": {
+    "mtime": 1779001818.0518115,
+    "ast_hash": "e03eed7bb618d03ecc895b86c0585b51",
+    "semantic_hash": "e03eed7bb618d03ecc895b86c0585b51"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/models/init-db.go": {
+    "mtime": 1779001818.0518742,
+    "ast_hash": "daacaa6767db081101f7992c2cfe3ebb",
+    "semantic_hash": "daacaa6767db081101f7992c2cfe3ebb"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/models/order.go": {
+    "mtime": 1779001818.0519354,
+    "ast_hash": "1d38a4fe319578a197e8c48bf1c2383c",
+    "semantic_hash": "1d38a4fe319578a197e8c48bf1c2383c"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/models/product-info-base.go": {
+    "mtime": 1779001818.0519989,
+    "ast_hash": "73fb06f06be7446c0b57b35d18c4499f",
+    "semantic_hash": "73fb06f06be7446c0b57b35d18c4499f"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/models/shipping-order.go": {
+    "mtime": 1779001818.0520701,
+    "ast_hash": "d4fce8704ad9733ebc5d84604a780a35",
+    "semantic_hash": "d4fce8704ad9733ebc5d84604a780a35"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/models/upload-file.go": {
+    "mtime": 1779001818.0521307,
+    "ast_hash": "618a33f2e97f6b7cf35607da626de318",
+    "semantic_hash": "618a33f2e97f6b7cf35607da626de318"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/scripts/convert.py": {
+    "mtime": 1779001818.052325,
+    "ast_hash": "8a67952914a3f7f14544e95c3cd4a44f",
+    "semantic_hash": "8a67952914a3f7f14544e95c3cd4a44f"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/tests/api_test.go": {
+    "mtime": 1779001818.052691,
+    "ast_hash": "3360f263f239bbf147dd5711594b1638",
+    "semantic_hash": "3360f263f239bbf147dd5711594b1638"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/tests/freight_invoice_test.go": {
+    "mtime": 1780412790.5024445,
+    "ast_hash": "715dda3b0b36db48a533c84ff094c6ff",
+    "semantic_hash": "715dda3b0b36db48a533c84ff094c6ff"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/tests/testdb_test.go": {
+    "mtime": 1779001818.0527616,
+    "ast_hash": "0d29e58abc42e2695bfe3f67f1933e28",
+    "semantic_hash": "0d29e58abc42e2695bfe3f67f1933e28"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/tests/upload_to_nas_integration_test.go": {
+    "mtime": 1779027568.3633127,
+    "ast_hash": "18a43ad7e23b674d8a54aa694df201e9",
+    "semantic_hash": "18a43ad7e23b674d8a54aa694df201e9"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/tests/upload_to_nas_test.go": {
+    "mtime": 1779025643.7335992,
+    "ast_hash": "c08a1735e408db429dc7e278b84856da",
+    "semantic_hash": "c08a1735e408db429dc7e278b84856da"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/tests/utils_test.go": {
+    "mtime": 1779001818.052836,
+    "ast_hash": "7fd7ff8ef1a73e21bc44f78b5dea0596",
+    "semantic_hash": "7fd7ff8ef1a73e21bc44f78b5dea0596"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/utils/GetBaoguanDan.go": {
+    "mtime": 1779001818.0560887,
+    "ast_hash": "aa06669c9c71d9affa44a04e54ee5ac2",
+    "semantic_hash": "aa06669c9c71d9affa44a04e54ee5ac2"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/utils/GetQueryParams.go": {
+    "mtime": 1779001818.056142,
+    "ast_hash": "d669f79e43f8072ef174b8b0ecfa11c7",
+    "semantic_hash": "d669f79e43f8072ef174b8b0ecfa11c7"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/utils/If.go": {
+    "mtime": 1779001818.056193,
+    "ast_hash": "ad676ecd88c3e2ef7ec2316a0ddd461c",
+    "semantic_hash": "ad676ecd88c3e2ef7ec2316a0ddd461c"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/utils/Map.go": {
+    "mtime": 1779001818.0562458,
+    "ast_hash": "ad47735ed3d667608cdacd55965c6d5d",
+    "semantic_hash": "ad47735ed3d667608cdacd55965c6d5d"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/utils/ParseExcel.go": {
+    "mtime": 1779001818.0563023,
+    "ast_hash": "fc70217cf3a9256299f6adeadf2cca7a",
+    "semantic_hash": "fc70217cf3a9256299f6adeadf2cca7a"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/utils/PrintJson.go": {
+    "mtime": 1779001818.0563548,
+    "ast_hash": "868a4ae40fbe91a3900ce7457bd04832",
+    "semantic_hash": "868a4ae40fbe91a3900ce7457bd04832"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/utils/SafeArray.go": {
+    "mtime": 1779001818.0564046,
+    "ast_hash": "3244fea735ce04aca7ec0f258f67b91d",
+    "semantic_hash": "3244fea735ce04aca7ec0f258f67b91d"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/utils/SetContentRange.go": {
+    "mtime": 1779001818.0564575,
+    "ast_hash": "fcd92a2419bb53c4cbf0fed2b5cb073e",
+    "semantic_hash": "fcd92a2419bb53c4cbf0fed2b5cb073e"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/utils/download-from-nas.go": {
+    "mtime": 1779001818.0565097,
+    "ast_hash": "46302702fe2b06b6b1dc987a74809b5d",
+    "semantic_hash": "46302702fe2b06b6b1dc987a74809b5d"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/utils/excel-template-engines/invoice_template_file.go": {
+    "mtime": 1780413051.4800167,
+    "ast_hash": "e88e1f7def5cfa7994b4740a5537a07e",
+    "semantic_hash": "e88e1f7def5cfa7994b4740a5537a07e"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/utils/excel-template-engines/yifan-chengxin.go": {
+    "mtime": 1780413267.2439656,
+    "ast_hash": "131e1cc07c4d9fce9451d9f189cd68e7",
+    "semantic_hash": "131e1cc07c4d9fce9451d9f189cd68e7"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/utils/excel-template-engines/yifan-feiyong.go": {
+    "mtime": 1779001818.0567427,
+    "ast_hash": "86784c4c678ad73e49b0c621530eb3f8",
+    "semantic_hash": "86784c4c678ad73e49b0c621530eb3f8"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/utils/excel-template-engines/yifan-fenchang-jiesuandan.go": {
+    "mtime": 1779001818.0568135,
+    "ast_hash": "d667d64d824af872d1debee6fa33c111",
+    "semantic_hash": "d667d64d824af872d1debee6fa33c111"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/utils/excel-template-engines/yifan-suqian.go": {
+    "mtime": 1780413245.8752692,
+    "ast_hash": "8a0d80c66190bbfd55c61282fc696410",
+    "semantic_hash": "8a0d80c66190bbfd55c61282fc696410"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/utils/logger.go": {
+    "mtime": 1779001818.056953,
+    "ast_hash": "a54f85e383ea7b6bff489978caab5863",
+    "semantic_hash": "a54f85e383ea7b6bff489978caab5863"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/utils/upload-to-nas.go": {
+    "mtime": 1779001818.0570061,
+    "ast_hash": "ea6b063f0b4e3bc42cb0c1061c7697f1",
+    "semantic_hash": "ea6b063f0b4e3bc42cb0c1061c7697f1"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/cli/main.go": {
+    "mtime": 1780409386.5087214,
+    "ast_hash": "aabfc58511218542b504abe3143c00a4",
+    "semantic_hash": "aabfc58511218542b504abe3143c00a4"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/dev.sh": {
+    "mtime": 1779001818.057058,
+    "ast_hash": "4306361c4f0d97c90f728ab19a1b2100",
+    "semantic_hash": "4306361c4f0d97c90f728ab19a1b2100"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/.claude/settings.local.json": {
+    "mtime": 1779555555.2578638,
+    "ast_hash": "b4e72e3bb7343b15a6c6bb1232a76fee",
+    "semantic_hash": "b4e72e3bb7343b15a6c6bb1232a76fee"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/package.json": {
+    "mtime": 1779001818.0601866,
+    "ast_hash": "55cad07ed767e571b65d1e64c23a5e0d",
+    "semantic_hash": "55cad07ed767e571b65d1e64c23a5e0d"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/prettier.config.js": {
+    "mtime": 1779001818.0602412,
+    "ast_hash": "a10b4978dbbf03e8bab090cc9cabd934",
+    "semantic_hash": "a10b4978dbbf03e8bab090cc9cabd934"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/public/manifest.json": {
+    "mtime": 1779001818.0604632,
+    "ast_hash": "0d23df64ab5adc1032dd87814bcb42a8",
+    "semantic_hash": "0d23df64ab5adc1032dd87814bcb42a8"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/App.tsx": {
+    "mtime": 1779001818.0606241,
+    "ast_hash": "a427cca30f82cf886c628aa104cd562b",
+    "semantic_hash": "a427cca30f82cf886c628aa104cd562b"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/authProvider.ts": {
+    "mtime": 1779001818.0606916,
+    "ast_hash": "ac18051d521378a634681b602365706c",
+    "semantic_hash": "ac18051d521378a634681b602365706c"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/components/AdSelectInput.tsx": {
+    "mtime": 1779001818.0608778,
+    "ast_hash": "199bd37b4dfe315a42ffb4a62c71cc20",
+    "semantic_hash": "199bd37b4dfe315a42ffb4a62c71cc20"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/components/DateRangeInput.tsx": {
+    "mtime": 1779001818.060947,
+    "ast_hash": "5ded2c629e2b3bcd3f375b81db8e907d",
+    "semantic_hash": "5ded2c629e2b3bcd3f375b81db8e907d"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/dataProvider.ts": {
+    "mtime": 1779001818.0610182,
+    "ast_hash": "3dc26d6b909a5d87238ed9fd9b7b8e91",
+    "semantic_hash": "3dc26d6b909a5d87238ed9fd9b7b8e91"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/index.tsx": {
+    "mtime": 1779001818.061077,
+    "ast_hash": "6d4bd3c1690291af226a549c2e338fc1",
+    "semantic_hash": "6d4bd3c1690291af226a549c2e338fc1"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/layout/Menu.tsx": {
+    "mtime": 1779001818.0612419,
+    "ast_hash": "34258bf5f0a5ab618c357b7f0e69ed64",
+    "semantic_hash": "34258bf5f0a5ab618c357b7f0e69ed64"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/layout/SubMenu.tsx": {
+    "mtime": 1779001818.061308,
+    "ast_hash": "8ea396e6687583051efdc06912836487",
+    "semantic_hash": "8ea396e6687583051efdc06912836487"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/layout/index.tsx": {
+    "mtime": 1779001818.0613666,
+    "ast_hash": "f01fec7bbc95dab81fa328f0ef96fc50",
+    "semantic_hash": "f01fec7bbc95dab81fa328f0ef96fc50"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/dashboard/index.tsx": {
+    "mtime": 1779001818.0616446,
+    "ast_hash": "3ab8a9dd2f69fb12dea663de1dbb4ff2",
+    "semantic_hash": "3ab8a9dd2f69fb12dea663de1dbb4ff2"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/excels/BatchExport.tsx": {
+    "mtime": 1779001818.0618367,
+    "ast_hash": "3b739a345aeaf2a3278349d4d2835c15",
+    "semantic_hash": "3b739a345aeaf2a3278349d4d2835c15"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/excels/CreateTemplate.tsx": {
+    "mtime": 1779001818.0619085,
+    "ast_hash": "065bc4e8216ae16fd9326601731e2f85",
+    "semantic_hash": "065bc4e8216ae16fd9326601731e2f85"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/excels/DataField.tsx": {
+    "mtime": 1779001818.0619733,
+    "ast_hash": "cc1ae89caa80d2772b2e6f16b6cdd25f",
+    "semantic_hash": "cc1ae89caa80d2772b2e6f16b6cdd25f"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/excels/DatasInput.tsx": {
+    "mtime": 1779001818.0620368,
+    "ast_hash": "8aa831d7186ed9ac0ffcf411b709eb1a",
+    "semantic_hash": "8aa831d7186ed9ac0ffcf411b709eb1a"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/excels/Edit.tsx": {
+    "mtime": 1779001818.062093,
+    "ast_hash": "928526e82e9172f3e02ff68844cbc0c8",
+    "semantic_hash": "928526e82e9172f3e02ff68844cbc0c8"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/excels/Export.tsx": {
+    "mtime": 1779001818.0621557,
+    "ast_hash": "e595723c109a1835cafdb11ad255b810",
+    "semantic_hash": "e595723c109a1835cafdb11ad255b810"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/excels/ManageExportRule.tsx": {
+    "mtime": 1779001818.062213,
+    "ast_hash": "86a222b72ac651554c7bd257b4a5e533",
+    "semantic_hash": "86a222b72ac651554c7bd257b4a5e533"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/excels/SingleExport.tsx": {
+    "mtime": 1779001818.0622742,
+    "ast_hash": "0bae5edd4fc5a84abffd6c1935c5a0e7",
+    "semantic_hash": "0bae5edd4fc5a84abffd6c1935c5a0e7"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/excels/Upload.tsx": {
+    "mtime": 1779001818.0623355,
+    "ast_hash": "7a2755525eef34ee8d0244e6d0e2744a",
+    "semantic_hash": "7a2755525eef34ee8d0244e6d0e2744a"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/excels/index.tsx": {
+    "mtime": 1779001818.062403,
+    "ast_hash": "cb44cca7b8f3b36040d572c3ab335a78",
+    "semantic_hash": "cb44cca7b8f3b36040d572c3ab335a78"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/settlement-form-entry/Create.tsx": {
+    "mtime": 1779001818.0625627,
+    "ast_hash": "40092c9058d3fefae7fda9c13f8e33d2",
+    "semantic_hash": "40092c9058d3fefae7fda9c13f8e33d2"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/settlement-form-entry/List.tsx": {
+    "mtime": 1779001818.0626252,
+    "ast_hash": "b8aa16319690a6c5b309948b60e3ae28",
+    "semantic_hash": "b8aa16319690a6c5b309948b60e3ae28"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/settlement-form-entry/index.ts": {
+    "mtime": 1779001818.0626843,
+    "ast_hash": "67192de306e21e6360db35ef9543d88c",
+    "semantic_hash": "67192de306e21e6360db35ef9543d88c"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/tool-pages/dict-manage/Create.tsx": {
+    "mtime": 1779001818.0629308,
+    "ast_hash": "353adeda9038afddf5180ef5847c61c5",
+    "semantic_hash": "353adeda9038afddf5180ef5847c61c5"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/tool-pages/dict-manage/Edit.tsx": {
+    "mtime": 1779001818.062985,
+    "ast_hash": "3b971c229f28bbe738d19c435776b49b",
+    "semantic_hash": "3b971c229f28bbe738d19c435776b49b"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/tool-pages/dict-manage/List.tsx": {
+    "mtime": 1779001818.0630403,
+    "ast_hash": "1eaa9a183e371846f5829d12c0b435ac",
+    "semantic_hash": "1eaa9a183e371846f5829d12c0b435ac"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/tool-pages/dict-manage/index.ts": {
+    "mtime": 1779001818.0630996,
+    "ast_hash": "7fe862c42e72c1bee657dc59e5506ad8",
+    "semantic_hash": "7fe862c42e72c1bee657dc59e5506ad8"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/tool-pages/excel-read-rules/Create.tsx": {
+    "mtime": 1779001818.0632696,
+    "ast_hash": "bc7756f9e63f46ef5984b2f1ae022b58",
+    "semantic_hash": "bc7756f9e63f46ef5984b2f1ae022b58"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/tool-pages/excel-read-rules/Edit.tsx": {
+    "mtime": 1779001818.0633318,
+    "ast_hash": "95eb426efe975fc3cf00fefc76378faf",
+    "semantic_hash": "95eb426efe975fc3cf00fefc76378faf"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/tool-pages/excel-read-rules/List.tsx": {
+    "mtime": 1779001818.0633917,
+    "ast_hash": "16b1327078d89cdf7b35f3c19d7f22f1",
+    "semantic_hash": "16b1327078d89cdf7b35f3c19d7f22f1"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/tool-pages/excel-read-rules/RuleInput.tsx": {
+    "mtime": 1779001818.063456,
+    "ast_hash": "98e98f9e24d6d6389bedde9a765cecbb",
+    "semantic_hash": "98e98f9e24d6d6389bedde9a765cecbb"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/tool-pages/excel-read-rules/index.ts": {
+    "mtime": 1779001818.063518,
+    "ast_hash": "514954e978fc701211c582359596295f",
+    "semantic_hash": "514954e978fc701211c582359596295f"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/yifan/cost-calculation/Create.tsx": {
+    "mtime": 1779001818.0637646,
+    "ast_hash": "40092c9058d3fefae7fda9c13f8e33d2",
+    "semantic_hash": "40092c9058d3fefae7fda9c13f8e33d2"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/yifan/cost-calculation/List.tsx": {
+    "mtime": 1779001818.063818,
+    "ast_hash": "2e6332be49d0fd7b58e1640ce9c0b060",
+    "semantic_hash": "2e6332be49d0fd7b58e1640ce9c0b060"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/yifan/cost-calculation/index.ts": {
+    "mtime": 1779001818.0638723,
+    "ast_hash": "67192de306e21e6360db35ef9543d88c",
+    "semantic_hash": "67192de306e21e6360db35ef9543d88c"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/users.json": {
+    "mtime": 1779001818.0639846,
+    "ast_hash": "1ae8a2ae63326f2a8af9a2229ae10599",
+    "semantic_hash": "1ae8a2ae63326f2a8af9a2229ae10599"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/vite-env.d.ts": {
+    "mtime": 1779001818.064057,
+    "ast_hash": "0352474ba2918efe13895edbc3780d94",
+    "semantic_hash": "0352474ba2918efe13895edbc3780d94"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/tsconfig.app.json": {
+    "mtime": 1779001818.0641148,
+    "ast_hash": "9b1898a378e428ef8eca998f9d73f6dd",
+    "semantic_hash": "9b1898a378e428ef8eca998f9d73f6dd"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/tsconfig.json": {
+    "mtime": 1779001818.0641747,
+    "ast_hash": "2e1e44248ee3af6e1bd5de1797ed249d",
+    "semantic_hash": "2e1e44248ee3af6e1bd5de1797ed249d"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/tsconfig.node.json": {
+    "mtime": 1779001818.0642452,
+    "ast_hash": "62eb7bf86cb5bae87440c683e5bd1e04",
+    "semantic_hash": "62eb7bf86cb5bae87440c683e5bd1e04"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/vite.config.ts": {
+    "mtime": 1779001818.0643058,
+    "ast_hash": "1eaea4e234b35459d277215630b3409e",
+    "semantic_hash": "1eaea4e234b35459d277215630b3409e"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/run.sh": {
+    "mtime": 1779001818.0649111,
+    "ast_hash": "65c069c7e89200b4d56ff8e50734c0be",
+    "semantic_hash": "65c069c7e89200b4d56ff8e50734c0be"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/ssc-sqls/common.sql": {
+    "mtime": 1779001818.0650725,
+    "ast_hash": "f550134f1e7a98cf315257323d03ed59",
+    "semantic_hash": "f550134f1e7a98cf315257323d03ed59"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/.github/workflows/docker-build-push.yml": {
+    "mtime": 1779001818.0483582,
+    "ast_hash": "05e9315f56dfbc5626841d0f092a81e4",
+    "semantic_hash": "05e9315f56dfbc5626841d0f092a81e4"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/AGENTS.md": {
+    "mtime": 1779001818.0492194,
+    "ast_hash": "f95d7b7fafe4e4cfb085b27a61b35ea5",
+    "semantic_hash": "f95d7b7fafe4e4cfb085b27a61b35ea5"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/AGENTS.md": {
+    "mtime": 1779001818.0494888,
+    "ast_hash": "f90d4fdbb5644987461ae8b33224dcd9",
+    "semantic_hash": "f90d4fdbb5644987461ae8b33224dcd9"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/configs/AGENTS.md": {
+    "mtime": 1779001818.049599,
+    "ast_hash": "1ce8720b9c19dfc62135a77f03684c92",
+    "semantic_hash": "1ce8720b9c19dfc62135a77f03684c92"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/controllers/AGENTS.md": {
+    "mtime": 1779001818.0497704,
+    "ast_hash": "8dc608b8c97c9d11dd0faacd62a42219",
+    "semantic_hash": "8dc608b8c97c9d11dd0faacd62a42219"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/middleware/AGENTS.md": {
+    "mtime": 1779001818.05103,
+    "ast_hash": "0dced2b312a80d29fae0548df66d1aae",
+    "semantic_hash": "0dced2b312a80d29fae0548df66d1aae"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/models/AGENTS.md": {
+    "mtime": 1779001818.0512815,
+    "ast_hash": "3a854d233b9ee3260be4e6856dfc4364",
+    "semantic_hash": "3a854d233b9ee3260be4e6856dfc4364"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/scripts/AGENTS.md": {
+    "mtime": 1779001818.0522473,
+    "ast_hash": "5070e4ee73f5ed9a6c080566c4ffc88a",
+    "semantic_hash": "5070e4ee73f5ed9a6c080566c4ffc88a"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/tests/AGENTS.md": {
+    "mtime": 1779001818.0525682,
+    "ast_hash": "441a433087a1e38943ef079316868ab8",
+    "semantic_hash": "441a433087a1e38943ef079316868ab8"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/uploads/AGENTS.md": {
+    "mtime": 1779001818.0530598,
+    "ast_hash": "ce7792dcedcf8256537d00e816825d1b",
+    "semantic_hash": "ce7792dcedcf8256537d00e816825d1b"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/utils/AGENTS.md": {
+    "mtime": 1779001818.0560253,
+    "ast_hash": "3300f5f6677beecbe2ab245dbca42ceb",
+    "semantic_hash": "3300f5f6677beecbe2ab245dbca42ceb"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/backend/utils/excel-template-engines/AGENTS.md": {
+    "mtime": 1779001818.0565975,
+    "ast_hash": "d7880322e5919601484ffe0a4f7877da",
+    "semantic_hash": "d7880322e5919601484ffe0a4f7877da"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/cli/README.md": {
+    "mtime": 1780409363.743349,
+    "ast_hash": "d4a90e3dd6d760b6277fd930f8f6b68f",
+    "semantic_hash": "d4a90e3dd6d760b6277fd930f8f6b68f"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/AGENTS.md": {
+    "mtime": 1779001818.0600157,
+    "ast_hash": "c23461a5bbc2c1dc399df8681a20a6a2",
+    "semantic_hash": "c23461a5bbc2c1dc399df8681a20a6a2"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/README.md": {
+    "mtime": 1779001818.06007,
+    "ast_hash": "082bbed69d0b351a467b22610b14b697",
+    "semantic_hash": "082bbed69d0b351a467b22610b14b697"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/index.html": {
+    "mtime": 1779001818.0601285,
+    "ast_hash": "b68ff33fdcd33485b207e56cad2a4b1c",
+    "semantic_hash": "b68ff33fdcd33485b207e56cad2a4b1c"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/public/AGENTS.md": {
+    "mtime": 1779001818.060332,
+    "ast_hash": "bf422a5cfab210cf0834a8fb50c9b20a",
+    "semantic_hash": "bf422a5cfab210cf0834a8fb50c9b20a"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/AGENTS.md": {
+    "mtime": 1779001818.0605586,
+    "ast_hash": "f1a8173dfa0c1afea5d65b864a2113e5",
+    "semantic_hash": "f1a8173dfa0c1afea5d65b864a2113e5"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/components/AGENTS.md": {
+    "mtime": 1779001818.0608022,
+    "ast_hash": "54d632f9464b4280a31b905f1526c019",
+    "semantic_hash": "54d632f9464b4280a31b905f1526c019"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/layout/AGENTS.md": {
+    "mtime": 1779001818.0611746,
+    "ast_hash": "8b1094812513b9880be2c5003e38f147",
+    "semantic_hash": "8b1094812513b9880be2c5003e38f147"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/AGENTS.md": {
+    "mtime": 1779001818.0614722,
+    "ast_hash": "0595889f12d1be8df2996ad288159044",
+    "semantic_hash": "0595889f12d1be8df2996ad288159044"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/dashboard/AGENTS.md": {
+    "mtime": 1779001818.0615811,
+    "ast_hash": "9f8838bcf37d1e4be564c43c85c0929c",
+    "semantic_hash": "9f8838bcf37d1e4be564c43c85c0929c"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/excels/AGENTS.md": {
+    "mtime": 1779001818.061757,
+    "ast_hash": "210df677f5df5a5edc546e487ebbc40d",
+    "semantic_hash": "210df677f5df5a5edc546e487ebbc40d"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/settlement-form-entry/AGENTS.md": {
+    "mtime": 1779001818.0625014,
+    "ast_hash": "40712d77649635feb99a2703d340809c",
+    "semantic_hash": "40712d77649635feb99a2703d340809c"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/tool-pages/AGENTS.md": {
+    "mtime": 1779001818.0627751,
+    "ast_hash": "e6b167bd7bdd28ad7710f3f435880c60",
+    "semantic_hash": "e6b167bd7bdd28ad7710f3f435880c60"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/tool-pages/dict-manage/AGENTS.md": {
+    "mtime": 1779001818.062869,
+    "ast_hash": "d1400ab354196c86b05f1fcbd4314acf",
+    "semantic_hash": "d1400ab354196c86b05f1fcbd4314acf"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/tool-pages/excel-read-rules/AGENTS.md": {
+    "mtime": 1779001818.0631976,
+    "ast_hash": "d7585d5f441811fb1ce0ff04be76e07f",
+    "semantic_hash": "d7585d5f441811fb1ce0ff04be76e07f"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/yifan/AGENTS.md": {
+    "mtime": 1779001818.0636132,
+    "ast_hash": "969f95c37c64690b4a98ef7e133445b2",
+    "semantic_hash": "969f95c37c64690b4a98ef7e133445b2"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/frontend/src/pages/yifan/cost-calculation/AGENTS.md": {
+    "mtime": 1779001818.0637121,
+    "ast_hash": "b157a3128f0ed5fb7d1ce0d90ba5632d",
+    "semantic_hash": "b157a3128f0ed5fb7d1ce0d90ba5632d"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/ssc-deployment.yaml": {
+    "mtime": 1779001818.0649765,
+    "ast_hash": "b8bf0074401e20daa905417a3c0cac92",
+    "semantic_hash": "b8bf0074401e20daa905417a3c0cac92"
+  },
+  "/Users/menghongfei/Desktop/projects/super-supply-chain/todo.md": {
+    "mtime": 1780413154.4641013,
+    "ast_hash": "d348e3eefa42e927bc8936c0801ab73f",
+    "semantic_hash": "d348e3eefa42e927bc8936c0801ab73f"
+  }
+}
