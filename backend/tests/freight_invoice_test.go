@@ -134,6 +134,61 @@ func TestGetClearanceInvoiceFileGeneratesWorkbook(t *testing.T) {
 	assertCell(t, workbook, "2-发票明细信息", "I5", "0.06")
 }
 
+// 测试掏箱费数量或单价缺失、为 0 时不生成掏箱费明细。
+func TestGetUnpackingInvoiceFileSkipsMissingOrZeroValues(t *testing.T) {
+	setupInvoiceGeneratorTest(t)
+
+	outputPath := filepath.Join(t.TempDir(), "unpacking-invoice.xlsx")
+	datas := []models.DynamicExcelTable{
+		{
+			Datas: models.ExcelData{BaseData: map[string]string{
+				"sap_number":               "UNP-001",
+				"bus_num":                  "BUS-001",
+				"invoice_company":          "杭州测试公司",
+				"arrival_port":             "上海洋山",
+				"product_name":             "进口果汁",
+				"total_count":              "12.5",
+				"unpacking_fee_unit_count": "0",
+				"unpacking_fee_unit_price": "80",
+			}},
+		},
+		{
+			Datas: models.ExcelData{BaseData: map[string]string{
+				"sap_number":               "UNP-002",
+				"bus_num":                  "BUS-002",
+				"invoice_company":          "杭州测试公司",
+				"arrival_port":             "上海洋山",
+				"product_name":             "进口果汁",
+				"total_count":              "12.5",
+				"unpacking_fee_unit_count": "1",
+				"unpacking_fee_unit_price": "0.00",
+			}},
+		},
+		{
+			Datas: models.ExcelData{BaseData: map[string]string{
+				"sap_number":               "UNP-003",
+				"bus_num":                  "BUS-003",
+				"invoice_company":          "杭州测试公司",
+				"arrival_port":             "上海洋山",
+				"product_name":             "进口果汁",
+				"total_count":              "12.5",
+				"unpacking_fee_unit_count": "1",
+			}},
+		},
+	}
+
+	if err := excelTemplateEngines.GetUnpackingInvoiceFile(datas, outputPath); err != nil {
+		t.Fatalf("GetUnpackingInvoiceFile returned error: %v", err)
+	}
+
+	workbook := openWorkbook(t, outputPath)
+	defer workbook.Close()
+
+	assertCell(t, workbook, "1-发票基本信息", "A4", "")
+	assertCell(t, workbook, "2-发票明细信息", "A4", "")
+	assertCell(t, workbook, "2-发票明细信息", "B4", "")
+}
+
 // 测试短驳费用模板只导出短驳费不为空且不为 0 的数据。
 func TestGetShortHaulFileGeneratesWorkbook(t *testing.T) {
 	setupInvoiceGeneratorTest(t)
