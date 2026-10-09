@@ -19,7 +19,7 @@ JSON API 在站点源站的 `/api` 下，**不是** `/super-supply-chain` 下面
 | POST | `/api/register` | 注册。MCP 未包装此接口。 |
 | POST | `/api/login` | 登录，返回 JWT 和用户信息。MCP 不提供登录工具；设置 `SSC_TOKEN`，或设置 `SSC_USERNAME` 与 `SSC_PASSWORD` 让进程自己调用这里。 |
 
-其余业务接口在 `/api/admin`，请求头为 `Authorization: Bearer <token>`。JWT 为 HS256，有效期 24 小时。
+其余业务接口在 `/api/admin`，请求头为 `Authorization: Bearer <token>`。JWT 为 HS256，有效期 24 小时。也可以改用个人访问令牌：在管理后台创建，调用时仍用 `Authorization: Bearer`，也接受 `X-API-Key`，以及不推荐的查询参数 `token`。见 [个人访问令牌](/personal-access-tokens)。
 
 登录后的主要资源包括结算单、Excel 读取规则、字典、动态 Excel 表、导出规则，以及菜单和选项接口。列表接口沿用 React Admin 的 `range`、`sort`、`filter` 和 `Content-Range`。`range` 为 `[start, end]`，`end` 是开区间端点，不传给 MCP 工具时默认 `[0, 49]`。
 

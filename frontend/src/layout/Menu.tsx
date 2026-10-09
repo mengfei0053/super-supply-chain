@@ -9,6 +9,7 @@ import {
 import { Box } from "@mui/material";
 import ProductIcon from "@mui/icons-material/Collections";
 import OrderIcon from "@mui/icons-material/AttachMoney";
+import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import * as React from "react";
 import SubMenu from "./SubMenu";
 import { httpClient } from "../dataProvider";
@@ -121,6 +122,15 @@ const Menu: React.FunctionComponent<IMenuProps> = ({ dense = false }) => {
             smart_count: 2,
           })}
           leftIcon={<OrderIcon />}
+          dense={dense}
+        />
+        <MenuItemLink
+          to="/personal-access-tokens"
+          state={{ _scrollToTop: true }}
+          primaryText={translate(`个人访问令牌`, {
+            smart_count: 2,
+          })}
+          leftIcon={<VpnKeyIcon />}
           dense={dense}
         />
       </SubMenu>

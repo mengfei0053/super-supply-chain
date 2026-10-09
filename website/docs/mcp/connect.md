@@ -47,7 +47,7 @@ npm run build
 
 除登录以外的工具都要已有凭证。两种方式：
 
-1. **Token（优先）。** 从浏览器登录态或仓库 `cli/` 的 `ssc login` 取出 JWT，设为 `SSC_TOKEN`。请求头是 `Authorization: Bearer <token>`。JWT 为 HS256，有效期 24 小时。
+1. **Token（优先）。** `SSC_TOKEN` 可以是登录 JWT，也可以是管理后台创建的个人访问令牌。请求头都是 `Authorization: Bearer <token>`。JWT 为 HS256，有效期 24 小时。个人访问令牌在撤销或到期前一直有效，创建方式见 [个人访问令牌](/personal-access-tokens)。
 2. **用户名和密码。** 设置 `SSC_USERNAME` 与 `SSC_PASSWORD`。进程在第一次需要登录的调用上请求 `POST /api/login`，把 JWT 放在内存里，不打印出来。没有单独的登录工具。
 
 同一个操作系统进程里的全部会话共用这一次登录。不同账号请各起一个进程。HTTP 模式不要把端口暴露到不受信任的网络。

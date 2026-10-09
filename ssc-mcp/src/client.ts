@@ -3,7 +3,7 @@
  *
  * API origin: SSC_BASE_URL (default https://ssc.mengfei.tech)
  * Public:    POST /api/login, POST /api/register
- * Protected: /api/admin/* with Authorization: Bearer <jwt>
+ * Protected: /api/admin/* with Authorization: Bearer <jwt or personal access token>
  */
 
 import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
@@ -174,7 +174,7 @@ export class SscClient {
     this.password = config.password;
   }
 
-  /** Ensure we have a JWT: use SSC_TOKEN, or login with username/password. */
+  /** Ensure we have a bearer token: use SSC_TOKEN (JWT or PAT), or login with username/password. */
   async ensureAuth(): Promise<string> {
     if (this.token) return this.token;
     if (!this.username || !this.password) {
