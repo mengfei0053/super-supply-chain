@@ -15,6 +15,12 @@ The remote MCP tools `ssc_upload_excel`, `ssc_list_excel`, `ssc_delete_excel_row
 
 Use this skill when connecting to that public MCP, or when calling those tools for 娃哈哈发票模板导出.
 
+## Install
+
+Follow the agent checklist before connecting: [Agent 安装说明](https://ssc.mengfei.tech/docs/mcp/agent-install/).
+
+Ask the human to create a personal access token in the SSC admin under **工具 → 个人访问令牌**. Do not invent or hardcode a token. Wait until the human provides the PAT before writing MCP config or connecting.
+
 ## Connect
 
 Use public HTTPS only.

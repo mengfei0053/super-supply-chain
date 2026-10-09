@@ -21,7 +21,7 @@ Super Supply Chain（SSC）用来做娃哈哈结算 Excel 的上传，以及四�
 
 管理后台在 `https://ssc.mengfei.tech/super-supply-chain/`，那只是静态页面。JSON API 与后台路径并列，不在 `/super-supply-chain` 下面。
 
-五个工具的说明见 [API 与 MCP](/api-and-mcp#tools)。仓库里的英文说明在 `ssc-mcp/README.md`，路径表在 `ssc-mcp/API_CATALOG.md`。
+五个工具的说明见 [API 与 MCP](/api-and-mcp#tools)。仓库里的英文说明在 `ssc-mcp/README.md`，路径表在 `ssc-mcp/API_CATALOG.md`。给 Agent 的逐步安装清单见 [Agent 安装说明](/mcp/agent-install)。
 
 ## 下载 Cursor Skill
 
