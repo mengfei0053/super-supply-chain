@@ -46,4 +46,4 @@ curl -X POST \
 
 ## MCP
 
-还没有对应的 MCP 工具。`ssc-mcp` 不能代替这次上传。以后若包装，应调用本页的 `POST`，表单仍是 `file` 与 `name`。接入见 [MCP 接入与使用](/mcp)。
+对应工具 `ssc_upload_excel`。参数是本机 xlsx 路径 `filePath`、表名 `tableName` 和表单字段 `name`。请求仍是本页的 `POST`，字段仍是 `file` 与 `name`。接入见 [MCP 接入与使用](/mcp)。

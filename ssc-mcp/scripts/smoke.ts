@@ -7,6 +7,7 @@ import {
   SscClient,
   SscApiError,
   loadConfigFromEnv,
+  redactSecrets,
 } from "../src/client.js";
 
 async function main(): Promise<void> {
@@ -20,7 +21,7 @@ async function main(): Promise<void> {
 
   if (!hasToken && !hasPass) {
     console.error(
-      "FAIL: set SSC_TOKEN or SSC_USERNAME+SSC_PASSWORD before smoke test",
+      "FAIL: set SSC_TOKEN or SSC_USERNAME+SSC_PASSWORD before smoke test. See README.md Manual verification. Tokens are not printed.",
     );
     process.exit(2);
   }
@@ -31,27 +32,66 @@ async function main(): Promise<void> {
       console.log("login: OK as", user.username, "(token not printed)");
     } else {
       await client.ensureAuth();
-      console.log("token: present (not printed)");
+      console.log(
+        "token: present (not printed). Set SSC_SMOKE_EXPORT_* to verify it against the API.",
+      );
     }
 
-    const menus = await client.getMenus();
-    const n = Array.isArray(menus) ? menus.length : -1;
-    console.log("GET /api/admin/menus: OK, count =", n);
+    const exportTable = process.env.SSC_SMOKE_EXPORT_TABLE?.trim();
+    const exportIds = process.env.SSC_SMOKE_EXPORT_IDS?.trim();
+    const exportType = process.env.SSC_SMOKE_EXPORT_TYPE?.trim();
+    if (exportTable && exportIds && exportType) {
+      const file = await client.exportExcel({
+        tableName: exportTable,
+        ids: exportIds,
+        type: exportType,
+      });
+      console.log(
+        "GET excel-exports: OK",
+        JSON.stringify({
+          path: file.path,
+          bytes: file.bytes,
+          fileName: file.fileName,
+          xlsx: file.xlsx,
+        }),
+      );
+    } else {
+      console.log(
+        "export smoke skipped (set SSC_SMOKE_EXPORT_TABLE, SSC_SMOKE_EXPORT_IDS, SSC_SMOKE_EXPORT_TYPE)",
+      );
+    }
 
-    const orders = await client.listOrders();
-    const on = Array.isArray(orders) ? orders.length : -1;
-    console.log("GET /api/admin/settlement-form-entry: OK, count =", on);
-
-    const dicts = await client.listDicts([0, 5]);
-    const dn = Array.isArray(dicts) ? dicts.length : -1;
-    console.log("GET /api/admin/dict-manage: OK, page size =", dn);
+    const uploadFile = process.env.SSC_SMOKE_UPLOAD_FILE?.trim();
+    const uploadTable = process.env.SSC_SMOKE_UPLOAD_TABLE?.trim();
+    if (uploadFile && uploadTable) {
+      const uploaded = await client.uploadExcel({
+        tableName: uploadTable,
+        filePath: uploadFile,
+        name:
+          process.env.SSC_SMOKE_UPLOAD_NAME?.trim() ||
+          uploadFile.split(/[/\\]/).pop() ||
+          "upload.xlsx",
+      });
+      console.log(
+        "POST excel upload: OK",
+        JSON.stringify({
+          tableName: uploaded.tableName,
+          fileName: uploaded.fileName,
+          bytes: uploaded.bytes,
+        }),
+      );
+    } else {
+      console.log(
+        "upload smoke skipped (set SSC_SMOKE_UPLOAD_TABLE and SSC_SMOKE_UPLOAD_FILE; this inserts a row)",
+      );
+    }
 
     console.log("SMOKE: PASS");
   } catch (err) {
     if (err instanceof SscApiError) {
       console.error("SMOKE: FAIL", err.message);
       // Avoid dumping large bodies; truncate
-      console.error("body:", err.body.slice(0, 300));
+      console.error("body:", redactSecrets(err.body.slice(0, 300)));
     } else {
       console.error("SMOKE: FAIL", err);
     }

@@ -7,11 +7,11 @@ slug: /mcp
 
 # MCP 接入与使用
 
-`ssc-mcp` 把 Super Supply Chain 的 HTTP API 包成 MCP 工具，给 Cursor 和其他 Agent 客户端调用。它不另写一套业务接口：登录、菜单、结算单、字典、Excel 读取规则、动态表行和导出规则，都转发到源站的 `/api` 与 `/api/admin`。
+`ssc-mcp` 把 Super Supply Chain 里常用的 Excel 上传、删除和四类发票导出包成 MCP 工具，给 Cursor 和其他 Agent 客户端调用。它不另写一套业务接口，请求都转到源站的 `/api` 与 `/api/admin`。
 
 生产源站是 `https://ssc.mengfei.tech`。管理后台在 `https://ssc.mengfei.tech/super-supply-chain/`，那只是静态页面。JSON API 与后台路径并列，不在 `/super-supply-chain` 下面。
 
-20 个工具的分组说明见 [API 与 MCP](/api-and-mcp#tools)。仓库里的英文说明在 `ssc-mcp/README.md`，路径表在 `ssc-mcp/API_CATALOG.md`。
+三个工具的说明见 [API 与 MCP](/api-and-mcp#tools)。仓库里的英文说明在 `ssc-mcp/README.md`，路径表在 `ssc-mcp/API_CATALOG.md`。
 
 ## 安装与构建
 
@@ -48,7 +48,7 @@ npm run build
 除登录以外的工具都要已有凭证。两种方式：
 
 1. **Token（优先）。** 从浏览器登录态或仓库 `cli/` 的 `ssc login` 取出 JWT，设为 `SSC_TOKEN`。请求头是 `Authorization: Bearer <token>`。JWT 为 HS256，有效期 24 小时。
-2. **用户名和密码。** 设置 `SSC_USERNAME` 与 `SSC_PASSWORD`。进程在第一次需要登录的调用上请求 `POST /api/login`，把 JWT 放在内存里，不打印出来。也可以稍后调用工具 `ssc_login`。
+2. **用户名和密码。** 设置 `SSC_USERNAME` 与 `SSC_PASSWORD`。进程在第一次需要登录的调用上请求 `POST /api/login`，把 JWT 放在内存里，不打印出来。没有单独的登录工具。
 
 同一个操作系统进程里的全部会话共用这一次登录。不同账号请各起一个进程。HTTP 模式不要把端口暴露到不受信任的网络。
 
@@ -167,34 +167,17 @@ npm run start
 
 ## 工具概览
 
-服务注册了 **20** 个工具，分成六组。每一项的用途见 [工具一览](/api-and-mcp#tools)。
+服务只注册 **3** 个工具，都是常用接口。说明见 [工具一览](/api-and-mcp#tools)。
 
-| 分组 | 工具 |
+| 常用接口 | 工具 |
 | --- | --- |
-| 登录、状态、菜单 | `ssc_login`、`ssc_status`、`ssc_list_menus` |
-| 结算单 | `ssc_list_orders`、`ssc_get_order` |
-| 字典 | `ssc_list_dicts`、`ssc_get_dict`、`ssc_get_dict_map`、`ssc_create_dict`、`ssc_update_dict`、`ssc_delete_dict` |
-| Excel 读取规则 | `ssc_list_excel_read_rules`、`ssc_get_excel_read_rule` |
-| 动态 Excel 行 | `ssc_list_excel_rows`、`ssc_get_excel_row`、`ssc_update_excel_row`、`ssc_delete_excel_row` |
-| 导出规则 | `ssc_list_export_rules`、`ssc_list_export_template_options`、`ssc_get_export_rule` |
+| [上传 Excel](/common-apis/upload) | `ssc_upload_excel` |
+| [删除一行](/common-apis/delete-row) | `ssc_delete_excel_row` |
+| [短驳发票](/common-apis/export-short-haul)、[拆箱发票](/common-apis/export-unpacking)、[清关发票](/common-apis/export-clearance)、[运费发票](/common-apis/export-freight) | `ssc_export_excel`（`type` 分别为 `shortHaulInvoice`、`invoice_unpacking`、`invoice_clearance_only`、`invoice_freight`） |
 
-列表类工具的 `range` 沿用 React Admin，形如 `[start, end]`，不传时默认 `[0, 49]`。动态表名来自 `ssc_list_menus` 返回的 `dynamicTableName`。
+导出工具把 xlsx 写到临时文件，并在结果里返回路径。登录、菜单、结算单、字典和读取规则没有对应工具。凭证只放在 `SSC_TOKEN` 或用户名密码环境变量里。
 
-目录里记录过的动态表包括 `dynamic_Integrity_packaging_invoice`、`dynamic_customs_declaration_form`、`dynamic_settlement_statement_fenchang`、`dynamic_settlement_statement_suqian`、`dynamic_yifan_cost_cal`。以菜单接口的实时结果为准。
-
-### 常用接口里，哪些已经包进 MCP
-
-侧边栏「常用接口」写的是宿迁结算表上最常调用的 HTTP。和 MCP 的对应关系：
-
-| 常用接口 | MCP |
-| --- | --- |
-| [上传 Excel](/common-apis/upload) | 还没有工具。网页上传已可用（本机目录，不再依赖家里 NAS）。 |
-| [短驳发票](/common-apis/export-short-haul)、[拆箱发票](/common-apis/export-unpacking)、[清关发票](/common-apis/export-clearance)、[运费发票](/common-apis/export-freight) | 还没有工具。这些 `GET` 返回 xlsx 文件，不是 JSON。 |
-| [删除一行](/common-apis/delete-row) | 已有 `ssc_delete_excel_row`，对应 `DELETE /api/admin/excel/{tableName}/{id}`。 |
-
-以后若把上传和这四类导出包进 MCP，工具应调用「常用接口」里的路径和参数（上传的 `file` / `name`，导出的 `ids` 与 `type`），并把导出的 xlsx 原样交回，不要改成另一套 URL。
-
-另外尚未包装的还有：结算单文件上传（`POST /api/admin/settlement-form-entries`）和注册账号（`POST /api/register`）。
+尚未包装的还有：结算单文件上传（`POST /api/admin/settlement-form-entries`）和注册账号（`POST /api/register`）。
 
 ## 冒烟
 
@@ -206,13 +189,13 @@ export SSC_TOKEN='...'
 npm run smoke
 ```
 
-只检查传输、不连接业务账号时，用下面的命令。它会在临时端口上握手 Streamable HTTP 和旧版 SSE，列出工具，调用 `ssc_status`，检查 CORS，再握手默认的 stdio 服务：
+只检查传输、不连接业务账号时，用下面的命令。它会在临时端口上握手 Streamable HTTP 和旧版 SSE，确认只有这三个工具，在没有凭证时调用删除，检查 CORS，再握手默认的 stdio 服务：
 
 ```bash
 npm run smoke:http
 ```
 
-接入 Cursor 之后，先调用 `ssc_status`。返回里 `authenticated` 为真，并带有菜单数量，就说明源站和凭证是通的。然后用 `ssc_list_menus` 拿到 `dynamicTableName`，再查表。
+接入 Cursor 之后，用一次只读的 `ssc_export_excel`（例如宿迁表、已有 id、`type` 为 `shortHaulInvoice`）确认源站和凭证是通的。成功时结果里有本地 xlsx 路径。
 
 ## 常见问题
 
@@ -224,6 +207,4 @@ npm run smoke:http
 
 **把 token 写进 HTTP 配置。** HTTP 模式下，`SSC_TOKEN` 或用户名密码属于启动 `ssc-mcp` 的那个进程。Cursor 的配置只需要 `url`。
 
-**列表为空，或接口要求 `range`。** 字典、读取规则、导出模板等列表沿用 React Admin 的 `range`。工具不传时默认 `[0, 49]`。动态表还可以用 `filterStart`、`filterEnd` 按 `created_at` 过滤，格式 `YYYY-MM-DD`。
-
-**网页能上传，MCP 不能传文件。** 生产机访问不到家里局域网的 NAS（WebDAV）。当前部署把 `UPLOAD_SERVER` 设为 `file://` 或 `local://`（例如 `file:///data/ssc-uploads`），管理后台的 Excel 上传写到本机目录或对应的 Docker 卷。改回一个可达的 WebDAV 地址才会回到 NAS 模式。这条存储切换只影响网站上传；MCP 仍然没有上传、结算单传文件或批量导出下载工具。查行、改行、删行可以，传文件请用管理后台。
+**网页上传和 MCP 上传走同一条接口。** 生产机访问不到家里局域网的 NAS（WebDAV）。当前部署把 `UPLOAD_SERVER` 设为 `file://` 或 `local://`（例如 `file:///data/ssc-uploads`），Excel 上传写到本机目录或对应的 Docker 卷。`ssc_upload_excel` 调用的也是这条 `POST /api/admin/excel/{tableName}`。改回一个可达的 WebDAV 地址才会回到 NAS 模式。结算单文件上传（`POST /api/admin/settlement-form-entries`）仍然没有 MCP 工具。

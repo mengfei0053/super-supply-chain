@@ -31,6 +31,4 @@ Authorization: Bearer <JWT>
 
 ## 和 MCP 的关系
 
-`ssc-mcp` 今天只包装了删除：工具 `ssc_delete_excel_row` 调用上面的 `DELETE`。上传和四类发票下载还没有 MCP 工具。Cursor 里要传文件或导出发票时，直接请求这些 HTTP 接口，或使用管理后台。
-
-以后若把上传和导出包进 MCP，工具应对应本分组里的路径和参数，而不是另起一套 URL。接入步骤见 [MCP 接入与使用](/mcp)，已有工具见 [API 与 MCP](/api-and-mcp#tools)。
+这几条都已经有 MCP 工具：上传是 `ssc_upload_excel`，删除是 `ssc_delete_excel_row`，四类导出发票是 `ssc_export_excel`。工具使用本分组里的路径和参数。接入步骤见 [MCP 接入与使用](/mcp)，工具说明见 [API 与 MCP](/api-and-mcp#tools)。

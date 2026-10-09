@@ -7,6 +7,8 @@ SPA path: `/super-supply-chain/` (static only; not an API prefix).
 
 Auth: JWT Bearer (`middleware.AuthMiddleware`). Public endpoints do not require auth.
 
+The MCP server exposes only three tools, all 常用: `ssc_upload_excel`, `ssc_delete_excel_row`, and `ssc_export_excel` (types `shortHaulInvoice`, `invoice_unpacking`, `invoice_clearance_only`, `invoice_freight`). Other routes below are not MCP tools. Auth is `SSC_TOKEN` or `SSC_USERNAME` + `SSC_PASSWORD` (no login tool).
+
 ## Public
 
 | Method | Path | Auth | Purpose | Body / params |
@@ -53,10 +55,10 @@ Auth: JWT Bearer (`middleware.AuthMiddleware`). Public endpoints do not require 
 | --- | --- | --- | --- |
 | GET | `/excel/:tableName` | List rows | `range` + `filter.start` / `filter.end` (created_at) |
 | GET | `/excel/:tableName/:id` | Row detail | |
-| POST | `/excel/:tableName` | Upload Excel → parse → insert | multipart `file` |
+| POST | `/excel/:tableName` | Upload Excel → parse → insert | multipart `file` + `name`. MCP 常用: `ssc_upload_excel` |
 | PUT | `/excel/:tableName/:id` | Update row | JSON `DynamicExcelTable` |
-| DELETE | `/excel/:tableName/:id` | Hard delete | Unscoped |
-| GET | `/excel-exports/:tableName` | Export Excel file | `ids`, `type` query; binary |
+| DELETE | `/excel/:tableName/:id` | Hard delete | Unscoped. MCP 常用: `ssc_delete_excel_row` |
+| GET | `/excel-exports/:tableName` | Export Excel file | repeated `ids` plus `type`. 常用 types: `shortHaulInvoice`, `invoice_unpacking`, `invoice_clearance_only`, `invoice_freight`. MCP 常用: `ssc_export_excel` (saves a temp path) |
 
 Known dynamic tables (from MySQL):  
 `dynamic_Integrity_packaging_invoice`, `dynamic_customs_declaration_form`, `dynamic_settlement_statement_fenchang`, `dynamic_settlement_statement_suqian`, `dynamic_yifan_cost_cal`

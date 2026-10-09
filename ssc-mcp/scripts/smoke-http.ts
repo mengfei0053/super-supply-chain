@@ -15,26 +15,9 @@ import { loadMcpRuntimeConfig } from "../src/config.js";
 import { startHttpServer, type HttpServerHandle } from "../src/http.js";
 
 const EXPECTED_TOOLS = [
-  "ssc_login",
-  "ssc_status",
-  "ssc_list_menus",
-  "ssc_list_orders",
-  "ssc_get_order",
-  "ssc_list_dicts",
-  "ssc_get_dict",
-  "ssc_get_dict_map",
-  "ssc_create_dict",
-  "ssc_update_dict",
-  "ssc_delete_dict",
-  "ssc_list_excel_read_rules",
-  "ssc_get_excel_read_rule",
-  "ssc_list_excel_rows",
-  "ssc_get_excel_row",
-  "ssc_update_excel_row",
+  "ssc_upload_excel",
   "ssc_delete_excel_row",
-  "ssc_list_export_rules",
-  "ssc_get_export_rule",
-  "ssc_list_export_template_options",
+  "ssc_export_excel",
 ] as const;
 
 const root = fileURLToPath(new URL("..", import.meta.url));
@@ -98,8 +81,8 @@ async function listToolNames(label: string, connect: () => Promise<Client>): Pro
     const names = new Set(listed.tools.map((tool) => tool.name));
     const missing = EXPECTED_TOOLS.filter((name) => !names.has(name));
     assert(
-      missing.length === 0,
-      `${label} missing tools: ${missing.join(", ")} (got ${listed.tools.length})`,
+      missing.length === 0 && names.size === EXPECTED_TOOLS.length,
+      `${label} tool mismatch: missing ${missing.join(", ") || "(none)"} (got ${listed.tools.length})`,
     );
     console.log(`${label}: handshake OK, tools = ${listed.tools.length}`);
   } finally {
@@ -120,14 +103,20 @@ async function connectHttp(url: string, mode: "streamable" | "sse"): Promise<Cli
 async function checkToolCall(mcpUrl: string): Promise<void> {
   const mcp = await connectHttp(mcpUrl, "streamable");
   try {
-    const result = await mcp.callTool({ name: "ssc_status", arguments: {} });
-    assert(result.isError === true, "ssc_status without credentials should return isError");
+    const result = await mcp.callTool({
+      name: "ssc_delete_excel_row",
+      arguments: {
+        tableName: "dynamic_settlement_statement_suqian",
+        id: "896",
+      },
+    });
+    assert(result.isError === true, "delete without credentials should return isError");
     const text = textContent(result.content);
     assert(
       text.includes("Not authenticated"),
-      `ssc_status body did not describe missing auth: ${text}`,
+      `delete body did not describe missing auth: ${text}`,
     );
-    console.log("streamable ssc_status: OK (tool dispatched, no SSC credentials)");
+    console.log("streamable delete without auth: OK (tool dispatched, no SSC credentials)");
   } finally {
     await mcp.close().catch(() => undefined);
   }
@@ -218,7 +207,10 @@ async function checkStdio(): Promise<void> {
     const listed = await mcp.listTools();
     const names = new Set(listed.tools.map((tool) => tool.name));
     const missing = EXPECTED_TOOLS.filter((name) => !names.has(name));
-    assert(missing.length === 0, `stdio missing tools: ${missing.join(", ")}`);
+    assert(
+      missing.length === 0 && names.size === EXPECTED_TOOLS.length,
+      `stdio tool mismatch: missing ${missing.join(", ") || "(none)"} (got ${listed.tools.length})`,
+    );
     assert(
       !stderr.includes("HTTP listening"),
       "default stdio process should not start the HTTP server",
