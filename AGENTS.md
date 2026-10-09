@@ -6,6 +6,7 @@ This repository contains Super Supply Chain, a supply-chain admin system with:
 
 - `backend/`: Go 1.23.6 API server using Gin, GORM, MySQL, JWT auth, Excel parsing/export helpers, and optional WebDAV upload/download.
 - `frontend/`: React 19 + Vite + React Admin UI, with MUI components and custom pages for settlement forms, dynamic Excel tables, dict management, read rules, and Yifan cost calculation.
+- `website/`: Docusaurus 3 docs site. `baseUrl` is `/docs/`, so pages are `/docs/` and `/docs/intro/`. Production serves `website/build` from the Go process at host path `/docs` (not under `/super-supply-chain/`). The admin header link points at `/docs/`.
 - `ssc-sqls/`: SQL initialization or shared database scripts.
 - `Dockerfile`: multi-stage build that compiles the frontend, copies it into the Go image, builds `backend`, and serves the production app.
 - `ssc-deployment.yaml`: Kubernetes deployment/service manifest for namespace `ssc`.
@@ -30,6 +31,7 @@ Main behavior:
 - Connects to MySQL via `models.InitDB()`.
 - Installs zap-backed Gin logger and recovery middleware.
 - Serves frontend static files at `/super-supply-chain` only in production.
+- Serves the Docusaurus build at `/docs` only in production (`website/build`).
 - Redirects `/` to `/super-supply-chain`.
 - Public auth endpoints:
   - `POST /api/register`
@@ -141,10 +143,21 @@ docker build -t super-supply-chain .
 The Dockerfile:
 
 1. Builds `frontend` with Node 22.
-2. Copies `frontend/dist` into the final Go image.
-3. Builds the Go backend binary as `app`.
-4. Exposes `8081`.
-5. Sets `ENVIRONMENT=production`.
+2. Builds `website` with Node 22 (`npm ci` and `npm run build`).
+3. Copies `frontend/dist` and `website/build` into the final Go image.
+4. Builds the Go backend binary as `app`.
+5. Exposes `8081`.
+6. Sets `ENVIRONMENT=production`.
+
+Docs site commands, from `website/`:
+
+```sh
+npm install
+npm start
+npm run build
+```
+
+`npm start` serves `http://localhost:3000/docs/`. See `website/README.md`.
 
 Kubernetes:
 
@@ -174,6 +187,7 @@ Use the narrowest checks that match the change:
 - Backend compile-sensitive change: `cd backend && go build ./...`
 - Frontend-only change: `cd frontend && yarn type-check` and usually `yarn build`
 - Frontend formatting/linting change: `cd frontend && yarn lint`
+- Docs site change: `cd website && npm run build`
 - Docker/deployment change: inspect `Dockerfile`, `ssc-deployment.yaml`, and build locally when practical.
 
 If a command cannot run because dependencies or services are missing, report the exact blocker.
