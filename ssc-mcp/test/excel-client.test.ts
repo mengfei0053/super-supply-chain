@@ -214,6 +214,142 @@ test("uploadExcel rejects a missing file before calling the API", async () => {
   }
 });
 
+test("listExcel sends filter JSON, object sort, and repeated range", async () => {
+  let seenUrl = "";
+  let seenAuth = "";
+  const server = createServer((_req, res) => {
+    seenUrl = _req.url ?? "";
+    seenAuth = _req.headers.authorization ?? "";
+    res.writeHead(200, {
+      "Content-Type": "application/json",
+      "Content-Range": "2",
+    });
+    res.end(
+      JSON.stringify([
+        {
+          id: 896,
+          fileName: "statement.xlsx",
+          datas: { baseData: { port: "上海" }, list: [] },
+        },
+      ]),
+    );
+  });
+  const port = await listen(server);
+  try {
+    const client = new SscClient({
+      baseUrl: `http://127.0.0.1:${port}`,
+      token: TOKEN,
+    });
+    const listed = await client.listExcel({
+      tableName: "dynamic_settlement_statement_suqian",
+      filterStart: "2026-10-09",
+      filterEnd: "2026-10-09",
+      sort: { field: "id", order: "ASC" },
+    });
+    const url = new URL(seenUrl, "http://127.0.0.1");
+    assert.equal(
+      url.pathname,
+      "/api/admin/excel/dynamic_settlement_statement_suqian",
+    );
+    assert.equal(
+      url.searchParams.get("filter"),
+      '{"start":"2026-10-09","end":"2026-10-09"}',
+    );
+    assert.equal(
+      url.searchParams.get("sort"),
+      '{"field":"id","order":"ASC"}',
+    );
+    assert.deepEqual(url.searchParams.getAll("range"), ["0", "50"]);
+    assert.equal(seenAuth, `Bearer ${TOKEN}`);
+    assert.equal(listed.contentRange, "2");
+    assert.ok(Array.isArray(listed.rows));
+    assert.equal(JSON.stringify(listed).includes(TOKEN), false);
+
+    await client.listExcel({
+      tableName: "dynamic_settlement_statement_suqian",
+      filterStart: "2026-10-01",
+      filterEnd: "2026-10-09",
+      sort: ["id", "DESC"],
+      range: [0, 10],
+    });
+    const next = new URL(seenUrl, "http://127.0.0.1");
+    assert.equal(next.searchParams.get("sort"), '["id","DESC"]');
+    assert.deepEqual(next.searchParams.getAll("range"), ["0", "10"]);
+  } finally {
+    server.close();
+  }
+});
+
+test("searchCompanies queries name and alias keyword", async () => {
+  let seenUrl = "";
+  const server = createServer((_req, res) => {
+    seenUrl = _req.url ?? "";
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify([
+        {
+          id: 1,
+          created_at: "2026-01-01T00:00:00Z",
+          updated_at: "2026-01-01T00:00:00Z",
+          deleted_at: null,
+          name: "南阳食品有限公司",
+          addr_country: "中国",
+          addr_province: "河南",
+          addr_city: "南阳",
+          addr_street: "示例路 1 号",
+          unified_social_credit_code: "91330000NAME",
+          bank_code: "BANK001",
+          phone_num: "0377-0000000",
+          alias: "食品",
+          target_addr: "南阳",
+        },
+      ]),
+    );
+  });
+  const port = await listen(server);
+  try {
+    const client = new SscClient({
+      baseUrl: `http://127.0.0.1:${port}`,
+      token: TOKEN,
+    });
+    const rows = await client.searchCompanies({ keyword: "南阳" });
+    const url = new URL(seenUrl, "http://127.0.0.1");
+    assert.equal(url.pathname, "/api/admin/companies");
+    assert.equal(url.searchParams.get("keyword"), "南阳");
+    assert.equal(url.searchParams.get("includeDeleted"), null);
+    assert.ok(Array.isArray(rows));
+    const first = (rows as Array<Record<string, unknown>>)[0];
+    for (const key of [
+      "id",
+      "created_at",
+      "updated_at",
+      "deleted_at",
+      "name",
+      "addr_country",
+      "addr_province",
+      "addr_city",
+      "addr_street",
+      "unified_social_credit_code",
+      "bank_code",
+      "phone_num",
+      "alias",
+      "target_addr",
+    ]) {
+      assert.ok(key in first, `missing ${key}`);
+    }
+
+    await client.searchCompanies({ keyword: "南阳", includeDeleted: true });
+    const next = new URL(seenUrl, "http://127.0.0.1");
+    assert.equal(next.searchParams.get("includeDeleted"), "true");
+    await assert.rejects(
+      () => client.searchCompanies({ keyword: "  " }),
+      /keyword is required/,
+    );
+  } finally {
+    server.close();
+  }
+});
+
 test("deleteExcelRow sends one id and rejects extra export types", async () => {
   let seenUrl = "";
   let seenMethod = "";

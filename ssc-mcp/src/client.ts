@@ -86,6 +86,65 @@ export function parseExcelIds(
   return out;
 }
 
+export type ExcelListSort =
+  | { field: string; order: "ASC" | "DESC" }
+  | [string, "ASC" | "DESC"];
+
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+export function assertIsoDate(label: string, value: string): string {
+  const date = value.trim();
+  if (!ISO_DATE.test(date)) {
+    throw new Error(`${label} must be YYYY-MM-DD`);
+  }
+  return date;
+}
+
+/** [start, end) pagination. Default matches the admin UI page size example range=0&range=50. */
+export function parseExcelRange(
+  range: [number, number] | undefined,
+): [number, number] {
+  const [start, end] = range ?? [0, 50];
+  if (
+    !Number.isInteger(start) ||
+    !Number.isInteger(end) ||
+    start < 0 ||
+    end < start
+  ) {
+    throw new Error(
+      "range must be [start, end] with integers and 0 <= start <= end",
+    );
+  }
+  return [start, end];
+}
+
+export function serializeExcelSort(
+  sort: ExcelListSort | undefined,
+): string | undefined {
+  if (!sort) return undefined;
+  if (Array.isArray(sort)) {
+    const [field, order] = sort;
+    assertSortField(field);
+    if (order !== "ASC" && order !== "DESC") {
+      throw new Error('sort order must be "ASC" or "DESC"');
+    }
+    return JSON.stringify([field, order]);
+  }
+  assertSortField(sort.field);
+  if (sort.order !== "ASC" && sort.order !== "DESC") {
+    throw new Error('sort order must be "ASC" or "DESC"');
+  }
+  return JSON.stringify({ field: sort.field, order: sort.order });
+}
+
+function assertSortField(field: string): void {
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(field)) {
+    throw new Error(
+      "sort field must be an identifier such as id or created_at",
+    );
+  }
+}
+
 export function isExcelExportType(value: string): value is ExcelExportType {
   return (EXCEL_EXPORT_TYPES as readonly string[]).includes(value);
 }
@@ -214,6 +273,53 @@ export class SscClient {
     this.token = data.token;
     this.username = username;
     return data;
+  }
+
+  /**
+   * GET /api/admin/excel/:tableName
+   * React Admin list params: filter JSON {start,end}, optional sort JSON, repeated range.
+   */
+  async listExcel(opts: {
+    tableName: string;
+    filterStart: string;
+    filterEnd: string;
+    sort?: ExcelListSort;
+    range?: [number, number];
+  }): Promise<{ rows: unknown; contentRange: string | null }> {
+    const tableName = assertTableName(opts.tableName);
+    const filterStart = assertIsoDate("filterStart", opts.filterStart);
+    const filterEnd = assertIsoDate("filterEnd", opts.filterEnd);
+    if (filterStart > filterEnd) {
+      throw new Error("filterStart must be on or before filterEnd");
+    }
+    const [start, end] = parseExcelRange(opts.range);
+    const query: Record<string, string | string[]> = {
+      filter: JSON.stringify({ start: filterStart, end: filterEnd }),
+      range: [String(start), String(end)],
+    };
+    const sort = serializeExcelSort(opts.sort);
+    if (sort) query.sort = sort;
+
+    const apiPath = `/api/admin/excel/${encodeURIComponent(tableName)}`;
+    const res = await this.request("GET", apiPath, { query });
+    const rows = await readJsonBody(res, "GET", apiPath);
+    return { rows, contentRange: res.headers.get("content-range") };
+  }
+
+  /**
+   * GET /api/admin/companies?keyword=
+   * Fuzzy match on name and alias. includeDeleted=true keeps soft-deleted rows.
+   */
+  async searchCompanies(opts: {
+    keyword: string;
+    includeDeleted?: boolean;
+  }): Promise<unknown> {
+    const keyword = opts.keyword.trim();
+    if (!keyword) throw new Error("keyword is required");
+    if ([...keyword].length > 100) throw new Error("keyword is too long");
+    const query: Record<string, string> = { keyword };
+    if (opts.includeDeleted) query.includeDeleted = "true";
+    return this.requestJson("GET", "/api/admin/companies", { query });
   }
 
   async deleteExcelRow(

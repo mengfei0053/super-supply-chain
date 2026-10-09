@@ -17,6 +17,8 @@ const expectedTools = [
   "ssc_upload_excel",
   "ssc_delete_excel_row",
   "ssc_export_excel",
+  "ssc_list_excel",
+  "ssc_search_companies",
 ];
 
 test("streamable HTTP exposes upload and export tools", async () => {

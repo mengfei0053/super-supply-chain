@@ -7,11 +7,11 @@ slug: /mcp
 
 # MCP 接入与使用
 
-`ssc-mcp` 把 Super Supply Chain 里常用的 Excel 上传、删除和四类发票导出包成 MCP 工具，给 Cursor 和其他 Agent 客户端调用。它不另写一套业务接口，请求都转到源站的 `/api` 与 `/api/admin`。
+`ssc-mcp` 把 Super Supply Chain 里常用的 Excel 上传、列表、删除、四类发票导出，以及公司查询包成 MCP 工具，给 Cursor 和其他 Agent 客户端调用。它不另写一套业务接口，请求都转到源站的 `/api` 与 `/api/admin`。
 
 生产源站是 `https://ssc.mengfei.tech`。管理后台在 `https://ssc.mengfei.tech/super-supply-chain/`，那只是静态页面。JSON API 与后台路径并列，不在 `/super-supply-chain` 下面。
 
-三个工具的说明见 [API 与 MCP](/api-and-mcp#tools)。仓库里的英文说明在 `ssc-mcp/README.md`，路径表在 `ssc-mcp/API_CATALOG.md`。
+五个工具的说明见 [API 与 MCP](/api-and-mcp#tools)。仓库里的英文说明在 `ssc-mcp/README.md`，路径表在 `ssc-mcp/API_CATALOG.md`。
 
 ## 安装与构建
 
@@ -169,15 +169,17 @@ npm run start
 
 ## 工具概览
 
-服务只注册 **3** 个工具，都是常用接口。说明见 [工具一览](/api-and-mcp#tools)。
+服务只注册 **5** 个工具，都是常用接口。说明见 [工具一览](/api-and-mcp#tools)。
 
 | 常用接口 | 工具 |
 | --- | --- |
 | [上传 Excel](/common-apis/upload) | `ssc_upload_excel` |
+| [查询列表](/common-apis/list) | `ssc_list_excel` |
 | [删除一行](/common-apis/delete-row) | `ssc_delete_excel_row` |
 | [短驳发票](/common-apis/export-short-haul)、[拆箱发票](/common-apis/export-unpacking)、[清关发票](/common-apis/export-clearance)、[运费发票](/common-apis/export-freight) | `ssc_export_excel`（`type` 分别为 `shortHaulInvoice`、`invoice_unpacking`、`invoice_clearance_only`、`invoice_freight`） |
+| [公司查询](/common-apis/companies) | `ssc_search_companies` |
 
-导出工具把 xlsx 写到临时文件，并在结果里返回路径。登录、菜单、结算单、字典和读取规则没有对应工具。凭证只放在 `SSC_TOKEN` 或用户名密码环境变量里。
+导出工具把 xlsx 写到临时文件，并在结果里返回路径。列表和公司查询返回 JSON 行。登录、菜单、结算单、字典和读取规则没有对应工具。凭证只放在 `SSC_TOKEN` 或用户名密码环境变量里。
 
 尚未包装的还有：结算单文件上传（`POST /api/admin/settlement-form-entries`）和注册账号（`POST /api/register`）。
 
@@ -191,7 +193,7 @@ export SSC_TOKEN='...'
 npm run smoke
 ```
 
-只检查传输、不连接业务账号时，用下面的命令。它会在临时端口上握手 Streamable HTTP 和旧版 SSE，确认只有这三个工具，在没有凭证时调用删除，检查 CORS，再握手默认的 stdio 服务：
+只检查传输、不连接业务账号时，用下面的命令。它会在临时端口上握手 Streamable HTTP 和旧版 SSE，确认只有这五个工具，在没有凭证时调用删除，检查 CORS，再握手默认的 stdio 服务：
 
 ```bash
 npm run smoke:http
