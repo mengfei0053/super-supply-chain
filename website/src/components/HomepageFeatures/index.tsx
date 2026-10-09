@@ -24,7 +24,7 @@ const FeatureList: FeatureItem[] = [
     description: (
       <>
         Go / Gin 提供 <code>/api/login</code> 和受保护的 <code>/api/admin</code>
-        。列表接口兼容 React Admin 的查询参数。
+        。上传、导出发票和删除见 <Link to="/common-apis">常用接口</Link>。
       </>
     ),
   },

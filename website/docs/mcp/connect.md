@@ -1,7 +1,8 @@
 ---
-sidebar_position: 3
+id: mcp
+sidebar_position: 1
 title: MCP 接入与使用
-slug: mcp
+slug: /mcp
 ---
 
 # MCP 接入与使用
@@ -181,16 +182,19 @@ npm run start
 
 目录里记录过的动态表包括 `dynamic_Integrity_packaging_invoice`、`dynamic_customs_declaration_form`、`dynamic_settlement_statement_fenchang`、`dynamic_settlement_statement_suqian`、`dynamic_yifan_cost_cal`。以菜单接口的实时结果为准。
 
-### 还没有包进 MCP 的接口
+### 常用接口里，哪些已经包进 MCP
 
-下面这些 HTTP 能力存在，**还没有**对应的 MCP 工具：
+侧边栏「常用接口」写的是宿迁结算表上最常调用的 HTTP。和 MCP 的对应关系：
 
-- 动态表 Excel 上传（`POST /api/admin/excel/:tableName`，multipart `file`）
-- 结算单文件上传（`POST /api/admin/settlement-form-entries`，multipart `file`）
-- 批量导出下载（`GET /api/admin/excel-exports/:tableName`，返回二进制文件）
-- 注册账号（`POST /api/register`）
+| 常用接口 | MCP |
+| --- | --- |
+| [上传 Excel](/common-apis/upload) | 还没有工具。网页上传已可用（本机目录，不再依赖家里 NAS）。 |
+| [短驳发票](/common-apis/export-short-haul)、[拆箱发票](/common-apis/export-unpacking)、[清关发票](/common-apis/export-clearance)、[运费发票](/common-apis/export-freight) | 还没有工具。这些 `GET` 返回 xlsx 文件，不是 JSON。 |
+| [删除一行](/common-apis/delete-row) | 已有 `ssc_delete_excel_row`，对应 `DELETE /api/admin/excel/{tableName}/{id}`。 |
 
-管理后台的 Excel 上传已经可用，文件写到服务端本机目录。MCP 上传工具仍未提供，不能用现有工具代替网页上传。
+以后若把上传和这四类导出包进 MCP，工具应调用「常用接口」里的路径和参数（上传的 `file` / `name`，导出的 `ids` 与 `type`），并把导出的 xlsx 原样交回，不要改成另一套 URL。
+
+另外尚未包装的还有：结算单文件上传（`POST /api/admin/settlement-form-entries`）和注册账号（`POST /api/register`）。
 
 ## 冒烟
 

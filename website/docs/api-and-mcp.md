@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 5
 title: API 与 MCP
 slug: api-and-mcp
 ---
@@ -83,7 +83,7 @@ JSON API 在站点源站的 `/api` 下，**不是** `/super-supply-chain` 下面
 | `ssc_list_excel_rows` | 按表名分页列出数据行。可用 `filterStart`、`filterEnd` 过滤 `created_at`（`YYYY-MM-DD`）。未传日期时，工具默认使用 `2000-01-01` 到 `2099-12-31`。 |
 | `ssc_get_excel_row` | 按表名和 id 读取一行。 |
 | `ssc_update_excel_row` | 用 JSON 更新一行，字段与 `DynamicExcelTable` 一致，例如 `fileName`、`datas`。 |
-| `ssc_delete_excel_row` | 按表名和 id 硬删除一行。 |
+| `ssc_delete_excel_row` | 按表名和 id 硬删除一行。对应常用接口 [删除一行](/common-apis/delete-row)。 |
 
 表名来自菜单或读取规则，例如 `dynamic_customs_declaration_form`。目录中出现过的动态表还有 `dynamic_Integrity_packaging_invoice`、`dynamic_settlement_statement_fenchang`、`dynamic_settlement_statement_suqian`、`dynamic_yifan_cost_cal`。以 `ssc_list_menus` 的结果为准。
 
@@ -97,15 +97,20 @@ JSON API 在站点源站的 `/api` 下，**不是** `/super-supply-chain` 下面
 
 ## 尚未包装的能力 {#not-wrapped}
 
-下列接口在后端存在，MCP **还没有**对应工具：
+下列接口在后端存在，MCP **还没有**对应工具。上传和四类发票下载的请求形状写在侧边栏 [常用接口](/common-apis)，不放在本页里展开：
 
-| 能力 | HTTP | 原因 |
+| 能力 | HTTP | 说明 |
 | --- | --- | --- |
-| 动态表 Excel 上传 | `POST /api/admin/excel/:tableName` | multipart 文件 |
+| [上传 Excel](/common-apis/upload) | `POST /api/admin/excel/{tableName}` | multipart：`file`（xlsx）、`name`（文件名） |
+| [短驳发票](/common-apis/export-short-haul) | `GET /api/admin/excel-exports/{tableName}?ids={id}&type=shortHaulInvoice` | xlsx 文件下载 |
+| [拆箱发票](/common-apis/export-unpacking) | `GET /api/admin/excel-exports/{tableName}?ids={id}&type=invoice_unpacking` | xlsx 文件下载 |
+| [清关发票](/common-apis/export-clearance) | `GET /api/admin/excel-exports/{tableName}?ids={id}&type=invoice_clearance_only` | xlsx 文件下载 |
+| [运费发票](/common-apis/export-freight) | `GET /api/admin/excel-exports/{tableName}?ids={id}&type=invoice_freight` | xlsx 文件下载 |
 | 结算单文件上传 | `POST /api/admin/settlement-form-entries` | multipart 文件 |
-| 批量导出下载 | `GET /api/admin/excel-exports/:tableName` | 返回二进制文件 |
 | 注册账号 | `POST /api/register` | 未包装 |
 
-管理后台的 Excel 上传已经可用：服务端按 `UPLOAD_SERVER` 写入本机目录（`file://` 或 `local://`，生产示例为 `file:///data/ssc-uploads`），不再依赖从部署机访问不到的家里 NAS。这只打通了网站上传。MCP 上传工具仍然待做，现有工具不能代替在网页里传文件。
+删除一行已经包装为 `ssc_delete_excel_row`，HTTP 说明见 [删除一行](/common-apis/delete-row)。
 
-Cursor 配置示例（stdio 命令与 HTTP `url`）见 [MCP 接入与使用](/mcp)。
+管理后台的 Excel 上传已经可用：服务端按 `UPLOAD_SERVER` 写入本机目录（`file://` 或 `local://`，生产示例为 `file:///data/ssc-uploads`），不再依赖从部署机访问不到的家里 NAS。这只打通了网站上传。MCP 上传工具仍然待做。
+
+以后若把上传和导出包进 MCP，以「常用接口」里的 URL 和参数为准。Cursor 配置示例见 [MCP 接入与使用](/mcp)。
