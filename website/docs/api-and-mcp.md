@@ -27,7 +27,7 @@ JSON API 在站点源站的 `/api` 下，**不是** `/super-supply-chain` 下面
 
 ## MCP 是什么
 
-`ssc-mcp/` 只把下面的常用 Excel 接口包成 MCP 工具，供 Cursor 等客户端调用。默认走 stdio；设置 `SSC_MCP_TRANSPORT=http` 后，Streamable HTTP 在 `/mcp`，旧版 SSE 在 `/sse`。
+`ssc-mcp/` 只把下面的常用 Excel 接口包成 MCP 工具，供 Cursor 等客户端调用。默认走 stdio。生产 HTTP 由服务器上的 `ssc-mcp` 容器提供：Cursor 使用 `https://ssc.mengfei.tech/mcp`，旧版 SSE 使用 `https://ssc.mengfei.tech/sse`。Nginx Proxy Manager 终止 TLS 并反代到容器，不要使用公网 IP 加 `3100`。客户端认证会改用管理后台的个人访问令牌（创建、列表、吊销），不另做 MCP 专用密钥。细节见 [MCP 接入与使用](/mcp)。
 
 配置时注意：
 

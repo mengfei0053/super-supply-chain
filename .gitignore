@@ -2,6 +2,7 @@
 .idea/
 node_modules/
 configs/**/*.env
+.env.compose
 ssc-deployment.yam
 logs/
 py-backend/files/**/*

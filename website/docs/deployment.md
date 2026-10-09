@@ -36,6 +36,20 @@ Docusaurus 打开了 `trailingSlash: true`，每个页面是目录下的 `index.
 
 本地开发（`ENVIRONMENT` 不是 `production`）不走这段静态托管。前端用 Vite，文档用 `npm start`。
 
+## MCP
+
+`/mcp`、`/sse` 和 `/messages` 不由 Go 进程提供。`docker-compose.yml` 里的 `ssc-mcp` 以 HTTP 模式跑 Node MCP 服务，监听 `0.0.0.0:3100`。宿主机只在 docker0 发布 `172.17.0.1:3100`，不把 `3100` 开到公网网卡。
+
+Nginx Proxy Manager 终止 TLS，用自定义 location 把下面三个路径反代到 `http://172.17.0.1:3100`，并保留原路径：
+
+- `https://ssc.mengfei.tech/mcp`：Streamable HTTP，Cursor 用这个
+- `https://ssc.mengfei.tech/sse`：旧版 SSE
+- `https://ssc.mengfei.tech/messages`：旧版 SSE 的 POST
+
+不要把客户端指到公网 IP 的 `3100` 端口。自定义 location 的具体字段和超时写在仓库的 `DEPLOY.md`。
+
+容器调用 SSC API 时，使用 `.env.compose` 里的 `SSC_TOKEN`，或 `SSC_USERNAME` 与 `SSC_PASSWORD`。这是进程登录凭证，不要提交，也不是单独的 MCP 密钥。管理后台的个人访问令牌（创建、列表、吊销）上线后，公网 MCP 会接受该 PAT 作为客户端凭证。客户端配置见 [MCP 接入与使用](/mcp)。
+
 ## Kubernetes
 
 `ssc-deployment.yaml` 把容器发布到命名空间 `ssc`。运行时环境来自 `PORT`、`ENVIRONMENT=production` 和 Secret `ssc-secret`。更新镜像标签后，同一 Service 会同时提供后台、API 和 `/docs/`。

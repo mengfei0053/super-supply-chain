@@ -134,10 +134,17 @@ Notes:
 
 ## Deployment
 
+Docker Compose (`docker-compose.yml`) runs `ssc-mysql`, `ssc-app`, and `ssc-mcp` on network `ssc-net`. Secrets stay in `.env.compose` (gitignored). See `DEPLOY.md`.
+
+- `ssc-app` publishes `172.17.0.1:8088` to container port `8081` (docker0 only).
+- `ssc-mcp` (`ssc-mcp/Dockerfile`) runs the Node MCP server with `SSC_MCP_TRANSPORT=http`, bind `0.0.0.0`, port `3100`, and `SSC_BASE_URL=https://ssc.mengfei.tech`. The host publish is `172.17.0.1:3100:3100`. Nginx Proxy Manager terminates TLS and proxies `/mcp`, `/sse`, and `/messages` to that address.
+- The container calls SSC with `SSC_TOKEN` or `SSC_USERNAME`/`SSC_PASSWORD` from the env file. Public HTTP client auth will use personal access tokens after the admin create/list/revoke feature exists. Do not add an MCP-only secret.
+
 Docker build:
 
 ```sh
 docker build -t super-supply-chain .
+docker compose build ssc-mcp
 ```
 
 The Dockerfile:

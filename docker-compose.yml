@@ -45,6 +45,44 @@ services:
     networks:
       - ssc-net
 
+  # Node MCP server. docker0 only, same pattern as ssc-app:8088.
+  # NPM terminates TLS and proxies /mcp, /sse, and /messages here.
+  # SSC_TOKEN or SSC_USERNAME/SSC_PASSWORD come from the compose env file.
+  # Client PATs are not a separate secret; they will be accepted after the
+  # admin create/list/revoke APIs exist.
+  ssc-mcp:
+    build:
+      context: ./ssc-mcp
+      dockerfile: Dockerfile
+    image: ssc-mcp:local
+    container_name: ssc-mcp
+    restart: unless-stopped
+    environment:
+      SSC_MCP_TRANSPORT: http
+      SSC_MCP_HOST: 0.0.0.0
+      SSC_MCP_PORT: "3100"
+      SSC_BASE_URL: https://ssc.mengfei.tech
+      SSC_MCP_ALLOWED_HOSTS: ssc.mengfei.tech,172.17.0.1,127.0.0.1,localhost
+      SSC_TOKEN: ${SSC_TOKEN:-}
+      SSC_USERNAME: ${SSC_USERNAME:-}
+      SSC_PASSWORD: ${SSC_PASSWORD:-}
+    ports:
+      - "172.17.0.1:3100:3100"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3100/mcp').then((r)=>process.exit(r.status<500?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - ssc-net
+
 volumes:
   ssc-mysql-data:
   ssc-uploads:
