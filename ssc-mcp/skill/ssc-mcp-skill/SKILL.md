@@ -1,6 +1,6 @@
 ---
 name: SSC MCP
-description: When connecting to or calling Super Supply Chain via remote MCP for 娃哈哈发票模板导出 (Wahaha invoice template export: upload/list/delete/export Excel, search companies).
+description: When connecting to or calling Super Supply Chain via remote MCP for 娃哈哈发票模板导出 (Wahaha invoice template export: upload/list/delete/export Excel, search, create, and update companies).
 ---
 
 # SSC MCP
@@ -11,7 +11,7 @@ This MCP and this skill belong to the **娃哈哈发票模板导出流程** (Wah
 
 Super Supply Chain (SSC) is used for Wahaha settlement Excel upload and four invoice template exports: `shortHaulInvoice`, `invoice_unpacking`, `invoice_clearance_only`, and `invoice_freight`.
 
-The remote MCP tools `ssc_upload_excel`, `ssc_list_excel`, `ssc_delete_excel_row`, `ssc_export_excel`, and `ssc_search_companies` are the agent-facing surface of that same Wahaha invoice-export pipeline.
+The remote MCP tools `ssc_upload_excel`, `ssc_list_excel`, `ssc_delete_excel_row`, `ssc_export_excel`, `ssc_search_companies`, `ssc_create_company`, and `ssc_update_company` are the agent-facing surface of that same Wahaha invoice-export pipeline.
 
 Use this skill when connecting to that public MCP, or when calling those tools for 娃哈哈发票模板导出.
 
@@ -78,7 +78,7 @@ Save this in `~/.cursor/mcp.json`, or in the project file `.cursor/mcp.json`.
 
 ## Tools
 
-Five tools. Example table name: `dynamic_settlement_statement_suqian`.
+Seven tools. Example table name: `dynamic_settlement_statement_suqian`.
 
 ### `ssc_upload_excel`
 
@@ -125,6 +125,24 @@ Use when looking up companies by keyword (`GET /api/admin/companies?keyword=`). 
 
 - `keyword`
 - `includeDeleted` — optional. Default `false` omits soft-deleted rows.
+
+### `ssc_create_company`
+
+Use when a company is missing from invoice export (`POST /api/admin/companies`). `name` and `unified_social_credit_code` must be unique, including against soft-deleted rows.
+
+- `name` — 公司名称. Required.
+- `unifiedSocialCreditCode` — 统一社会信用代码. Required.
+- `alias` — optional 公司别名. Invoice export also matches this field.
+- `targetAddr` — optional 发票目标地址.
+
+### `ssc_update_company`
+
+Use when fixing a company's 名称, alias, or 发票目标地址 (`PUT /api/admin/companies/{id}`). Other columns, including the credit code, stay as stored. At least one of `name`, `alias`, or `targetAddr` is required. An empty `alias` or `targetAddr` clears that column.
+
+- `id` — company id from `ssc_search_companies`
+- `name` — optional
+- `alias` — optional
+- `targetAddr` — optional
 
 ## Auth
 

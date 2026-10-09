@@ -1,10 +1,14 @@
 package tests
 
 import (
+	"bytes"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -178,6 +182,248 @@ func getCompanies(t *testing.T, keyword string, includeDeleted bool) []map[strin
 		t.Fatalf("response is not a JSON array: %v; body = %s", err, w.Body.String())
 	}
 	return body
+}
+
+func TestCreateCompanyInsertsSearchableRow(t *testing.T) {
+	setupTestDB(t, &models.BaseCompaniesInfos{})
+	token := signedToken(t, "alice", time.Now().Add(time.Hour))
+
+	w := doCompanyJSON(t, http.MethodPost, "/api/admin/companies", map[string]any{
+		"name":                       "  杭州测试公司  ",
+		"alias":                      " 杭州测试 ",
+		"target_addr":                "杭州",
+		"unified_social_credit_code": "91330100TEST",
+	}, token)
+	if w.Code != http.StatusOK {
+		t.Fatalf("status = %d, body = %s; want 200", w.Code, w.Body.String())
+	}
+	created := decodeCompanyObject(t, w.Body.Bytes())
+	if created["name"] != "杭州测试公司" || created["alias"] != "杭州测试" || created["target_addr"] != "杭州" {
+		t.Fatalf("created = %s", w.Body.String())
+	}
+	if created["unified_social_credit_code"] != "91330100TEST" || created["deleted_at"] != nil {
+		t.Fatalf("created = %s", w.Body.String())
+	}
+	if created["addr_city"] != "" || created["bank_code"] != "" || created["phone_num"] != "" {
+		t.Fatalf("unexpected extra fields = %s", w.Body.String())
+	}
+
+	byName := getCompanies(t, "杭州测试公司", false)
+	if len(byName) != 1 || byName[0]["alias"] != "杭州测试" {
+		t.Fatalf("search by name = %s", mustJSON(t, byName))
+	}
+	byAlias := getCompanies(t, "杭州测试", false)
+	if len(byAlias) != 1 || byAlias[0]["name"] != "杭州测试公司" {
+		t.Fatalf("search by alias = %s", mustJSON(t, byAlias))
+	}
+}
+
+func TestCreateCompanyRequiresNameAndCreditCode(t *testing.T) {
+	setupTestDB(t, &models.BaseCompaniesInfos{})
+	token := signedToken(t, "alice", time.Now().Add(time.Hour))
+
+	missingName := doCompanyJSON(t, http.MethodPost, "/api/admin/companies", map[string]any{
+		"alias":                      "别名",
+		"target_addr":                "杭州",
+		"unified_social_credit_code": "91330100TEST",
+	}, token)
+	if missingName.Code != http.StatusBadRequest || !strings.Contains(missingName.Body.String(), "name is required") {
+		t.Fatalf("missing name = %d %s", missingName.Code, missingName.Body.String())
+	}
+
+	missingCode := doCompanyJSON(t, http.MethodPost, "/api/admin/companies", map[string]any{
+		"name":        "杭州测试公司",
+		"alias":       "杭州测试",
+		"target_addr": "杭州",
+	}, token)
+	if missingCode.Code != http.StatusBadRequest || !strings.Contains(missingCode.Body.String(), "unified_social_credit_code is required") {
+		t.Fatalf("missing code = %d %s", missingCode.Code, missingCode.Body.String())
+	}
+
+	if got := getCompanies(t, "杭州", false); len(got) != 0 {
+		t.Fatalf("failed creates were stored: %s", mustJSON(t, got))
+	}
+}
+
+func TestCreateCompanyRejectsDuplicateNameOrCreditCode(t *testing.T) {
+	setupTestDB(t, &models.BaseCompaniesInfos{})
+	token := signedToken(t, "alice", time.Now().Add(time.Hour))
+	seedCompany(t, companySeed{
+		Name:                    "南阳已删除公司",
+		Alias:                   "旧南阳",
+		UnifiedSocialCreditCode: "91330000DEL",
+		TargetAddr:              "南阳",
+		DeletedAt:               "2020-01-02 03:04:05",
+	})
+
+	dupName := doCompanyJSON(t, http.MethodPost, "/api/admin/companies", map[string]any{
+		"name":                       "南阳已删除公司",
+		"unified_social_credit_code": "91330000NEW",
+	}, token)
+	if dupName.Code != http.StatusConflict || !strings.Contains(dupName.Body.String(), "name already exists") {
+		t.Fatalf("duplicate name = %d %s", dupName.Code, dupName.Body.String())
+	}
+
+	dupCode := doCompanyJSON(t, http.MethodPost, "/api/admin/companies", map[string]any{
+		"name":                       "新公司",
+		"unified_social_credit_code": "91330000DEL",
+	}, token)
+	if dupCode.Code != http.StatusConflict || !strings.Contains(dupCode.Body.String(), "unified_social_credit_code already exists") {
+		t.Fatalf("duplicate code = %d %s", dupCode.Code, dupCode.Body.String())
+	}
+}
+
+func TestUpdateCompanyChangesNameAliasAndTargetAddrOnly(t *testing.T) {
+	setupTestDB(t, &models.BaseCompaniesInfos{})
+	token := signedToken(t, "alice", time.Now().Add(time.Hour))
+	seedCompany(t, companySeed{
+		Name:                    "杭州测试公司",
+		Alias:                   "仓储备注",
+		AddrCity:                "杭州",
+		UnifiedSocialCreditCode: "91330100TEST",
+		BankCode:                "BANK001",
+		PhoneNum:                "0571-0000000",
+		TargetAddr:              "杭州",
+	})
+	found := getCompanies(t, "杭州测试公司", false)
+	if len(found) != 1 {
+		t.Fatalf("seed search = %s", mustJSON(t, found))
+	}
+	id := companyIDString(t, found[0]["id"])
+
+	partial := doCompanyJSON(t, http.MethodPut, "/api/admin/companies/"+id, map[string]any{
+		"target_addr": "海宁",
+	}, token)
+	if partial.Code != http.StatusOK {
+		t.Fatalf("partial status = %d, body = %s", partial.Code, partial.Body.String())
+	}
+	partialRow := decodeCompanyObject(t, partial.Body.Bytes())
+	if partialRow["name"] != "杭州测试公司" || partialRow["alias"] != "仓储备注" || partialRow["target_addr"] != "海宁" {
+		t.Fatalf("partial row = %s", partial.Body.String())
+	}
+	if partialRow["unified_social_credit_code"] != "91330100TEST" || partialRow["addr_city"] != "杭州" || partialRow["bank_code"] != "BANK001" {
+		t.Fatalf("partial row changed other fields: %s", partial.Body.String())
+	}
+
+	full := doCompanyJSON(t, http.MethodPut, "/api/admin/companies/"+id, map[string]any{
+		"name":                       "杭州测试公司（更新）",
+		"alias":                      "",
+		"target_addr":                "嘉兴",
+		"unified_social_credit_code": "SHOULD-IGNORE",
+		"addr_city":                  "SHOULD-IGNORE",
+	}, token)
+	if full.Code != http.StatusOK {
+		t.Fatalf("update status = %d, body = %s", full.Code, full.Body.String())
+	}
+	updated := decodeCompanyObject(t, full.Body.Bytes())
+	if updated["name"] != "杭州测试公司（更新）" || updated["alias"] != "" || updated["target_addr"] != "嘉兴" {
+		t.Fatalf("updated = %s", full.Body.String())
+	}
+	if updated["unified_social_credit_code"] != "91330100TEST" || updated["addr_city"] != "杭州" || updated["phone_num"] != "0571-0000000" {
+		t.Fatalf("updated changed other fields: %s", full.Body.String())
+	}
+
+	if got := getCompanies(t, "仓储备注", false); len(got) != 0 {
+		t.Fatalf("cleared alias still matches: %s", mustJSON(t, got))
+	}
+	byNewName := getCompanies(t, "杭州测试公司（更新）", false)
+	if len(byNewName) != 1 || byNewName[0]["target_addr"] != "嘉兴" {
+		t.Fatalf("search after rename = %s", mustJSON(t, byNewName))
+	}
+}
+
+func TestUpdateCompanyRejectsMissingAndDeletedRows(t *testing.T) {
+	setupTestDB(t, &models.BaseCompaniesInfos{})
+	token := signedToken(t, "alice", time.Now().Add(time.Hour))
+	seedCompany(t, companySeed{
+		Name:                    "南阳已删除公司",
+		Alias:                   "旧南阳",
+		UnifiedSocialCreditCode: "91330000DEL",
+		DeletedAt:               "2020-01-02 03:04:05",
+	})
+	deleted := getCompanies(t, "南阳已删除公司", true)
+	if len(deleted) != 1 {
+		t.Fatalf("deleted search = %s", mustJSON(t, deleted))
+	}
+	id := companyIDString(t, deleted[0]["id"])
+
+	missing := doCompanyJSON(t, http.MethodPut, "/api/admin/companies/99999", map[string]any{
+		"alias": "不会写入",
+	}, token)
+	if missing.Code != http.StatusNotFound {
+		t.Fatalf("missing status = %d, body = %s", missing.Code, missing.Body.String())
+	}
+
+	soft := doCompanyJSON(t, http.MethodPut, "/api/admin/companies/"+id, map[string]any{
+		"name":        "改名",
+		"alias":       "新别名",
+		"target_addr": "海宁",
+	}, token)
+	if soft.Code != http.StatusNotFound {
+		t.Fatalf("deleted status = %d, body = %s", soft.Code, soft.Body.String())
+	}
+	again := getCompanies(t, "南阳已删除公司", true)
+	if len(again) != 1 || again[0]["name"] != "南阳已删除公司" || again[0]["alias"] != "旧南阳" {
+		t.Fatalf("deleted row changed: %s", mustJSON(t, again))
+	}
+
+	empty := doCompanyJSON(t, http.MethodPut, "/api/admin/companies/"+id, map[string]any{}, token)
+	if empty.Code != http.StatusBadRequest || !strings.Contains(empty.Body.String(), "name, alias, or target_addr is required") {
+		t.Fatalf("empty update = %d %s", empty.Code, empty.Body.String())
+	}
+	badID := doCompanyJSON(t, http.MethodPut, "/api/admin/companies/abc", map[string]any{"name": "x"}, token)
+	if badID.Code != http.StatusBadRequest {
+		t.Fatalf("bad id = %d %s", badID.Code, badID.Body.String())
+	}
+}
+
+func doCompanyJSON(t *testing.T, method, path string, body any, token string) *httptest.ResponseRecorder {
+	t.Helper()
+	router := setupProtectedAPIRouter()
+	var reader io.Reader
+	if body != nil {
+		raw, err := json.Marshal(body)
+		if err != nil {
+			t.Fatalf("marshal body: %v", err)
+		}
+		reader = bytes.NewReader(raw)
+	}
+	req := httptest.NewRequest(method, path, reader)
+	req.Header.Set("Content-Type", "application/json")
+	if token != "" {
+		req.Header.Set("Authorization", "Bearer "+token)
+	}
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
+func decodeCompanyObject(t *testing.T, raw []byte) map[string]any {
+	t.Helper()
+	var body map[string]any
+	if err := json.Unmarshal(raw, &body); err != nil {
+		t.Fatalf("response is not a JSON object: %v; body = %s", err, raw)
+	}
+	return body
+}
+
+func companyIDString(t *testing.T, value any) string {
+	t.Helper()
+	switch id := value.(type) {
+	case float64:
+		if id <= 0 || id != float64(uint64(id)) {
+			t.Fatalf("id = %v", value)
+		}
+		return strconv.FormatUint(uint64(id), 10)
+	case string:
+		if id == "" {
+			t.Fatalf("id is empty")
+		}
+		return id
+	default:
+		t.Fatalf("id type = %T (%v)", value, value)
+		return ""
+	}
 }
 
 func mustJSON(t *testing.T, value any) string {

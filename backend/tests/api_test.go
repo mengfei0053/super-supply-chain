@@ -74,6 +74,8 @@ func setupProtectedAPIRouter() *gin.Engine {
 		protected.GET("/options/:key", controllers.GetOptions)
 		protected.GET("/menus", controllers.GetDynamicExcelMenus)
 		protected.GET("/companies", controllers.SearchCompanies)
+		protected.POST("/companies", controllers.CreateCompany)
+		protected.PUT("/companies/:id", controllers.UpdateCompany)
 
 		sessionOnly := middleware.RequireSessionJWT()
 		protected.GET("/personal-access-tokens", sessionOnly, controllers.ListPersonalAccessTokens)
@@ -123,6 +125,8 @@ func TestProtectedAPIRequiresAuthorization(t *testing.T) {
 		{http.MethodGet, "/api/admin/options/status"},
 		{http.MethodGet, "/api/admin/menus"},
 		{http.MethodGet, "/api/admin/companies"},
+		{http.MethodPost, "/api/admin/companies"},
+		{http.MethodPut, "/api/admin/companies/1"},
 		{http.MethodGet, "/api/admin/personal-access-tokens"},
 		{http.MethodPost, "/api/admin/personal-access-tokens"},
 		{http.MethodDelete, "/api/admin/personal-access-tokens/1"},

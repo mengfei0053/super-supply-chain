@@ -15,17 +15,17 @@ import SkillZipLink from '@site/src/components/SkillZipLink';
 
 Super Supply Chain（SSC）用来做娃哈哈结算 Excel 的上传，以及四类发票模板导出：`shortHaulInvoice`（短驳）、`invoice_unpacking`（拆箱）、`invoice_clearance_only`（清关）、`invoice_freight`（运费）。
 
-远程 MCP 的五个工具 `ssc_upload_excel`、`ssc_list_excel`、`ssc_delete_excel_row`、`ssc_export_excel`、`ssc_search_companies` 是这条娃哈哈发票导出流水线面向 Agent 的入口。
+远程 MCP 的七个工具 `ssc_upload_excel`、`ssc_list_excel`、`ssc_delete_excel_row`、`ssc_export_excel`、`ssc_search_companies`、`ssc_create_company`、`ssc_update_company` 是这条娃哈哈发票导出流水线面向 Agent 的入口。
 
 `ssc-mcp` 把上述能力包成 MCP 工具，给 Cursor 和其他 Agent 客户端调用。它不另写一套业务接口，请求都转到源站的 `/api` 与 `/api/admin`。
 
 管理后台在 `https://ssc.mengfei.tech/super-supply-chain/`，那只是静态页面。JSON API 与后台路径并列，不在 `/super-supply-chain` 下面。
 
-五个工具的说明见 [API 与 MCP](/api-and-mcp#tools)。仓库里的英文说明在 `ssc-mcp/README.md`，路径表在 `ssc-mcp/API_CATALOG.md`。给 Agent 的逐步安装清单见 [Agent 安装说明](/mcp/agent-install)。
+七个工具的说明见 [API 与 MCP](/api-and-mcp#tools)。仓库里的英文说明在 `ssc-mcp/README.md`，路径表在 `ssc-mcp/API_CATALOG.md`。给 Agent 的逐步安装清单见 [Agent 安装说明](/mcp/agent-install)。
 
 ## 下载 Cursor Skill
 
-公网 MCP 的接法和五个工具的用法写在一份 Cursor Skill 里，供 **娃哈哈发票模板导出** 时使用。连接 `https://ssc.mengfei.tech/mcp`、上传或查询 Excel、导出发票、删除一行、搜索公司时，让 Agent 读取它。
+公网 MCP 的接法和七个工具的用法写在一份 Cursor Skill 里，供 **娃哈哈发票模板导出** 时使用。连接 `https://ssc.mengfei.tech/mcp`、上传或查询 Excel、导出发票、删除一行、搜索、新增或更新公司时，让 Agent 读取它。
 
 <SkillZipLink />
 
@@ -108,7 +108,7 @@ JWT 为 HS256，有效期 24 小时。个人访问令牌在撤销或到期前一
 
 ## 工具概览
 
-服务只注册 **5** 个工具，都是常用接口。说明见 [工具一览](/api-and-mcp#tools)。
+服务只注册 **7** 个工具，都是常用接口。说明见 [工具一览](/api-and-mcp#tools)。
 
 | 常用接口 | 工具 |
 | --- | --- |
@@ -117,8 +117,10 @@ JWT 为 HS256，有效期 24 小时。个人访问令牌在撤销或到期前一
 | [删除一行](/common-apis/delete-row) | `ssc_delete_excel_row` |
 | [短驳发票](/common-apis/export-short-haul)、[拆箱发票](/common-apis/export-unpacking)、[清关发票](/common-apis/export-clearance)、[运费发票](/common-apis/export-freight) | `ssc_export_excel`（`type` 分别为 `shortHaulInvoice`、`invoice_unpacking`、`invoice_clearance_only`、`invoice_freight`） |
 | [公司查询](/common-apis/companies) | `ssc_search_companies` |
+| [新增公司](/common-apis/companies-create) | `ssc_create_company` |
+| [更新公司](/common-apis/companies-update) | `ssc_update_company` |
 
-导出工具把 xlsx 写到临时文件，并在结果里返回路径。列表和公司查询返回 JSON 行。登录、菜单、结算单、字典和读取规则没有对应工具。
+导出工具把 xlsx 写到临时文件，并在结果里返回路径。列表和公司查询返回 JSON 行。新增和更新公司返回写入后的那一行。登录、菜单、结算单、字典和读取规则没有对应工具。
 
 尚未包装的还有：结算单文件上传（`POST /api/admin/settlement-form-entries`）和注册账号（`POST /api/register`）。
 

@@ -54,6 +54,14 @@ function trimSlash(url: string): string {
   return url.replace(/\/+$/, "");
 }
 
+export function assertCompanyID(id: string | number): string {
+  const text = String(id).trim();
+  if (!/^[1-9]\d*$/.test(text)) {
+    throw new Error("id must be a positive integer");
+  }
+  return text;
+}
+
 export function assertTableName(tableName: string): string {
   const name = tableName.trim();
   if (!/^[A-Za-z0-9_]+$/.test(name)) {
@@ -439,6 +447,58 @@ export class SscClient {
     const query: Record<string, string> = { keyword };
     if (opts.includeDeleted) query.includeDeleted = "true";
     return this.requestJson("GET", "/api/admin/companies", { query });
+  }
+
+  /**
+   * POST /api/admin/companies
+   * name and unified_social_credit_code are required. alias and target_addr are optional.
+   */
+  async createCompany(opts: {
+    name: string;
+    unifiedSocialCreditCode: string;
+    alias?: string;
+    targetAddr?: string;
+  }): Promise<unknown> {
+    const name = opts.name.trim();
+    const code = opts.unifiedSocialCreditCode.trim();
+    if (!name) throw new Error("name is required");
+    if (!code) throw new Error("unified_social_credit_code is required");
+    const body: Record<string, string> = {
+      name,
+      unified_social_credit_code: code,
+    };
+    if (opts.alias !== undefined) body.alias = opts.alias.trim();
+    if (opts.targetAddr !== undefined) body.target_addr = opts.targetAddr.trim();
+    return this.requestJson("POST", "/api/admin/companies", { body });
+  }
+
+  /**
+   * PUT /api/admin/companies/:id
+   * Updates only the fields that are provided. Other columns stay as stored.
+   */
+  async updateCompany(opts: {
+    id: string | number;
+    name?: string;
+    alias?: string;
+    targetAddr?: string;
+  }): Promise<unknown> {
+    const id = assertCompanyID(opts.id);
+    const body: Record<string, string> = {};
+    if (opts.name !== undefined) {
+      const name = opts.name.trim();
+      if (!name) throw new Error("name is required");
+      body.name = name;
+    }
+    if (opts.alias !== undefined) body.alias = opts.alias.trim();
+    if (opts.targetAddr !== undefined) body.target_addr = opts.targetAddr.trim();
+    if (Object.keys(body).length === 0) {
+      throw new Error("name, alias, or target_addr is required");
+    }
+    return this.requestJson(
+      "PUT",
+      `/api/admin/companies/${encodeURIComponent(id)}`,
+      { body },
+    );
   }
 
   async deleteExcelRow(

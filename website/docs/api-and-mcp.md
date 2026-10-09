@@ -10,7 +10,7 @@ JSON API 在站点源站的 `/api` 下，**不是** `/super-supply-chain` 下面
 
 生产源站示例：`https://ssc.mengfei.tech`。本地则是后端监听的地址，例如 `http://localhost:8081`。
 
-怎么把这套 API 接到 Cursor，见独立说明 [MCP 接入与使用](/mcp)。本页列出接口范围，以及 `ssc-mcp` 已经包好的 5 个常用工具。
+怎么把这套 API 接到 Cursor，见独立说明 [MCP 接入与使用](/mcp)。本页列出接口范围，以及 `ssc-mcp` 已经包好的 7 个常用工具。
 
 ## 认证
 
@@ -33,7 +33,7 @@ JSON API 在站点源站的 `/api` 下，**不是** `/super-supply-chain` 下面
 
 ## 工具一览 \{#tools}
 
-共 5 个工具，都是常用接口。说明根据 `ssc-mcp/README.md` 与 `ssc-mcp/src/server.ts` 里的注册信息整理。
+共 7 个工具，都是常用接口。说明根据 `ssc-mcp/README.md` 与 `ssc-mcp/src/server.ts` 里的注册信息整理。
 
 | 工具 | 说明 |
 | --- | --- |
@@ -42,6 +42,8 @@ JSON API 在站点源站的 `/api` 下，**不是** `/super-supply-chain` 下面
 | `ssc_export_excel` | 常用。`GET /api/admin/excel-exports/{tableName}?ids={ids}&type={type}`。`type` 只能是 `shortHaulInvoice`、`invoice_unpacking`、`invoice_clearance_only`、`invoice_freight`，分别对应 [短驳发票](/common-apis/export-short-haul)、[拆箱发票](/common-apis/export-unpacking)、[清关发票](/common-apis/export-clearance)、[运费发票](/common-apis/export-freight)。工具按 `Content-Disposition` 把工作簿写成 `.xlsx` 并返回路径。响应 `Content-Type` 即使是 `application/zip`（xlsx 本身是 zip），也不会存成 `.zip`。 |
 | `ssc_list_excel` | 常用。`GET /api/admin/excel/{tableName}`，`filter` 为 `{"start","end"}`，可选 `sort`，`range` 重复传 `range=0&range=50`。对应 [查询列表](/common-apis/list)。 |
 | `ssc_search_companies` | 常用。`GET /api/admin/companies?keyword=`，在 `name` 与 `alias` 上做包含匹配，返回全部列。对应 [公司查询](/common-apis/companies)。 |
+| `ssc_create_company` | 常用。`POST /api/admin/companies`。必填 `name` 与 `unified_social_credit_code`，可选 `alias`、`target_addr`。对应 [新增公司](/common-apis/companies-create)。 |
+| `ssc_update_company` | 常用。`PUT /api/admin/companies/{id}`。可改 `name`、`alias`、`target_addr`，其它列保持原值。对应 [更新公司](/common-apis/companies-update)。 |
 
 表名示例：`dynamic_settlement_statement_suqian`。登录、菜单、结算单、字典和读取规则没有 MCP 工具。
 

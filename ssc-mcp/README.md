@@ -1,6 +1,6 @@
 # ssc-mcp
 
-MCP server for the commonly used **Super Supply Chain (SSC)** Excel list, upload, delete, and export APIs, plus company keyword search.
+MCP server for the commonly used **Super Supply Chain (SSC)** Excel list, upload, delete, and export APIs, plus company keyword search, create, and update.
 
 - Project path: `/workspace/ssc-mcp`
 - Live UI: <https://ssc.mengfei.tech/super-supply-chain/>
@@ -185,13 +185,13 @@ Older clients that only speak SSE. Same headers, other path:
 
 For local debug, point `url` at `http://127.0.0.1:3100/mcp` or `http://127.0.0.1:3100/sse` and keep `headers`. A self-hosted process still reads `SSC_TOKEN` or `SSC_USERNAME` + `SSC_PASSWORD` from its environment. That does not replace the client headers.
 
-## Tools (5)
+## Tools (7)
 
 These are the only tools. There is no login or status tool: set `SSC_TOKEN`, or `SSC_USERNAME` plus `SSC_PASSWORD`. With username and password, the process calls `POST /api/login` on the first tool call and keeps the JWT in memory. The token is never printed.
 
 ### 常用
 
-Upload, list, delete, these four exports, and company keyword search are the commonly used APIs:
+Upload, list, delete, these four exports, and company keyword search, create, and update are the commonly used APIs:
 
 | 常用 | API | Tool |
 | --- | --- | --- |
@@ -203,6 +203,8 @@ Upload, list, delete, these four exports, and company keyword search are the com
 | 常用 | `GET /api/admin/excel-exports/{tableName}?ids={ids}&type=invoice_clearance_only` | `ssc_export_excel` |
 | 常用 | `GET /api/admin/excel-exports/{tableName}?ids={ids}&type=invoice_freight` | `ssc_export_excel` |
 | 常用 | `GET /api/admin/companies?keyword={keyword}` | `ssc_search_companies` |
+| 常用 | `POST /api/admin/companies` | `ssc_create_company` |
+| 常用 | `PUT /api/admin/companies/{id}` | `ssc_update_company` |
 
 `ssc_upload_excel` (常用) reads a local `.xlsx`/`.xls` path on the machine running the MCP server and posts it as multipart `file`, plus form field `name`. Example table: `dynamic_settlement_statement_suqian`. This inserts a row.
 
@@ -213,6 +215,10 @@ Upload, list, delete, these four exports, and company keyword search are the com
 `ssc_export_excel` (常用) downloads a workbook and writes it under the OS temp directory (`ssc-mcp-exports`, or `SSC_EXPORT_DIR` / `outputPath`). The tool result is metadata plus `path` — read that file; the bytes are not inlined. The saved name comes from `Content-Disposition` (`filename*` / `filename`) and ends in `.xlsx`. These responses are often `Content-Type: application/zip` because Office Open XML is a zip; that header is not used as the file extension. If `outputPath` ends in `.zip` and the body is one workbook, the tool still writes `.xlsx`. A `.zip` path is kept only when the body is a zip of several separate workbooks. `ids` may be `896`, `896,897`, or an array. Commonly used `type` values are `shortHaulInvoice`, `invoice_unpacking`, `invoice_clearance_only`, and `invoice_freight`.
 
 `ssc_search_companies` (常用) searches `base_companies_infos` by a literal substring of `name` or `alias` (`LIKE %keyword%`, with `%` and `_` escaped). The `rows` array includes every column: `id`, `created_at`, `updated_at`, `deleted_at`, `name`, `addr_country`, `addr_province`, `addr_city`, `addr_street`, `unified_social_credit_code`, `bank_code`, `phone_num`, `alias`, `target_addr`. Rows with `deleted_at` set are omitted unless `includeDeleted` is true.
+
+`ssc_create_company` (常用) inserts one company (`POST /api/admin/companies`). `name` and `unifiedSocialCreditCode` (统一社会信用代码, sent as `unified_social_credit_code`) are required and unique. `alias` and `targetAddr` (发票目标地址, sent as `target_addr`) are optional. The result's `company` object is the stored row.
+
+`ssc_update_company` (常用) updates one active company (`PUT /api/admin/companies/{id}`). Send `id` plus any of `name`, `alias`, and `targetAddr`. Omitted fields stay unchanged. An empty `alias` or `targetAddr` clears that column. `unified_social_credit_code` and the address, bank, and phone columns are not modified. Soft-deleted rows return 404.
 
 Orders, dictionaries, menus, read rules, and other export types are not exposed.
 
@@ -225,7 +231,7 @@ npm test
 npm run build
 ```
 
-Transport smoke (no SSC credentials). Starts HTTP on an ephemeral port, handshakes Streamable HTTP and legacy SSE, lists the five tools, calls delete without credentials, checks CORS, then handshakes the default stdio server:
+Transport smoke (no SSC credentials). Starts HTTP on an ephemeral port, handshakes Streamable HTTP and legacy SSE, lists the seven tools, calls delete without credentials, checks CORS, then handshakes the default stdio server:
 
 ```bash
 npm run smoke:http
