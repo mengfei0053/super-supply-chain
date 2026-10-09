@@ -1,0 +1,92 @@
+# SSC Backend API Catalog
+
+Source of truth: `/opt/super-supply-chain/backend/main.go` on host `101.36.111.17`.
+
+Base origin (production): `https://ssc.mengfei.tech`  
+SPA path: `/super-supply-chain/` (static only; not an API prefix).
+
+Auth: JWT Bearer (`middleware.AuthMiddleware`). Public endpoints do not require auth.
+
+## Public
+
+| Method | Path | Auth | Purpose | Body / params |
+| --- | --- | --- | --- | --- |
+| POST | `/api/register` | no | Create account | `{username, password}` |
+| POST | `/api/login` | no | Login, return JWT + user | `{username, password}` → `{id,username,fullName,email,token,avatar}` |
+
+## Protected (`/api/admin`)
+
+### Settlement / orders
+
+| Method | Path | Purpose | Notes |
+| --- | --- | --- | --- |
+| GET | `/settlement-form-entry` | List order summaries | `id, orderNumber, arrivalDate, arrivalPort` |
+| GET | `/settlement-form-entry/:id` | Order detail (same fields) | |
+| POST | `/settlement-form-entries` | Upload settlement file | multipart `file` → NAS |
+| PUT | `/settlement-form-entry/:id` | Stub | returns success message only |
+| DELETE | `/settlement-form-entry/:id` | Stub | returns success message only |
+
+### Excel read rules
+
+| Method | Path | Purpose | Notes |
+| --- | --- | --- | --- |
+| GET | `/excel-read-rules` | List rules | requires `range` query (RA style) |
+| GET | `/excel-read-rules/:id` | Rule detail | includes mapping `rules` |
+| POST | `/excel-read-rules` | Create rule + migrate dynamic table | JSON body |
+| PUT | `/excel-read-rules/:id` | Update rule | |
+| DELETE | `/excel-read-rules/:id` | Delete rule | |
+
+### Dictionary
+
+| Method | Path | Purpose | Notes |
+| --- | --- | --- | --- |
+| GET | `/dict-manage` | List dicts | requires `range` |
+| GET | `/dict-manage/:id` | Detail | |
+| POST | `/dict-manage` | Create | `{key,value,type}` |
+| PUT | `/dict-manage/:id` | Update | |
+| DELETE | `/dict-manage/:id` | Delete | |
+| GET | `/dict-manage/map/:type` | key→value map by type | |
+
+### Dynamic Excel tables
+
+| Method | Path | Purpose | Notes |
+| --- | --- | --- | --- |
+| GET | `/excel/:tableName` | List rows | `range` + `filter.start` / `filter.end` (created_at) |
+| GET | `/excel/:tableName/:id` | Row detail | |
+| POST | `/excel/:tableName` | Upload Excel → parse → insert | multipart `file` |
+| PUT | `/excel/:tableName/:id` | Update row | JSON `DynamicExcelTable` |
+| DELETE | `/excel/:tableName/:id` | Hard delete | Unscoped |
+| GET | `/excel-exports/:tableName` | Export Excel file | `ids`, `type` query; binary |
+
+Known dynamic tables (from MySQL):  
+`dynamic_Integrity_packaging_invoice`, `dynamic_customs_declaration_form`, `dynamic_settlement_statement_fenchang`, `dynamic_settlement_statement_suqian`, `dynamic_yifan_cost_cal`
+
+### Excel export rules / templates
+
+| Method | Path | Purpose | Notes |
+| --- | --- | --- | --- |
+| GET | `/excel-export-rule/template/:tableName` | List templates | requires `range` |
+| GET | `/excel-export-rule/template/:tableName/:id` | Template detail | |
+| POST | `/excel-export-rule/template/:tableName` | Upload template | multipart `file` + `alias` |
+| PUT | `/excel-export-rule/:tableName/:id` | Stub | |
+| DELETE | `/excel-export-rule/:tableName/:id` | Delete template | |
+| POST | `/excel-export-rule/:tableName/export` | Export | |
+| GET | `/excel-export-rule/:tableName/export/:id` | Single export | |
+
+### Misc
+
+| Method | Path | Purpose | Notes |
+| --- | --- | --- | --- |
+| GET | `/options/:key` | Select options | `key=export-templates` + `associated_table` |
+| GET | `/menus` | Dynamic menus | `{id, menuName, dynamicTableName}[]` |
+
+## Not mounted
+
+`controllers/companies.go` defines `GetCompanies` but it is **not** registered in `main.go`.
+
+## List query convention
+
+Most list endpoints use React Admin params via `utils.GetListQueryParams`:
+
+- `range` **required** — JSON `[start, end]` or repeated `range=start&range=end` (end is exclusive limit end; limit = end - start, offset = start)
+- optional `filter` JSON `{start,end}` or `filter.start` / `filter.end` (used heavily by dynamic excel date window)
