@@ -4,12 +4,15 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { once } from "node:events";
+import { crc32 } from "node:zlib";
 import test from "node:test";
 import {
   SscClient,
+  classifyExportBody,
   filenameFromContentDisposition,
   parseExcelIds,
   redactSecrets,
+  resolveExportDownloadName,
   sanitizeDownloadName,
 } from "../src/client.js";
 
@@ -152,6 +155,107 @@ test("exportExcel writes a temp xlsx and repeats ids", async () => {
     server.close();
     await rm(outDir, { recursive: true, force: true });
   }
+});
+
+test("disposition .xlsx wins over Content-Type application/zip", async () => {
+  const xlsx = storedZip([
+    { name: "[Content_Types].xml", data: Buffer.from("<Types/>") },
+    { name: "xl/workbook.xml", data: Buffer.from("<workbook/>") },
+    { name: "xl/worksheets/sheet1.xml", data: Buffer.from("<worksheet/>") },
+    { name: "docProps/core.xml", data: Buffer.from("<core/>") },
+  ]);
+  assert.equal(classifyExportBody(xlsx), "ooxml-workbook");
+  const header =
+    "attachment; filename=\"export.xlsx\"; filename*=UTF-8''%E5%AF%BC%E5%87%BA%E5%8F%91%E7%A5%A8.xlsx";
+  assert.equal(
+    resolveExportDownloadName(header, "shortHaulInvoice.xlsx", xlsx),
+    "导出发票.xlsx",
+  );
+  assert.equal(
+    resolveExportDownloadName(null, "shortHaulInvoice.xlsx", xlsx),
+    "shortHaulInvoice.xlsx",
+  );
+  assert.equal(
+    resolveExportDownloadName(
+      'attachment; filename="invoice.zip"',
+      "shortHaulInvoice.xlsx",
+      xlsx,
+    ),
+    "invoice.xlsx",
+  );
+  assert.equal(
+    resolveExportDownloadName(
+      'attachment; filename="invoice"',
+      "shortHaulInvoice.xlsx",
+      xlsx,
+    ),
+    "invoice.xlsx",
+  );
+
+  const server = createServer((_req, res) => {
+    res.writeHead(200, {
+      "Content-Type": "application/zip",
+      "Content-Disposition": header,
+    });
+    res.end(xlsx);
+  });
+  const port = await listen(server);
+  const zipPath = path.join(
+    tmpdir(),
+    `ssc-invoice-${Date.now()}-${Math.random().toString(16).slice(2)}.zip`,
+  );
+
+  try {
+    const client = new SscClient({
+      baseUrl: `http://127.0.0.1:${port}`,
+      token: TOKEN,
+    });
+    const file = await client.exportExcel({
+      tableName: "dynamic_settlement_statement_suqian",
+      ids: "896",
+      type: "invoice_unpacking",
+      outputPath: zipPath,
+    });
+    assert.equal(file.xlsx, true);
+    assert.equal(file.fileName, "导出发票.xlsx");
+    assert.equal(file.path, zipPath.replace(/\.zip$/i, ".xlsx"));
+    assert.match(file.path, /\.xlsx$/i);
+    assert.equal(file.path.toLowerCase().endsWith(".zip"), false);
+    assert.deepEqual(await readFile(file.path), xlsx);
+    await assert.rejects(() => readFile(zipPath));
+  } finally {
+    server.close();
+    await rm(zipPath, { force: true });
+    await rm(zipPath.replace(/\.zip$/i, ".xlsx"), { force: true });
+  }
+});
+
+test("a zip of separate workbooks keeps .zip when the name has no spreadsheet extension", () => {
+  const archive = storedZip([
+    { name: "clearance.xlsx", data: Buffer.from("one") },
+    { name: "freight.xlsx", data: Buffer.from("two") },
+  ]);
+  assert.equal(classifyExportBody(archive), "multi-workbook-zip");
+  assert.equal(
+    resolveExportDownloadName(null, "invoice_freight.xlsx", archive),
+    "invoice_freight.zip",
+  );
+  assert.equal(
+    resolveExportDownloadName(
+      'attachment; filename="bundle"',
+      "invoice_freight.xlsx",
+      archive,
+    ),
+    "bundle.zip",
+  );
+  assert.equal(
+    resolveExportDownloadName(
+      "attachment; filename*=UTF-8''%E5%AF%BC%E5%87%BA.xlsx",
+      "invoice_freight.xlsx",
+      archive,
+    ),
+    "导出.xlsx",
+  );
 });
 
 test("exportExcel surfaces JSON errors and does not write a file", async () => {
@@ -398,6 +502,49 @@ function listen(server: ReturnType<typeof createServer>): Promise<number> {
     }
     return address.port;
   });
+}
+
+function storedZip(files: Array<{ name: string; data: Buffer }>): Buffer {
+  const locals: Buffer[] = [];
+  const centrals: Buffer[] = [];
+  let offset = 0;
+  for (const file of files) {
+    const name = Buffer.from(file.name, "utf8");
+    const sum = crc32(file.data);
+    const local = Buffer.alloc(30 + name.length + file.data.length);
+    local.writeUInt32LE(0x04034b50, 0);
+    local.writeUInt16LE(20, 4);
+    local.writeUInt16LE(0, 8);
+    local.writeUInt32LE(sum, 14);
+    local.writeUInt32LE(file.data.length, 18);
+    local.writeUInt32LE(file.data.length, 22);
+    local.writeUInt16LE(name.length, 26);
+    name.copy(local, 30);
+    file.data.copy(local, 30 + name.length);
+    locals.push(local);
+
+    const central = Buffer.alloc(46 + name.length);
+    central.writeUInt32LE(0x02014b50, 0);
+    central.writeUInt16LE(20, 4);
+    central.writeUInt16LE(20, 6);
+    central.writeUInt32LE(sum, 16);
+    central.writeUInt32LE(file.data.length, 20);
+    central.writeUInt32LE(file.data.length, 24);
+    central.writeUInt16LE(name.length, 28);
+    central.writeUInt32LE(offset, 42);
+    name.copy(central, 46);
+    centrals.push(central);
+    offset += local.length;
+  }
+  const localAll = Buffer.concat(locals);
+  const centralDir = Buffer.concat(centrals);
+  const eocd = Buffer.alloc(22);
+  eocd.writeUInt32LE(0x06054b50, 0);
+  eocd.writeUInt16LE(files.length, 8);
+  eocd.writeUInt16LE(files.length, 10);
+  eocd.writeUInt32LE(centralDir.length, 12);
+  eocd.writeUInt32LE(localAll.length, 16);
+  return Buffer.concat([localAll, centralDir, eocd]);
 }
 
 function readBody(req: IncomingMessage): Promise<Buffer> {

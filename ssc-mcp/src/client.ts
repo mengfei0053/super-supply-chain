@@ -154,7 +154,10 @@ export function filenameFromContentDisposition(
   fallback: string,
 ): string {
   if (!header) return fallback;
-  const star = header.match(/filename\*\s*=\s*(?:UTF-8''|utf-8'')([^;\s]+)/i);
+  // filename* (RFC 5987) wins over filename, including when the value is quoted.
+  const star = header.match(
+    /filename\*\s*=\s*"?(?:UTF-8|utf-8)'[^']*'([^";]+)"?/i,
+  );
   if (star?.[1]) {
     try {
       const decoded = decodeURIComponent(star[1].trim());
@@ -170,15 +173,120 @@ export function filenameFromContentDisposition(
   return fallback;
 }
 
-export function sanitizeDownloadName(name: string): string {
-  const base = path
-    .basename(name)
+/** Drop directories and control characters. Does not choose an extension. */
+export function safeDownloadBase(name: string): string {
+  const normalized = name.replace(/\\/g, "/");
+  return path.posix
+    .basename(normalized)
     .replace(/[\r\n\0]/g, "")
     .trim()
     .replace(/^\.+/, "");
-  const cleaned = base || "export.xlsx";
+}
+
+export function sanitizeDownloadName(name: string): string {
+  const cleaned = safeDownloadBase(name) || "export.xlsx";
   const limited = cleaned.slice(0, 180);
   return /\.xlsx?$/i.test(limited) ? limited : `${limited}.xlsx`;
+}
+
+export type ExportBodyKind = "ooxml-workbook" | "multi-workbook-zip" | "other";
+
+/**
+ * Office Open XML workbooks are zip packages (`xl/`, `[Content_Types].xml`).
+ * A zip of two or more separate workbooks is the only case these exports
+ * should keep a `.zip` name. Content-Type is intentionally not consulted:
+ * servers often send `application/zip` for a single `.xlsx`.
+ */
+export function classifyExportBody(buf: Buffer): ExportBodyKind {
+  const names = zipEntryNames(buf);
+  if (!names) return "other";
+  if (isOoxmlWorkbook(names)) return "ooxml-workbook";
+  const workbooks = names.filter((entry) => {
+    const base = entry.replace(/\\/g, "/").split("/").pop() ?? entry;
+    return !entry.endsWith("/") && /\.(xlsx|xlsm|xls)$/i.test(base);
+  });
+  if (workbooks.length >= 2) return "multi-workbook-zip";
+  return "other";
+}
+
+export function resolveExportDownloadName(
+  contentDisposition: string | null,
+  fallbackBase: string,
+  body: Buffer,
+): string {
+  const kind = classifyExportBody(body);
+  const raw = contentDisposition
+    ? filenameFromContentDisposition(contentDisposition, "")
+    : "";
+  const headerName = raw ? safeDownloadBase(raw) : "";
+  const headerExt = headerName ? path.extname(headerName).toLowerCase() : "";
+  const ext = extensionForExport(headerExt, kind);
+  const stemSource = headerName || fallbackBase || "export";
+  const stem = safeDownloadBase(stemSource).replace(/\.(xlsx|xlsm|xls|zip)$/i, "") || "export";
+  const fileName = `${stem}${ext}`;
+  if (fileName.length <= 180) return fileName;
+  return `${stem.slice(0, Math.max(1, 180 - ext.length))}${ext}`;
+}
+
+function extensionForExport(headerExt: string, kind: ExportBodyKind): string {
+  if (headerExt === ".xlsx" || headerExt === ".xlsm" || headerExt === ".xls") {
+    return headerExt;
+  }
+  if (kind === "multi-workbook-zip" && (headerExt === "" || headerExt === ".zip")) {
+    return ".zip";
+  }
+  // Missing extension, or a .zip name on one workbook: Office Open XML is a zip.
+  if (headerExt === "" || headerExt === ".zip") return ".xlsx";
+  return headerExt;
+}
+
+function isOoxmlWorkbook(names: string[]): boolean {
+  let types = false;
+  let workbook = false;
+  for (const raw of names) {
+    const name = raw.replace(/\\/g, "/").replace(/^\//, "");
+    if (name === "[Content_Types].xml") types = true;
+    if (/^xl\/workbook\.(xml|bin)$/i.test(name)) workbook = true;
+  }
+  return types && workbook;
+}
+
+function zipEntryNames(buf: Buffer): string[] | null {
+  if (buf.length < 22 || buf[0] !== 0x50 || buf[1] !== 0x4b) return null;
+  const eocd = findZipEocd(buf);
+  if (eocd === null) return null;
+  const total = buf.readUInt16LE(eocd + 10);
+  const cdSize = buf.readUInt32LE(eocd + 12);
+  const cdOffset = buf.readUInt32LE(eocd + 16);
+  if (total === 0xffff || cdOffset === 0xffffffff || cdSize === 0xffffffff) {
+    return null;
+  }
+  if (cdOffset + cdSize > buf.length) return null;
+  const names: string[] = [];
+  let cursor = cdOffset;
+  const end = cdOffset + cdSize;
+  while (cursor + 46 <= end && names.length < total) {
+    if (buf.readUInt32LE(cursor) !== 0x02014b50) break;
+    const nameLen = buf.readUInt16LE(cursor + 28);
+    const extraLen = buf.readUInt16LE(cursor + 30);
+    const commentLen = buf.readUInt16LE(cursor + 32);
+    const nameStart = cursor + 46;
+    const next = nameStart + nameLen + extraLen + commentLen;
+    if (next > buf.length) break;
+    names.push(buf.subarray(nameStart, nameStart + nameLen).toString("utf8"));
+    cursor = next;
+  }
+  return names;
+}
+
+function findZipEocd(buf: Buffer): number | null {
+  const min = Math.max(0, buf.length - (22 + 65535));
+  for (let i = buf.length - 22; i >= min; i--) {
+    if (buf.readUInt32LE(i) !== 0x06054b50) continue;
+    const commentLen = buf.readUInt16LE(i + 20);
+    if (i + 22 + commentLen === buf.length) return i;
+  }
+  return null;
 }
 
 function multipartFileName(name: string, filePath: string): string {
@@ -190,22 +298,33 @@ function multipartFileName(name: string, filePath: string): string {
 async function resolveExportPath(
   outputPath: string | undefined,
   fileName: string,
+  singleWorkbook: boolean,
 ): Promise<string> {
   if (outputPath && outputPath.trim()) {
-    const resolved = path.resolve(outputPath.trim());
+    const trimmed = outputPath.trim();
+    const resolved = path.resolve(trimmed);
+    const forcedDir = trimmed.endsWith("/") || trimmed.endsWith("\\");
     try {
       const st = await stat(resolved);
       if (st.isDirectory()) return path.join(resolved, fileName);
     } catch {
-      // Caller asked for a file path that does not exist yet.
+      if (forcedDir) return path.join(resolved, fileName);
     }
-    return resolved;
+    return rewriteZipOutputPath(resolved, singleWorkbook);
   }
   const dir = process.env.SSC_EXPORT_DIR?.trim()
     ? path.resolve(process.env.SSC_EXPORT_DIR.trim())
     : path.join(tmpdir(), "ssc-mcp-exports");
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
   return path.join(dir, `${stamp}-${fileName}`);
+}
+
+/** A caller-supplied `*.zip` path still receives one workbook as `.xlsx`. */
+function rewriteZipOutputPath(filePath: string, singleWorkbook: boolean): string {
+  if (!singleWorkbook) return filePath;
+  const ext = path.extname(filePath);
+  if (ext.toLowerCase() !== ".zip") return filePath;
+  return `${filePath.slice(0, -ext.length)}.xlsx`;
 }
 
 export function loadConfigFromEnv(): SscConfig {
@@ -436,10 +555,14 @@ export class SscClient {
       throw new Error("Export response was empty");
     }
 
-    const fileName = sanitizeDownloadName(
-      filenameFromContentDisposition(disposition, `${type}.xlsx`),
+    const kind = classifyExportBody(buf);
+    const fileName = resolveExportDownloadName(disposition, `${type}.xlsx`, buf);
+    const singleWorkbook = kind !== "multi-workbook-zip";
+    const outPath = await resolveExportPath(
+      opts.outputPath,
+      fileName,
+      singleWorkbook,
     );
-    const outPath = await resolveExportPath(opts.outputPath, fileName);
     await mkdir(path.dirname(outPath), { recursive: true });
     await writeFile(outPath, buf);
 
@@ -452,7 +575,8 @@ export class SscClient {
       contentType,
       fileName,
       contentDisposition: disposition,
-      xlsx: zip,
+      // True for one workbook. A zip of several workbooks is not an xlsx.
+      xlsx: singleWorkbook && (zip || kind === "ooxml-workbook"),
     };
   }
 

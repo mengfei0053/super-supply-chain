@@ -58,7 +58,7 @@ The MCP server exposes only five tools, all 常用: `ssc_upload_excel`, `ssc_lis
 | POST | `/excel/:tableName` | Upload Excel → parse → insert | multipart `file` + `name`. MCP 常用: `ssc_upload_excel` |
 | PUT | `/excel/:tableName/:id` | Update row | JSON `DynamicExcelTable` |
 | DELETE | `/excel/:tableName/:id` | Hard delete | Unscoped. MCP 常用: `ssc_delete_excel_row` |
-| GET | `/excel-exports/:tableName` | Export Excel file | repeated `ids` plus `type`. 常用 types: `shortHaulInvoice`, `invoice_unpacking`, `invoice_clearance_only`, `invoice_freight`. MCP 常用: `ssc_export_excel` (saves a temp path) |
+| GET | `/excel-exports/:tableName` | Export Excel file | repeated `ids` plus `type`. 常用 types: `shortHaulInvoice`, `invoice_unpacking`, `invoice_clearance_only`, `invoice_freight`. MCP 常用: `ssc_export_excel` saves `.xlsx` from `Content-Disposition` (not `.zip` when `Content-Type` is `application/zip`) |
 
 Known dynamic tables (from MySQL):  
 `dynamic_Integrity_packaging_invoice`, `dynamic_customs_declaration_form`, `dynamic_settlement_statement_fenchang`, `dynamic_settlement_statement_suqian`, `dynamic_yifan_cost_cal`

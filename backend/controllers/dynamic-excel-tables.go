@@ -152,6 +152,9 @@ func ExportDynamicExcel(c *gin.Context) {
 		return
 	}
 
+	// xlsx is a zip package. Set the spreadsheet type explicitly so clients
+	// do not save the body as .zip when the file is sniffed as application/zip.
+	c.Header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 	c.Header("Content-Disposition", buildExcelExportContentDisposition(queryType))
 	c.File(filePath)
 
