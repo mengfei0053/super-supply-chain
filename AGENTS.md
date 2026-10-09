@@ -7,6 +7,7 @@ This repository contains Super Supply Chain, a supply-chain admin system with:
 - `backend/`: Go 1.23.6 API server using Gin, GORM, MySQL, JWT auth, Excel parsing/export helpers, and optional WebDAV upload/download.
 - `frontend/`: React 19 + Vite + React Admin UI, with MUI components and custom pages for settlement forms, dynamic Excel tables, dict management, read rules, and Yifan cost calculation.
 - `website/`: Docusaurus 3 docs site. `baseUrl` is `/docs/`, so pages are `/docs/` and `/docs/intro/`. Production serves `website/build` from the Go process at host path `/docs` (not under `/super-supply-chain/`). The admin header link points at `/docs/`.
+- `ssc-mcp/`: MCP server for the common Excel and company APIs. The Cursor skill source is `ssc-mcp/skill/ssc-mcp-skill/`; the docs site publishes `website/static/files/ssc-mcp-skill.zip` (regenerate with the one-liner in `ssc-mcp/skill/README.md`).
 - `ssc-sqls/`: SQL initialization or shared database scripts.
 - `Dockerfile`: multi-stage build that compiles the frontend, copies it into the Go image, builds `backend`, and serves the production app.
 - `ssc-deployment.yaml`: Kubernetes deployment/service manifest for namespace `ssc`.

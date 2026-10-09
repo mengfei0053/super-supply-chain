@@ -8,6 +8,14 @@ MCP server for the commonly used **Super Supply Chain (SSC)** Excel list, upload
 
 > **Important:** Do **not** set `SSC_BASE_URL` to `.../super-supply-chain`. That path is the SPA only. JSON APIs are at `/api/*` on the same host.
 
+## Cursor skill
+
+The public-MCP usage skill is [`skill/ssc-mcp-skill/SKILL.md`](skill/ssc-mcp-skill/SKILL.md). The docs site serves a zip of that folder. Rebuild it from the repository root:
+
+```bash
+cd ssc-mcp/skill && rm -f ../../website/static/files/ssc-mcp-skill.zip && zip -r -X ../../website/static/files/ssc-mcp-skill.zip ssc-mcp-skill
+```
+
 ## Install
 
 ```bash

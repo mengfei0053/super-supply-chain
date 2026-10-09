@@ -13,6 +13,22 @@ slug: /mcp
 
 五个工具的说明见 [API 与 MCP](/api-and-mcp#tools)。仓库里的英文说明在 `ssc-mcp/README.md`，路径表在 `ssc-mcp/API_CATALOG.md`。
 
+## 下载 Cursor Skill
+
+公网 MCP 的接法和五个工具的用法写在一份 Cursor Skill 里。连接 `https://ssc.mengfei.tech/mcp`、上传或查询 Excel、导出发票、删除一行、搜索公司时，让 Agent 读取它。
+
+**[下载 SSC MCP Skill](/files/ssc-mcp-skill.zip)**
+
+1. 下载 zip 并解压，得到 `ssc-mcp-skill/SKILL.md`。
+2. 在 Cursor 里把 `ssc-mcp-skill` 添加为 Skill，或复制到 `~/.cursor/skills/ssc-mcp-skill/`。只给当前项目用时，复制到该项目的 `.cursor/skills/ssc-mcp-skill/`。
+3. 之后按 Skill 里的公网地址和个人访问令牌配置 MCP，再调用工具。
+
+源文件在仓库的 `ssc-mcp/skill/ssc-mcp-skill/`。改完 `SKILL.md` 后，在仓库根目录重新打包：
+
+```bash
+cd ssc-mcp/skill && rm -f ../../website/static/files/ssc-mcp-skill.zip && zip -r -X ../../website/static/files/ssc-mcp-skill.zip ssc-mcp-skill
+```
+
 ## 连接
 
 接入只使用下面两个公网地址。
