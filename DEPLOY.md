@@ -2,9 +2,10 @@
 
 - Path: `/opt/super-supply-chain`
 - Secrets: `.env.compose` (mode 600); original Mac env also at `configs/.env` (mode 600)
-- URL: https://ssc.mengfei.tech/super-supply-chain/ (docs: https://ssc.mengfei.tech/docs/)
+- URL: https://ssc.mengfei.tech/super-supply-chain/ (docs: https://ssc.mengfei.tech/docs/; MCP: https://ssc.mengfei.tech/mcp)
 - Port: **172.17.0.1:8088** -> container 8081 (not on public NIC; NPM uses docker0). 8317 is CLI Proxy — do not reuse
-- Stack: `ssc-mysql` + `ssc-app`, network `ssc-net`, restart unless-stopped
+- Stack: `ssc-mysql` + `ssc-app` + `ssc-mcp`, network `ssc-net`, restart unless-stopped
+- MCP HTTP: **172.17.0.1:3100** (docker0 only). Public: `https://ssc.mengfei.tech/mcp` (also `/sse`, `/messages`)
 - DB name: `super_supply_chain` (imported dump, 18 tables)
 - Dockerfile: public `node:22` + `golang:1.23.6-alpine` (Aliyun original saved as `Dockerfile.aliyun.bak`)
 
@@ -13,8 +14,10 @@
 ```sh
 # from a machine that can reach this VPS
 rsync -az --exclude frontend/node_modules --exclude .git ./ ubuntu@101.36.111.17:/opt/super-supply-chain/
-ssh ubuntu@101.36.111.17 'cd /opt/super-supply-chain && sudo docker compose --env-file .env.compose build ssc-app && sudo docker compose --env-file .env.compose up -d ssc-app'
+ssh ubuntu@101.36.111.17 'cd /opt/super-supply-chain && sudo docker compose --env-file .env.compose build ssc-app ssc-mcp && sudo docker compose --env-file .env.compose up -d ssc-app ssc-mcp'
 ```
+
+MCP env in `.env.compose`: `SSC_TOKEN` (preferred) or `SSC_USERNAME` + `SSC_PASSWORD`. Public raw `:3100` is closed; only docker0 + NPM.
 
 ## Notes
 

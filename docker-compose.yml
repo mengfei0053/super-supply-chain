@@ -45,6 +45,30 @@ services:
     networks:
       - ssc-net
 
+  ssc-mcp:
+    build:
+      context: ./ssc-mcp
+      dockerfile: Dockerfile
+    image: ssc-mcp:local
+    container_name: ssc-mcp
+    restart: unless-stopped
+    depends_on:
+      - ssc-app
+    environment:
+      SSC_MCP_TRANSPORT: http
+      SSC_MCP_HOST: "0.0.0.0"
+      SSC_MCP_PORT: "3100"
+      SSC_BASE_URL: https://ssc.mengfei.tech
+      SSC_TOKEN: ${SSC_TOKEN:-}
+      SSC_USERNAME: ${SSC_USERNAME:-}
+      SSC_PASSWORD: ${SSC_PASSWORD:-}
+      SSC_MCP_ALLOWED_HOSTS: ssc.mengfei.tech,172.17.0.1,localhost,127.0.0.1
+      SSC_EXPORT_DIR: /tmp/ssc-exports
+    ports:
+      - "172.17.0.1:3100:3100"
+    networks:
+      - ssc-net
+
 volumes:
   ssc-mysql-data:
   ssc-uploads:

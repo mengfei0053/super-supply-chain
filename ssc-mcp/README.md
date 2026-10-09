@@ -85,6 +85,18 @@ Or with username/password (the server calls `POST /api/login` on the first tool 
 
 HTTP mode is opt-in. It keeps the same tools and the same `SscClient` auth behavior. Streamable HTTP (the SDK's current remote transport) is served at `/mcp`. Legacy HTTP+SSE (protocol 2024-11-05) is also served for older clients.
 
+**Production** publishes MCP behind Nginx Proxy Manager on the same host as the app:
+
+| Transport | Production URL | Local debug | Methods |
+| --- | --- | --- | --- |
+| Streamable HTTP (use this) | `https://ssc.mengfei.tech/mcp` | `http://127.0.0.1:3100/mcp` | `POST`, `GET`, `DELETE` |
+| Legacy SSE | `https://ssc.mengfei.tech/sse` | `http://127.0.0.1:3100/sse` | `GET` |
+| Legacy SSE messages | `https://ssc.mengfei.tech/messages?sessionId=...` | `http://127.0.0.1:3100/messages?sessionId=...` | `POST` |
+
+Compose service `ssc-mcp` binds `172.17.0.1:3100` only (not the public NIC). Credentials live in `.env.compose` (`SSC_TOKEN`, or `SSC_USERNAME` + `SSC_PASSWORD`).
+
+Local HTTP process:
+
 ```bash
 export SSC_BASE_URL=https://ssc.mengfei.tech
 export SSC_TOKEN='<jwt>'
@@ -95,17 +107,9 @@ npm run start
 # or: npm run dev -- --transport http --port 3100
 ```
 
-Endpoints after startup:
+The process listens on `SSC_MCP_HOST` (default `0.0.0.0`). Point clients at the production HTTPS URL, or at `127.0.0.1` for local debug — never at `0.0.0.0`.
 
-| Transport | URL | Methods |
-| --- | --- | --- |
-| Streamable HTTP (use this) | `http://127.0.0.1:3100/mcp` | `POST`, `GET`, `DELETE` |
-| Legacy SSE | `http://127.0.0.1:3100/sse` | `GET` |
-| Legacy SSE messages | `http://127.0.0.1:3100/messages?sessionId=...` | `POST` |
-
-The process listens on `SSC_MCP_HOST` (default `0.0.0.0`). Point clients at `127.0.0.1` or another reachable address, not at `0.0.0.0`.
-
-One OS process shares one SSC credential (`SSC_TOKEN`, or `SSC_USERNAME` + `SSC_PASSWORD`) across every MCP session. Run a separate process per tenant, and do not expose the port on an untrusted network.
+One OS process shares one SSC credential (`SSC_TOKEN`, or `SSC_USERNAME` + `SSC_PASSWORD`) across every MCP session. Run a separate process per tenant. Public access should go through the domain reverse proxy, not raw `:3100`.
 
 Sessions are kept in memory. A session is removed when the client sends `DELETE /mcp`, the legacy SSE connection closes, or the session has had no open request for 30 minutes. At most 200 sessions are accepted.
 
@@ -124,31 +128,33 @@ Binding to `0.0.0.0` or `::` without `SSC_MCP_ALLOWED_HOSTS` disables the SDK's 
 
 ### Cursor HTTP config
 
-Start the server yourself, then point Cursor at the Streamable HTTP endpoint:
+Production (recommended) — MCP is already behind `ssc.mengfei.tech`:
 
 ```json
 {
   "mcpServers": {
     "ssc": {
-      "url": "http://127.0.0.1:3100/mcp"
+      "url": "https://ssc.mengfei.tech/mcp"
     }
   }
 }
 ```
 
-Older clients that only speak SSE can use the legacy endpoint instead:
+Older clients that only speak SSE:
 
 ```json
 {
   "mcpServers": {
     "ssc": {
-      "url": "http://127.0.0.1:3100/sse"
+      "url": "https://ssc.mengfei.tech/sse"
     }
   }
 }
 ```
 
-`SSC_TOKEN` / `SSC_USERNAME` / `SSC_PASSWORD` belong in the server process environment, not in the URL snippet.
+For local debug only, use `http://127.0.0.1:3100/mcp` (or `/sse`) after starting the process yourself.
+
+`SSC_TOKEN` / `SSC_USERNAME` / `SSC_PASSWORD` belong in the server process environment (production: compose `.env.compose`), not in the URL snippet.
 
 ## Tools (3)
 

@@ -41,3 +41,16 @@ Docusaurus 打开了 `trailingSlash: true`，每个页面是目录下的 `index.
 `ssc-deployment.yaml` 把容器发布到命名空间 `ssc`。运行时环境来自 `PORT`、`ENVIRONMENT=production` 和 Secret `ssc-secret`。更新镜像标签后，同一 Service 会同时提供后台、API 和 `/docs/`。
 
 GitHub Actions 工作流 `.github/workflows/docker-build-push.yml` 只在 `v*` tag 上构建并推送镜像。
+
+## MCP HTTP（生产）
+
+Compose 服务 `ssc-mcp` 监听容器内 `3100`，只发布到 `172.17.0.1:3100`。Nginx Proxy Manager 在 `ssc.mengfei.tech` 上把 `/mcp`、`/sse`、`/messages` 转到该地址；`/api`、`/docs`、`/super-supply-chain` 仍走 `172.17.0.1:8088`。
+
+Cursor 填：
+
+```json
+{ "mcpServers": { "ssc": { "url": "https://ssc.mengfei.tech/mcp" } } }
+```
+
+凭证用 `.env.compose` 里的 `SSC_TOKEN`（或 `SSC_USERNAME` + `SSC_PASSWORD`），不要写进客户端 URL 配置。
+

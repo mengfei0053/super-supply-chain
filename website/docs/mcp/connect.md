@@ -105,6 +105,16 @@ npm run start
 
 HTTP 需要显式打开。工具和登录行为与 stdio 相同。当前协议的 Streamable HTTP 在 `/mcp`。旧客户端使用的 HTTP+SSE（协议 2024-11-05）在 `/sse`。
 
+**生产环境已经挂到公网域名**（Nginx Proxy Manager 把 `/mcp`、`/sse`、`/messages` 转到本机 `172.17.0.1:3100` 上的 `ssc-mcp` 容器）。日常接入直接用 HTTPS，不必自己在本机起进程。
+
+| 传输 | 生产地址 | 本机调试 | 方法 |
+| --- | --- | --- | --- |
+| Streamable HTTP（用这个） | `https://ssc.mengfei.tech/mcp` | `http://127.0.0.1:3100/mcp` | `POST`、`GET`、`DELETE` |
+| 旧版 SSE | `https://ssc.mengfei.tech/sse` | `http://127.0.0.1:3100/sse` | `GET` |
+| 旧版 SSE 消息 | `https://ssc.mengfei.tech/messages?sessionId=...` | `http://127.0.0.1:3100/messages?sessionId=...` | `POST` |
+
+本机自己跑 HTTP 时：
+
 ```bash
 export SSC_BASE_URL=https://ssc.mengfei.tech
 export SSC_TOKEN='<jwt>'
@@ -114,15 +124,7 @@ export SSC_MCP_PORT=3100
 npm run start
 ```
 
-也可以：`npm run dev -- --transport http --port 3100`。
-
-| 传输 | 地址 | 方法 |
-| --- | --- | --- |
-| Streamable HTTP（用这个） | `http://127.0.0.1:3100/mcp` | `POST`、`GET`、`DELETE` |
-| 旧版 SSE | `http://127.0.0.1:3100/sse` | `GET` |
-| 旧版 SSE 消息 | `http://127.0.0.1:3100/messages?sessionId=...` | `POST` |
-
-进程默认听在 `0.0.0.0`。客户端要填 `127.0.0.1` 或其他能访问到的地址，不要填 `0.0.0.0`。
+也可以：`npm run dev -- --transport http --port 3100`。进程默认听在 `0.0.0.0`；客户端不要填 `0.0.0.0`，填 `127.0.0.1` 或生产域名。
 
 会话保存在内存中。客户端发送 `DELETE /mcp`、旧版 SSE 连接关闭，或 30 分钟内没有进行中的请求时，会话会被清掉。最多接受 200 个会话。
 
@@ -137,15 +139,15 @@ npm run start
 
 监听 `0.0.0.0` 或 `::` 且没有 `SSC_MCP_ALLOWED_HOSTS` 时，SDK 会关闭 DNS 重绑定检查并打印警告。绑定 `127.0.0.1`、`localhost` 或 `::1` 时会自动打开这项检查。若要听全部网卡又限制 `Host`，设置 `SSC_MCP_ALLOWED_HOSTS=localhost,127.0.0.1`。
 
-### Cursor：HTTP URL
+### Cursor：HTTP URL（生产推荐）
 
-先自己把服务跑起来，再把 Cursor 指到 Streamable HTTP：
+生产上 MCP 已在域名后面跑着，Cursor 直接填 HTTPS：
 
 ```json
 {
   "mcpServers": {
     "ssc": {
-      "url": "http://127.0.0.1:3100/mcp"
+      "url": "https://ssc.mengfei.tech/mcp"
     }
   }
 }
@@ -157,13 +159,13 @@ npm run start
 {
   "mcpServers": {
     "ssc": {
-      "url": "http://127.0.0.1:3100/sse"
+      "url": "https://ssc.mengfei.tech/sse"
     }
   }
 }
 ```
 
-`SSC_TOKEN`、`SSC_USERNAME`、`SSC_PASSWORD` 放在启动 MCP 的进程环境里，不要写进这段 URL 配置。
+业务侧的 `SSC_TOKEN` / `SSC_USERNAME`+`SSC_PASSWORD` 配在 **101 上 `ssc-mcp` 容器的环境变量**（`.env.compose`）里，不要写进 Cursor 的 URL 配置。本机临时起 HTTP 调试时，才用 `http://127.0.0.1:3100/mcp`，并把凭证放进启动进程的环境变量。
 
 ## 工具概览
 
@@ -203,8 +205,8 @@ npm run smoke:http
 `SSC_BASE_URL` 必须是 API 源站，例如 `https://ssc.mengfei.tech` 或本地 `http://localhost:8081`。不要写成 `https://ssc.mengfei.tech/super-supply-chain`。`/super-supply-chain` 只提供管理后台页面，请求会打到静态文件而不是 `/api`。
 :::
 
-**HTTP 的 `url` 写成了 `0.0.0.0`。** `0.0.0.0` 是进程的监听地址。Cursor 里填 `http://127.0.0.1:3100/mcp`。
+**HTTP 的 `url` 写成了 `0.0.0.0`。** `0.0.0.0` 是进程的监听地址。生产填 `https://ssc.mengfei.tech/mcp`；本机调试填 `http://127.0.0.1:3100/mcp`。
 
-**把 token 写进 HTTP 配置。** HTTP 模式下，`SSC_TOKEN` 或用户名密码属于启动 `ssc-mcp` 的那个进程。Cursor 的配置只需要 `url`。
+**把 token 写进 HTTP 配置。** HTTP 模式下，`SSC_TOKEN` 或用户名密码属于跑 `ssc-mcp` 的那个进程（生产是 101 上的容器）。Cursor 的配置只需要 `url`。
 
 **网页上传和 MCP 上传走同一条接口。** 生产机访问不到家里局域网的 NAS（WebDAV）。当前部署把 `UPLOAD_SERVER` 设为 `file://` 或 `local://`（例如 `file:///data/ssc-uploads`），Excel 上传写到本机目录或对应的 Docker 卷。`ssc_upload_excel` 调用的也是这条 `POST /api/admin/excel/{tableName}`。改回一个可达的 WebDAV 地址才会回到 NAS 模式。结算单文件上传（`POST /api/admin/settlement-form-entries`）仍然没有 MCP 工具。
