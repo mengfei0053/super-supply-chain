@@ -67,6 +67,19 @@ curl "https://ssc.mengfei.tech/api/admin/menus?token=ssc_pat_替换为你的令�
 
 ## 给 MCP 用
 
-`ssc-mcp` 不关心令牌是 JWT 还是 PAT。公网服务把 PAT 放在服务端的 `SSC_TOKEN` 里，访问源站时使用 `Authorization: Bearer`。远程连接器若自行带请求头，同样是 `Authorization: Bearer <token>`。这样不用在 MCP 配置里写密码，也不会在 24 小时后失效（除非你给令牌设了过期时间）。
+`ssc-mcp` 不关心令牌是 JWT 还是 PAT。公网服务把 PAT 放在服务端的 `SSC_TOKEN` 里，访问源站时使用 `Authorization: Bearer`。远程 Cursor 配置把同一把令牌放进 `headers`，不要只写 `url`。`Authorization` 要带 `Bearer `。旧客户端把 `url` 换成 `https://ssc.mengfei.tech/sse`。也可以改用 `"X-API-Key": "ssc_pat_你的令牌"`，这时不要加 `Bearer `。这样不用在 MCP 配置里写密码，也不会在 24 小时后失效（除非你给令牌设了过期时间）。
+
+```json
+{
+  "mcpServers": {
+    "ssc": {
+      "url": "https://ssc.mengfei.tech/mcp",
+      "headers": {
+        "Authorization": "Bearer ssc_pat_你的令牌"
+      }
+    }
+  }
+}
+```
 
 不要把真实令牌提交进仓库。连接地址见 [MCP 接入与使用](/mcp)。

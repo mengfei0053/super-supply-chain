@@ -46,11 +46,20 @@ GitHub Actions 工作流 `.github/workflows/docker-build-push.yml` 只在 `v*` t
 
 Compose 服务 `ssc-mcp` 监听容器内 `3100`，只发布到 `172.17.0.1:3100`。Nginx Proxy Manager 在 `ssc.mengfei.tech` 上把 `/mcp`、`/sse`、`/messages` 转到该地址；`/api`、`/docs`、`/super-supply-chain` 仍走 `172.17.0.1:8088`。
 
-Cursor 填：
+Cursor 填完整远程配置：`url` 加上个人访问令牌请求头。令牌在管理后台 **工具 → 个人访问令牌** 创建，下面只是占位，不要写真实令牌。`/sse` 与可选的 `X-API-Key` 见 [MCP 接入与使用](/mcp)。
 
 ```json
-{ "mcpServers": { "ssc": { "url": "https://ssc.mengfei.tech/mcp" } } }
+{
+  "mcpServers": {
+    "ssc": {
+      "url": "https://ssc.mengfei.tech/mcp",
+      "headers": {
+        "Authorization": "Bearer ssc_pat_你的令牌"
+      }
+    }
+  }
+}
 ```
 
-凭证用 `.env.compose` 里的 `SSC_TOKEN`（或 `SSC_USERNAME` + `SSC_PASSWORD`），不要写进客户端 URL 配置。
+自己在服务器上跑 `ssc-mcp` 时，进程仍用 `.env.compose` 里的 `SSC_TOKEN`（或 `SSC_USERNAME` + `SSC_PASSWORD`）去调用源站。那不能代替客户端的 `headers`。
 
