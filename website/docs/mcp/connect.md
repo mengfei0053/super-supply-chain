@@ -5,6 +5,8 @@ title: MCP 接入与使用
 slug: /mcp
 ---
 
+import SkillZipLink from '@site/src/components/SkillZipLink';
+
 # MCP 接入与使用
 
 `ssc-mcp` 把 Super Supply Chain 里常用的 Excel 上传、列表、删除、四类发票导出，以及公司查询包成 MCP 工具，给 Cursor 和其他 Agent 客户端调用。它不另写一套业务接口，请求都转到源站的 `/api` 与 `/api/admin`。
@@ -17,7 +19,7 @@ slug: /mcp
 
 公网 MCP 的接法和五个工具的用法写在一份 Cursor Skill 里。连接 `https://ssc.mengfei.tech/mcp`、上传或查询 Excel、导出发票、删除一行、搜索公司时，让 Agent 读取它。
 
-**[下载 SSC MCP Skill](/files/ssc-mcp-skill.zip)**
+<SkillZipLink />
 
 1. 下载 zip 并解压，得到 `ssc-mcp-skill/SKILL.md`。
 2. 在 Cursor 里把 `ssc-mcp-skill` 添加为 Skill，或复制到 `~/.cursor/skills/ssc-mcp-skill/`。只给当前项目用时，复制到该项目的 `.cursor/skills/ssc-mcp-skill/`。

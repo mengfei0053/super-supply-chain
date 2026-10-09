@@ -9,3 +9,5 @@ cd ssc-mcp/skill && rm -f ../../website/static/files/ssc-mcp-skill.zip && zip -r
 ```
 
 The archive must contain `ssc-mcp-skill/SKILL.md`.
+
+The docs page links through `website/src/components/SkillZipLink`, which points at `/docs/files/ssc-mcp-skill.zip`. A plain `/files/...` markdown link is rewritten to a hashed asset and gets a trailing slash, which does not download.
