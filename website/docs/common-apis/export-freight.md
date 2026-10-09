@@ -29,7 +29,7 @@ Authorization: Bearer <JWT>
 | `ids` | 动态表行 id。单行：`ids=896`。多行重复参数：`ids=896&ids=897`。 |
 | `type` | 固定 `invoice_freight`。 |
 
-成功时响应头 `Content-Disposition` 为附件。下载文件名形如 `导出发票-运费_2026_10_09_14_30_00.xlsx`。请把响应保存为文件。出错时才返回 JSON，HTTP `500`。
+成功时响应头 `Content-Disposition` 为附件。下载文件名形如 `导出发票-运费_2026_10_09_14_30_00.xlsx`。请按这个文件名把响应保存为 `.xlsx`。`Content-Type` 可能是 `application/zip`（Office Open XML 本身是 zip），不要因此改成 `.zip`。出错时才返回 JSON，HTTP `500`。
 
 ```bash
 curl -L -o freight-invoice.xlsx \

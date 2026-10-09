@@ -46,6 +46,12 @@ async function main(): Promise<void> {
         ids: exportIds,
         type: exportType,
       });
+      const saved = file.path.toLowerCase();
+      if (file.xlsx && !saved.endsWith(".xlsx") && !saved.endsWith(".xls")) {
+        throw new Error(
+          `invoice export was saved as ${file.path}; expected a .xlsx workbook (Content-Type application/zip is still .xlsx)`,
+        );
+      }
       console.log(
         "GET excel-exports: OK",
         JSON.stringify({

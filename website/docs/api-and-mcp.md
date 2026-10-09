@@ -45,7 +45,7 @@ JSON API 在站点源站的 `/api` 下，**不是** `/super-supply-chain` 下面
 | --- | --- |
 | `ssc_upload_excel` | 常用。`POST /api/admin/excel/{tableName}`，multipart 字段 `file` 与 `name`。对应 [上传 Excel](/common-apis/upload)。 |
 | `ssc_delete_excel_row` | 常用。`DELETE /api/admin/excel/{tableName}/{id}`。对应 [删除一行](/common-apis/delete-row)。 |
-| `ssc_export_excel` | 常用。`GET /api/admin/excel-exports/{tableName}?ids={ids}&type={type}`。`type` 只能是 `shortHaulInvoice`、`invoice_unpacking`、`invoice_clearance_only`、`invoice_freight`，分别对应 [短驳发票](/common-apis/export-short-haul)、[拆箱发票](/common-apis/export-unpacking)、[清关发票](/common-apis/export-clearance)、[运费发票](/common-apis/export-freight)。工具把 xlsx 写到临时路径并返回该路径。 |
+| `ssc_export_excel` | 常用。`GET /api/admin/excel-exports/{tableName}?ids={ids}&type={type}`。`type` 只能是 `shortHaulInvoice`、`invoice_unpacking`、`invoice_clearance_only`、`invoice_freight`，分别对应 [短驳发票](/common-apis/export-short-haul)、[拆箱发票](/common-apis/export-unpacking)、[清关发票](/common-apis/export-clearance)、[运费发票](/common-apis/export-freight)。工具按 `Content-Disposition` 把工作簿写成 `.xlsx` 并返回路径。响应 `Content-Type` 即使是 `application/zip`（xlsx 本身是 zip），也不会存成 `.zip`。 |
 | `ssc_list_excel` | 常用。`GET /api/admin/excel/{tableName}`，`filter` 为 `{"start","end"}`，可选 `sort`，`range` 重复传 `range=0&range=50`。对应 [查询列表](/common-apis/list)。 |
 | `ssc_search_companies` | 常用。`GET /api/admin/companies?keyword=`，在 `name` 与 `alias` 上做包含匹配，返回全部列。对应 [公司查询](/common-apis/companies)。 |
 

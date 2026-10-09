@@ -181,7 +181,7 @@ Upload, list, delete, these four exports, and company keyword search are the com
 
 `ssc_delete_excel_row` (常用) hard-deletes one row. Example: `DELETE /api/admin/excel/dynamic_settlement_statement_suqian/896`.
 
-`ssc_export_excel` (常用) downloads a workbook and writes it under the OS temp directory (`ssc-mcp-exports`, or `SSC_EXPORT_DIR` / `outputPath`). The tool result is metadata plus `path` — read that file; the bytes are not inlined. `ids` may be `896`, `896,897`, or an array. Commonly used `type` values are `shortHaulInvoice`, `invoice_unpacking`, `invoice_clearance_only`, and `invoice_freight`.
+`ssc_export_excel` (常用) downloads a workbook and writes it under the OS temp directory (`ssc-mcp-exports`, or `SSC_EXPORT_DIR` / `outputPath`). The tool result is metadata plus `path` — read that file; the bytes are not inlined. The saved name comes from `Content-Disposition` (`filename*` / `filename`) and ends in `.xlsx`. These responses are often `Content-Type: application/zip` because Office Open XML is a zip; that header is not used as the file extension. If `outputPath` ends in `.zip` and the body is one workbook, the tool still writes `.xlsx`. A `.zip` path is kept only when the body is a zip of several separate workbooks. `ids` may be `896`, `896,897`, or an array. Commonly used `type` values are `shortHaulInvoice`, `invoice_unpacking`, `invoice_clearance_only`, and `invoice_freight`.
 
 `ssc_search_companies` (常用) searches `base_companies_infos` by a literal substring of `name` or `alias` (`LIKE %keyword%`, with `%` and `_` escaped). The `rows` array includes every column: `id`, `created_at`, `updated_at`, `deleted_at`, `name`, `addr_country`, `addr_province`, `addr_city`, `addr_street`, `unified_social_credit_code`, `bank_code`, `phone_num`, `alias`, `target_addr`. Rows with `deleted_at` set are omitted unless `includeDeleted` is true.
 
@@ -243,7 +243,7 @@ console.log(JSON.stringify({ path: file.path, bytes: file.bytes, fileName: file.
 '
 ```
 
-3. Confirm the printed `path` is a non-empty `.xlsx` (`xlsx: true`).
+3. Confirm the printed `path` is a non-empty `.xlsx` (`xlsx: true`). A `Content-Type` of `application/zip` does not change that extension.
 4. Upload only against a table you mean to change:
 
 ```bash

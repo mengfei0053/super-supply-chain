@@ -77,8 +77,7 @@ test("HTTP tool call uploads and exports through the SSC client", async () => {
       return;
     }
     res.writeHead(200, {
-      "Content-Type":
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "Content-Type": "application/zip",
       "Content-Disposition": 'attachment; filename="export.xlsx"',
     });
     res.end(xlsx);
@@ -129,8 +128,15 @@ test("HTTP tool call uploads and exports through the SSC client", async () => {
     });
     assert.equal(exported.isError, undefined);
     const exportText = textOf(exported);
-    const parsed = JSON.parse(exportText) as { path: string; xlsx: boolean };
+    const parsed = JSON.parse(exportText) as {
+      path: string;
+      xlsx: boolean;
+      fileName: string;
+    };
     assert.equal(parsed.xlsx, true);
+    assert.equal(parsed.fileName, "export.xlsx");
+    assert.match(parsed.path, /\.xlsx$/i);
+    assert.equal(parsed.path.toLowerCase().endsWith(".zip"), false);
     assert.deepEqual(await readFile(parsed.path), xlsx);
     assert.equal(exportText.includes("unit-test-token"), false);
 

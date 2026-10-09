@@ -107,7 +107,7 @@ export function createSscMcpServer(client: SscClient): McpServer {
   server.registerTool(
     "ssc_export_excel",
     {
-      description: `常用. Download an Excel export (GET /api/admin/excel-exports/:tableName?ids=&type=). Writes the workbook to a temp file and returns that path. Types: ${EXCEL_EXPORT_TYPES.join(", ")}. Example: tableName dynamic_settlement_statement_suqian, ids 896, type shortHaulInvoice.`,
+      description: `常用. Download an Excel export (GET /api/admin/excel-exports/:tableName?ids=&type=). Writes one workbook as .xlsx (name from Content-Disposition; Content-Type application/zip is still .xlsx) and returns that path. Types: ${EXCEL_EXPORT_TYPES.join(", ")}. Example: tableName dynamic_settlement_statement_suqian, ids 896, type shortHaulInvoice.`,
       inputSchema: {
         tableName: z
           .string()
@@ -130,7 +130,7 @@ export function createSscMcpServer(client: SscClient): McpServer {
           .string()
           .optional()
           .describe(
-            "Optional file path or directory for the downloaded workbook. Default: OS temp dir / ssc-mcp-exports (or SSC_EXPORT_DIR).",
+            "Optional file path or directory for the downloaded workbook. A path ending in .zip is written as .xlsx when the response is one workbook. Default: OS temp dir / ssc-mcp-exports (or SSC_EXPORT_DIR).",
           ),
       },
     },
