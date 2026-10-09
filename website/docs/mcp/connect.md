@@ -9,7 +9,15 @@ import SkillZipLink from '@site/src/components/SkillZipLink';
 
 # MCP 接入与使用
 
-`ssc-mcp` 把 Super Supply Chain 里常用的 Excel 上传、列表、删除、四类发票导出，以及公司查询包成 MCP 工具，给 Cursor 和其他 Agent 客户端调用。它不另写一套业务接口，请求都转到源站的 `/api` 与 `/api/admin`。
+## 概述
+
+这份 MCP 和对应的 Cursor Skill 属于 **娃哈哈发票模板导出流程**。
+
+Super Supply Chain（SSC）用来做娃哈哈结算 Excel 的上传，以及四类发票模板导出：`shortHaulInvoice`（短驳）、`invoice_unpacking`（拆箱）、`invoice_clearance_only`（清关）、`invoice_freight`（运费）。
+
+远程 MCP 的五个工具 `ssc_upload_excel`、`ssc_list_excel`、`ssc_delete_excel_row`、`ssc_export_excel`、`ssc_search_companies` 是这条娃哈哈发票导出流水线面向 Agent 的入口。
+
+`ssc-mcp` 把上述能力包成 MCP 工具，给 Cursor 和其他 Agent 客户端调用。它不另写一套业务接口，请求都转到源站的 `/api` 与 `/api/admin`。
 
 管理后台在 `https://ssc.mengfei.tech/super-supply-chain/`，那只是静态页面。JSON API 与后台路径并列，不在 `/super-supply-chain` 下面。
 
@@ -17,7 +25,7 @@ import SkillZipLink from '@site/src/components/SkillZipLink';
 
 ## 下载 Cursor Skill
 
-公网 MCP 的接法和五个工具的用法写在一份 Cursor Skill 里。连接 `https://ssc.mengfei.tech/mcp`、上传或查询 Excel、导出发票、删除一行、搜索公司时，让 Agent 读取它。
+公网 MCP 的接法和五个工具的用法写在一份 Cursor Skill 里，供 **娃哈哈发票模板导出** 时使用。连接 `https://ssc.mengfei.tech/mcp`、上传或查询 Excel、导出发票、删除一行、搜索公司时，让 Agent 读取它。
 
 <SkillZipLink />
 

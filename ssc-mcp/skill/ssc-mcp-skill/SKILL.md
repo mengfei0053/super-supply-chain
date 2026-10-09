@@ -1,11 +1,19 @@
 ---
 name: SSC MCP
-description: When connecting to or calling Super Supply Chain via remote MCP (upload/list/delete/export Excel, search companies).
+description: When connecting to or calling Super Supply Chain via remote MCP for 娃哈哈发票模板导出 (Wahaha invoice template export: upload/list/delete/export Excel, search companies).
 ---
 
 # SSC MCP
 
-Use this when connecting Cursor or another agent to Super Supply Chain over the public remote MCP, or when calling its Excel and company tools.
+## Overview
+
+This MCP and this skill belong to the **娃哈哈发票模板导出流程** (Wahaha invoice template export workflow).
+
+Super Supply Chain (SSC) is used for Wahaha settlement Excel upload and four invoice template exports: `shortHaulInvoice`, `invoice_unpacking`, `invoice_clearance_only`, and `invoice_freight`.
+
+The remote MCP tools `ssc_upload_excel`, `ssc_list_excel`, `ssc_delete_excel_row`, `ssc_export_excel`, and `ssc_search_companies` are the agent-facing surface of that same Wahaha invoice-export pipeline.
+
+Use this skill when connecting to that public MCP, or when calling those tools for 娃哈哈发票模板导出.
 
 ## Connect
 

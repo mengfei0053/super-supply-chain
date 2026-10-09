@@ -1,6 +1,6 @@
 # SSC MCP Skill
 
-Cursor skill for the Super Supply Chain public remote MCP.
+Cursor skill for the Super Supply Chain public remote MCP. It belongs to the **娃哈哈发票模板导出流程** (Wahaha invoice template export workflow).
 
 1. Unzip so the folder is `ssc-mcp-skill/SKILL.md`.
 2. In Cursor, add that folder as a skill, or copy it to `~/.cursor/skills/ssc-mcp-skill/`. For one project, copy it to `.cursor/skills/ssc-mcp-skill/`.
