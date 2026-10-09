@@ -24,7 +24,7 @@ const FeatureList: FeatureItem[] = [
     description: (
       <>
         Go / Gin 提供 <code>/api/login</code> 和受保护的 <code>/api/admin</code>
-        。上传、查询、导出发票、删除和公司查询见 <Link to="/common-apis">常用接口</Link>。
+        。上传、查询、导出发票、删除，以及公司查询、新增和更新见 <Link to="/common-apis">常用接口</Link>。
       </>
     ),
   },

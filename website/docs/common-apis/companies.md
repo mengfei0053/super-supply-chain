@@ -73,3 +73,5 @@ curl -G \
 ## MCP
 
 对应工具 `ssc_search_companies`。参数是 `keyword`，可选 `includeDeleted`。工具请求本页的 `GET`，并把完整行数组放在结果的 `rows` 里。工具说明见 [API 与 MCP](/api-and-mcp#tools)。接入见 [MCP 接入与使用](/mcp)。
+
+新增一行见 [新增公司](/common-apis/companies-create)，修改名称、别名或发票目标地址见 [更新公司](/common-apis/companies-update)。

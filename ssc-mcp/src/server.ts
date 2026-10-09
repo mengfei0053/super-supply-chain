@@ -2,7 +2,8 @@
  * SSC MCP tools shared by stdio and Streamable HTTP.
  *
  * Commonly used Excel upload, list, delete, and export calls, plus company
- * keyword search. Auth is environment-only: SSC_TOKEN, or SSC_USERNAME + SSC_PASSWORD.
+ * keyword search, create, and update. Auth is environment-only: SSC_TOKEN, or
+ * SSC_USERNAME + SSC_PASSWORD.
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -31,7 +32,7 @@ const excelSortSchema = z
 export function createSscMcpServer(client: SscClient): McpServer {
   const server = new McpServer({
     name: "ssc-mcp",
-    version: "1.2.0",
+    version: "1.3.0",
   });
 
   server.registerTool(
@@ -236,6 +237,96 @@ export function createSscMcpServer(client: SscClient): McpServer {
           keyword: keyword.trim(),
           includeDeleted: includeDeleted === true,
           rows,
+        });
+      } catch (err) {
+        return errorResult(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "ssc_create_company",
+    {
+      description:
+        "常用. Create a base_companies_infos row (POST /api/admin/companies). Requires name and unified_social_credit_code (统一社会信用代码). alias and target_addr (发票目标地址) are optional. Invoice export looks up a company by exact name or by alias.",
+      inputSchema: {
+        name: z
+          .string()
+          .describe("公司名称. Required and unique, e.g. 杭州测试公司."),
+        unifiedSocialCreditCode: z
+          .string()
+          .describe(
+            "统一社会信用代码. Required and unique. Sent as unified_social_credit_code.",
+          ),
+        alias: z
+          .string()
+          .optional()
+          .describe(
+            "公司别名. Optional. Invoice export also matches this field.",
+          ),
+        targetAddr: z
+          .string()
+          .optional()
+          .describe("发票目标地址. Optional. Sent as target_addr."),
+      },
+    },
+    async ({ name, unifiedSocialCreditCode, alias, targetAddr }) => {
+      try {
+        const company = await client.createCompany({
+          name,
+          unifiedSocialCreditCode,
+          alias,
+          targetAddr,
+        });
+        return jsonResult({
+          ok: true,
+          company,
+        });
+      } catch (err) {
+        return errorResult(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "ssc_update_company",
+    {
+      description:
+        "常用. Update name, alias, and/or target_addr on one active company (PUT /api/admin/companies/:id). Omitted fields stay unchanged. An empty alias or target_addr clears that column. Does not change unified_social_credit_code or other columns.",
+      inputSchema: {
+        id: z
+          .union([z.string(), z.number()])
+          .describe("Company id from ssc_search_companies, e.g. 12."),
+        name: z
+          .string()
+          .optional()
+          .describe("New 公司名称. Omit to leave the stored name unchanged."),
+        alias: z
+          .string()
+          .optional()
+          .describe(
+            "New 公司别名. Omit to leave it unchanged. Send an empty string to clear it.",
+          ),
+        targetAddr: z
+          .string()
+          .optional()
+          .describe(
+            "New 发票目标地址. Omit to leave it unchanged. Send an empty string to clear it.",
+          ),
+      },
+    },
+    async ({ id, name, alias, targetAddr }) => {
+      try {
+        const company = await client.updateCompany({
+          id,
+          name,
+          alias,
+          targetAddr,
+        });
+        return jsonResult({
+          ok: true,
+          id: String(id).trim(),
+          company,
         });
       } catch (err) {
         return errorResult(err);

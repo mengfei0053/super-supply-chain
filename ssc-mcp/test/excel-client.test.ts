@@ -454,6 +454,101 @@ test("searchCompanies queries name and alias keyword", async () => {
   }
 });
 
+test("createCompany and updateCompany send name, alias, and target_addr", async () => {
+  let seenMethod = "";
+  let seenUrl = "";
+  let seenBody = "";
+  let seenAuth = "";
+  const server = createServer(async (req, res) => {
+    seenMethod = req.method ?? "";
+    seenUrl = req.url ?? "";
+    seenAuth = req.headers.authorization ?? "";
+    const chunks: Buffer[] = [];
+    for await (const chunk of req) chunks.push(Buffer.from(chunk));
+    seenBody = Buffer.concat(chunks).toString("utf8");
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({
+        id: 7,
+        name: "杭州测试公司",
+        alias: "杭州测试",
+        target_addr: "杭州",
+        unified_social_credit_code: "91330100TEST",
+        deleted_at: null,
+      }),
+    );
+  });
+  const port = await listen(server);
+  try {
+    const client = new SscClient({
+      baseUrl: `http://127.0.0.1:${port}`,
+      token: TOKEN,
+    });
+    const created = await client.createCompany({
+      name: " 杭州测试公司 ",
+      alias: " 杭州测试 ",
+      targetAddr: " 杭州 ",
+      unifiedSocialCreditCode: " 91330100TEST ",
+    });
+    assert.equal(seenMethod, "POST");
+    assert.equal(seenUrl, "/api/admin/companies");
+    assert.equal(seenAuth, `Bearer ${TOKEN}`);
+    assert.deepEqual(JSON.parse(seenBody), {
+      name: "杭州测试公司",
+      alias: "杭州测试",
+      target_addr: "杭州",
+      unified_social_credit_code: "91330100TEST",
+    });
+    assert.equal((created as { id: number }).id, 7);
+
+    const updated = await client.updateCompany({
+      id: 7,
+      name: "杭州测试公司",
+      alias: "杭州测试",
+      targetAddr: "海宁",
+    });
+    assert.equal(seenMethod, "PUT");
+    assert.equal(seenUrl, "/api/admin/companies/7");
+    assert.deepEqual(JSON.parse(seenBody), {
+      name: "杭州测试公司",
+      alias: "杭州测试",
+      target_addr: "海宁",
+    });
+    assert.equal((updated as { target_addr: string }).target_addr, "杭州");
+
+    await client.updateCompany({ id: "12", targetAddr: "嘉兴" });
+    assert.equal(seenUrl, "/api/admin/companies/12");
+    assert.deepEqual(JSON.parse(seenBody), { target_addr: "嘉兴" });
+
+    await assert.rejects(
+      () =>
+        client.createCompany({
+          name: "  ",
+          unifiedSocialCreditCode: "91330100TEST",
+        }),
+      /name is required/,
+    );
+    await assert.rejects(
+      () =>
+        client.createCompany({
+          name: "杭州测试公司",
+          unifiedSocialCreditCode: " ",
+        }),
+      /unified_social_credit_code is required/,
+    );
+    await assert.rejects(
+      () => client.updateCompany({ id: 7 }),
+      /name, alias, or target_addr is required/,
+    );
+    await assert.rejects(
+      () => client.updateCompany({ id: 0, name: "杭州测试公司" }),
+      /id must be a positive integer/,
+    );
+  } finally {
+    server.close();
+  }
+});
+
 test("deleteExcelRow sends one id and rejects extra export types", async () => {
   let seenUrl = "";
   let seenMethod = "";
