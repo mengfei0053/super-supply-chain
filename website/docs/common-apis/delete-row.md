@@ -35,4 +35,4 @@ curl -X DELETE \
 
 ## MCP
 
-这条路径已经有 MCP 工具 `ssc_delete_excel_row`。参数是 `tableName` 和 `id`，例如表名 `dynamic_settlement_statement_suqian`、id `896`。工具说明见 [API 与 MCP](/api-and-mcp#tools)。如何把 `ssc-mcp` 接到 Cursor，见 [MCP 接入与使用](/mcp)。
+这条路径是常用接口，MCP 工具是 `ssc_delete_excel_row`。参数是 `tableName` 和 `id`，例如表名 `dynamic_settlement_statement_suqian`、id `896`。工具说明见 [API 与 MCP](/api-and-mcp#tools)。如何把 `ssc-mcp` 接到 Cursor，见 [MCP 接入与使用](/mcp)。

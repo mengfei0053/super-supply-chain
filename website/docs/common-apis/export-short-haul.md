@@ -41,4 +41,4 @@ curl -L -o short-haul-invoice.xlsx \
 
 ## MCP
 
-批量导出下载还没有 MCP 工具。以后若包装，应请求本页的 `GET`，并原样带回 xlsx，而不是改成 JSON。接入见 [MCP 接入与使用](/mcp)。
+对应工具 `ssc_export_excel`，`type` 为 `shortHaulInvoice`。工具请求本页的 `GET`，把 xlsx 写到临时文件并返回路径。接入见 [MCP 接入与使用](/mcp)。
