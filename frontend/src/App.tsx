@@ -10,6 +10,7 @@ import ExcelPage from "./pages/excels";
 import dictManage from "./pages/tool-pages/dict-manage";
 import ExcelEditPage from "./pages/excels/Edit";
 import YifanCostCalculation from "./pages/yifan/cost-calculation";
+import PersonalAccessTokens from "./pages/personal-access-tokens";
 
 export const App = () => (
   <Admin
@@ -21,6 +22,11 @@ export const App = () => (
     <Resource name="settlement-form-entry" {...SettlementFormEntry}></Resource>
     <Resource name="excel-read-rules" {...ExcelReadRules}></Resource>
     <Resource name="dict-manage" {...dictManage}></Resource>
+    <Resource
+      name="personal-access-tokens"
+      options={{ label: "个人访问令牌" }}
+      {...PersonalAccessTokens}
+    ></Resource>
     <Resource
       name="yifan/cost-calculation"
       {...YifanCostCalculation}

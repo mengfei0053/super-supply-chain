@@ -24,11 +24,13 @@ func main() {
 
 	models.InitDB()
 
-	r := gin.Default()
+	// gin.Default() 会在进入后续中间件之前记下原始 query，?token= 会进访问日志。
+	// 这里只用会脱敏的 zap 日志和 recovery。
+	r := gin.New()
 	logger := utils.InitLogger()
 
+	r.Use(middleware.CaptureAndRedactQueryToken())
 	r.Use(middleware.GinZapLogger(logger))
-	// 替换默认 Recovery 中间件
 	r.Use(middleware.GinZapRecovery(logger, true))
 
 	controllers.LoadStatic(r)
@@ -84,6 +86,10 @@ func main() {
 		protected.GET("/options/:key", controllers.GetOptions)
 		protected.GET("/menus", controllers.GetDynamicExcelMenus)
 
+		sessionOnly := middleware.RequireSessionJWT()
+		protected.GET("/personal-access-tokens", sessionOnly, controllers.ListPersonalAccessTokens)
+		protected.POST("/personal-access-tokens", sessionOnly, controllers.CreatePersonalAccessToken)
+		protected.DELETE("/personal-access-tokens/:id", sessionOnly, controllers.RevokePersonalAccessToken)
 	}
 
 	srv := &http.Server{

@@ -32,7 +32,7 @@ Super Supply Chain（SSC）是一套供应链管理后台。它把结算录入�
 登录后的侧栏大致分成两类：
 
 - **Excel 处理**：按动态表名进入对应数据页，做录入、查看和导出。
-- **工具**：字典管理、Excel 读取规则。
+- **工具**：字典管理、Excel 读取规则、个人访问令牌。
 
 顶栏的「文档」会打开本站首页 `/docs/`。
 
@@ -46,3 +46,4 @@ Super Supply Chain（SSC）是一套供应链管理后台。它把结算录入�
 
 - [MCP 接入与使用](/mcp)：安装、环境变量、stdio 与 HTTP、Cursor 配置和常见错误。
 - [API 与 MCP](/api-and-mcp)：源站路径，以及已经包装的工具清单。
+- [个人访问令牌](/personal-access-tokens)：在后台创建长期令牌，给脚本、HTTP 和 MCP 使用。

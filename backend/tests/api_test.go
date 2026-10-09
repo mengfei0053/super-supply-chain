@@ -73,6 +73,11 @@ func setupProtectedAPIRouter() *gin.Engine {
 
 		protected.GET("/options/:key", controllers.GetOptions)
 		protected.GET("/menus", controllers.GetDynamicExcelMenus)
+
+		sessionOnly := middleware.RequireSessionJWT()
+		protected.GET("/personal-access-tokens", sessionOnly, controllers.ListPersonalAccessTokens)
+		protected.POST("/personal-access-tokens", sessionOnly, controllers.CreatePersonalAccessToken)
+		protected.DELETE("/personal-access-tokens/:id", sessionOnly, controllers.RevokePersonalAccessToken)
 	}
 
 	return r
@@ -116,6 +121,9 @@ func TestProtectedAPIRequiresAuthorization(t *testing.T) {
 		{http.MethodGet, "/api/admin/excel-export-rule/orders/export/1"},
 		{http.MethodGet, "/api/admin/options/status"},
 		{http.MethodGet, "/api/admin/menus"},
+		{http.MethodGet, "/api/admin/personal-access-tokens"},
+		{http.MethodPost, "/api/admin/personal-access-tokens"},
+		{http.MethodDelete, "/api/admin/personal-access-tokens/1"},
 	}
 
 	for _, tc := range cases {

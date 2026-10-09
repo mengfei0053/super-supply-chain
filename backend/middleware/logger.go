@@ -16,7 +16,7 @@ func GinZapLogger(logger *zap.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		path := c.Request.URL.Path
-		query := c.Request.URL.RawQuery
+		query := RedactSensitiveQuery(c.Request.URL.RawQuery)
 
 		// 处理请求
 		c.Next()
@@ -51,11 +51,11 @@ func GinZapRecovery(logger *zap.Logger, stack bool) gin.HandlerFunc {
 
 				dumpBytes, _ := httputil.DumpRequest(c.Request, false)
 
-				// 记录错误详情
+				// 记录错误详情。请求行和认证头里的令牌不能进日志。
 				if !brokenPipe {
 					logger.Error("Recovered from panic",
 						zap.Any("error", err),
-						zap.String("request", string(dumpBytes)),
+						zap.String("request", scrubSensitiveDump(string(dumpBytes))),
 						zap.String("stack", string(debug.Stack())),
 					)
 				}

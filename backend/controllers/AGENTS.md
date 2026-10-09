@@ -10,3 +10,4 @@ Controllers are Gin handlers for API and static serving behavior.
 - Return JSON shapes expected by the frontend; avoid renaming response fields casually.
 - File upload/export handlers should preserve existing Excel template and WebDAV workflows.
 - Add or update API tests in `backend/tests` when auth, status codes, query handling, or response shapes change.
+- Personal access token create may return the plaintext once. List and revoke responses must not include it or the hash.

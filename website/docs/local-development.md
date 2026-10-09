@@ -33,6 +33,8 @@ slug: local-development
 
 开发环境从 `configs/.env` 加载（相对 `backend/` 工作目录的 `../configs/.env`）。生产环境从进程或 Kubernetes Secret 读取。
 
+进程启动时会尝试创建 `personal_access_tokens` 表。若数据库账号没有建表权限，请先执行 `ssc-sqls/personal_access_tokens.sql`。
+
 不用热重载时，可以在 `backend/` 里执行 `go build ./...`。
 
 ## 前端

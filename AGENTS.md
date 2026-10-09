@@ -37,6 +37,7 @@ Main behavior:
   - `POST /api/register`
   - `POST /api/login`
 - Protected API group under `/api/admin`, guarded by `middleware.AuthMiddleware()`.
+- That middleware accepts a session JWT or a personal access token (`Authorization: Bearer`, `X-API-Key`, or `?token=`). Token management routes additionally require the session JWT. Tokens are stored as SHA-256 hashes in `personal_access_tokens` (`ssc-sqls/personal_access_tokens.sql`, also AutoMigrated on startup).
 
 Important backend directories:
 
@@ -100,6 +101,7 @@ The frontend is a React Admin application. Resources are registered for:
 - `settlement-form-entry`
 - `excel-read-rules`
 - `dict-manage`
+- `personal-access-tokens`
 - `yifan/cost-calculation`
 - dynamic `excel/:tableName` and `excel/:tableName/:id` routes
 

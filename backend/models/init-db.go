@@ -22,6 +22,13 @@ func InitDB() {
 		panic("failed to connect database")
 	}
 
+	// 已有业务表继续手工管理。个人访问令牌是新表，启动时单独迁移。
+	// 数据库账号没有建表权限时，执行 ssc-sqls/personal_access_tokens.sql。
+	if err = DB.AutoMigrate(&PersonalAccessToken{}); err != nil {
+		fmt.Println("warning: personal_access_tokens AutoMigrate failed:", err.Error())
+		fmt.Println("apply ssc-sqls/personal_access_tokens.sql if the table is missing")
+	}
+
 	// 迁移 schema
 	//DB.AutoMigrate(
 	//	&BaseAccountsInfos{},

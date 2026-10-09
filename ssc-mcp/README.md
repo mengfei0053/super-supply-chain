@@ -21,7 +21,7 @@ npm run build
 | Variable | Required | Description |
 | --- | --- | --- |
 | `SSC_BASE_URL` | no | API origin, default `https://ssc.mengfei.tech` |
-| `SSC_TOKEN` | one of token / user+pass | JWT from login (preferred) |
+| `SSC_TOKEN` | one of token / user+pass | Login JWT, or a personal access token from the admin UI (preferred for long-lived MCP) |
 | `SSC_USERNAME` | with password | Account for `POST /api/login` |
 | `SSC_PASSWORD` | with username | Password for login |
 | `SSC_MCP_TRANSPORT` | no | `stdio` (default) or `http` |
@@ -254,8 +254,8 @@ console.log(JSON.stringify({ fileName: uploaded.fileName, bytes: uploaded.bytes,
 
 ## Auth notes
 
-- No MCP login tool. Put a JWT in `SSC_TOKEN`, or set `SSC_USERNAME` and `SSC_PASSWORD` so the server can call `POST /api/login`.
-- JWT is HS256, 24h expiry, header `Authorization: Bearer <token>`. Do not print it.
+- No MCP login tool. Put a JWT or personal access token in `SSC_TOKEN`, or set `SSC_USERNAME` and `SSC_PASSWORD` so the server can call `POST /api/login`.
+- JWT is HS256, 24h expiry. A personal access token stays valid until it expires or is revoked. Both use `Authorization: Bearer <token>`. Do not print it. Create a PAT in the admin UI; see `website/docs/personal-access-tokens.md`.
 - Existing DB account: `testuser` (password not stored in this repo).
 - Project CLI: `/opt/super-supply-chain/cli` (`ssc login`) can mint a local token to place in `SSC_TOKEN`.
 

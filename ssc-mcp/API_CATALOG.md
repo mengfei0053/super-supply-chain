@@ -5,7 +5,7 @@ Source of truth: `/opt/super-supply-chain/backend/main.go` on host `101.36.111.1
 Base origin (production): `https://ssc.mengfei.tech`  
 SPA path: `/super-supply-chain/` (static only; not an API prefix).
 
-Auth: JWT Bearer (`middleware.AuthMiddleware`). Public endpoints do not require auth.
+Auth: session JWT or personal access token via `Authorization: Bearer`, `X-API-Key`, or `?token=` (`middleware.AuthMiddleware`). Public endpoints do not require auth. PAT management is session-JWT only. See `website/docs/personal-access-tokens.md`.
 
 The MCP server exposes only three tools, all 常用: `ssc_upload_excel`, `ssc_delete_excel_row`, and `ssc_export_excel` (types `shortHaulInvoice`, `invoice_unpacking`, `invoice_clearance_only`, `invoice_freight`). Other routes below are not MCP tools. Auth is `SSC_TOKEN` or `SSC_USERNAME` + `SSC_PASSWORD` (no login tool).
 
