@@ -1,6 +1,6 @@
 # ssc-mcp
 
-MCP server that wraps the **Super Supply Chain (SSC)** Go/Gin backend HTTP APIs for Cursor / Grok Bot.
+MCP server for the commonly used **Super Supply Chain (SSC)** Excel upload, delete, and export APIs.
 
 - Project path: `/workspace/ssc-mcp`
 - Live UI: <https://ssc.mengfei.tech/super-supply-chain/>
@@ -29,6 +29,7 @@ npm run build
 | `SSC_MCP_PORT` | no | HTTP port, default `3100` |
 | `SSC_MCP_CORS_ORIGIN` | no | Browser CORS allow-list, default `*` |
 | `SSC_MCP_ALLOWED_HOSTS` | no | Optional comma-separated `Host` allow-list for DNS-rebinding protection |
+| `SSC_EXPORT_DIR` | no | Directory for `ssc_export_excel` downloads |
 
 Copy `.env.example` → `.env` (mode `600`) and fill values. Never commit tokens or passwords.
 
@@ -62,7 +63,7 @@ Add to your MCP settings (e.g. Cursor `mcp.json`):
 }
 ```
 
-Or with username/password (server calls login on first authenticated tool):
+Or with username/password (the server calls `POST /api/login` on the first tool call):
 
 ```json
 {
@@ -104,7 +105,7 @@ Endpoints after startup:
 
 The process listens on `SSC_MCP_HOST` (default `0.0.0.0`). Point clients at `127.0.0.1` or another reachable address, not at `0.0.0.0`.
 
-One OS process shares one SSC login (`SSC_TOKEN` or `ssc_login`) across every MCP session. Run a separate process per tenant, and do not expose the port on an untrusted network.
+One OS process shares one SSC credential (`SSC_TOKEN`, or `SSC_USERNAME` + `SSC_PASSWORD`) across every MCP session. Run a separate process per tenant, and do not expose the port on an untrusted network.
 
 Sessions are kept in memory. A session is removed when the client sends `DELETE /mcp`, the legacy SSE connection closes, or the session has had no open request for 30 minutes. At most 200 sessions are accepted.
 
@@ -149,54 +150,108 @@ Older clients that only speak SSE can use the legacy endpoint instead:
 
 `SSC_TOKEN` / `SSC_USERNAME` / `SSC_PASSWORD` belong in the server process environment, not in the URL snippet.
 
-## Tools (20)
+## Tools (3)
 
-| Tool | Backend |
-| --- | --- |
-| `ssc_login` | `POST /api/login` |
-| `ssc_status` | `GET /api/admin/menus` (auth check) |
-| `ssc_list_menus` | `GET /api/admin/menus` |
-| `ssc_list_orders` | `GET /api/admin/settlement-form-entry` |
-| `ssc_get_order` | `GET /api/admin/settlement-form-entry/:id` |
-| `ssc_list_dicts` | `GET /api/admin/dict-manage` |
-| `ssc_get_dict` | `GET /api/admin/dict-manage/:id` |
-| `ssc_get_dict_map` | `GET /api/admin/dict-manage/map/:type` |
-| `ssc_create_dict` | `POST /api/admin/dict-manage` |
-| `ssc_update_dict` | `PUT /api/admin/dict-manage/:id` |
-| `ssc_delete_dict` | `DELETE /api/admin/dict-manage/:id` |
-| `ssc_list_excel_read_rules` | `GET /api/admin/excel-read-rules` |
-| `ssc_get_excel_read_rule` | `GET /api/admin/excel-read-rules/:id` |
-| `ssc_list_excel_rows` | `GET /api/admin/excel/:tableName` |
-| `ssc_get_excel_row` | `GET /api/admin/excel/:tableName/:id` |
-| `ssc_update_excel_row` | `PUT /api/admin/excel/:tableName/:id` |
-| `ssc_delete_excel_row` | `DELETE /api/admin/excel/:tableName/:id` |
-| `ssc_list_export_rules` | `GET /api/admin/excel-export-rule/template/:tableName` |
-| `ssc_list_export_template_options` | `GET /api/admin/options/export-templates` |
-| `ssc_get_export_rule` | `GET /api/admin/excel-export-rule/template/:tableName/:id` |
+These are the only tools. There is no login or status tool: set `SSC_TOKEN`, or `SSC_USERNAME` plus `SSC_PASSWORD`. With username and password, the process calls `POST /api/login` on the first tool call and keeps the JWT in memory. The token is never printed.
 
-Not wrapped (multipart / binary / stubs): Excel file upload create, settlement file upload, bulk Excel export download, register user.
+### 常用
+
+Upload, delete, and these four exports are the commonly used APIs:
+
+| 常用 | API | Tool |
+| --- | --- | --- |
+| 常用 | `POST /api/admin/excel/{tableName}` multipart `file` + `name` | `ssc_upload_excel` |
+| 常用 | `DELETE /api/admin/excel/{tableName}/{id}` | `ssc_delete_excel_row` |
+| 常用 | `GET /api/admin/excel-exports/{tableName}?ids={ids}&type=shortHaulInvoice` | `ssc_export_excel` |
+| 常用 | `GET /api/admin/excel-exports/{tableName}?ids={ids}&type=invoice_unpacking` | `ssc_export_excel` |
+| 常用 | `GET /api/admin/excel-exports/{tableName}?ids={ids}&type=invoice_clearance_only` | `ssc_export_excel` |
+| 常用 | `GET /api/admin/excel-exports/{tableName}?ids={ids}&type=invoice_freight` | `ssc_export_excel` |
+
+`ssc_upload_excel` (常用) reads a local `.xlsx`/`.xls` path on the machine running the MCP server and posts it as multipart `file`, plus form field `name`. Example table: `dynamic_settlement_statement_suqian`. This inserts a row.
+
+`ssc_delete_excel_row` (常用) hard-deletes one row. Example: `DELETE /api/admin/excel/dynamic_settlement_statement_suqian/896`.
+
+`ssc_export_excel` (常用) downloads a workbook and writes it under the OS temp directory (`ssc-mcp-exports`, or `SSC_EXPORT_DIR` / `outputPath`). The tool result is metadata plus `path` — read that file; the bytes are not inlined. `ids` may be `896`, `896,897`, or an array. Commonly used `type` values are `shortHaulInvoice`, `invoice_unpacking`, `invoice_clearance_only`, and `invoice_freight`.
+
+Orders, dictionaries, menus, read rules, row listing, and other export types are not exposed.
 
 ## Smoke test
 
-API smoke (live SSC, needs a token or username/password; does not print secrets):
+Local tests do not need SSC credentials. They mock the upload/export HTTP calls and exercise both MCP transports:
 
 ```bash
-export SSC_BASE_URL=https://ssc.mengfei.tech
-export SSC_TOKEN='...'   # or USERNAME+PASSWORD
-npm run smoke
+npm test
+npm run build
 ```
 
-Transport smoke (no SSC credentials). Starts HTTP on an ephemeral port, handshakes Streamable HTTP and legacy SSE, lists tools, calls `ssc_status`, checks CORS, then handshakes the default stdio server:
+Transport smoke (no SSC credentials). Starts HTTP on an ephemeral port, handshakes Streamable HTTP and legacy SSE, lists the three tools, calls delete without credentials, checks CORS, then handshakes the default stdio server:
 
 ```bash
 npm run smoke:http
 ```
 
+Live check against `https://ssc.mengfei.tech` (does not print the JWT):
+
+```bash
+export SSC_BASE_URL=https://ssc.mengfei.tech
+export SSC_TOKEN='...'   # or SSC_USERNAME + SSC_PASSWORD
+npm run smoke
+```
+
+Optional live export (read-only). Prints the saved path and byte size only:
+
+```bash
+export SSC_SMOKE_EXPORT_TABLE=dynamic_settlement_statement_suqian
+export SSC_SMOKE_EXPORT_IDS=896
+export SSC_SMOKE_EXPORT_TYPE=shortHaulInvoice
+npm run smoke
+```
+
+Optional live upload **inserts a row**. Set `SSC_SMOKE_UPLOAD_FILE` to a local `.xlsx` and `SSC_SMOKE_UPLOAD_NAME` (defaults to the file name). Skip this unless you intend to write to that table.
+
+### Manual verification
+
+Use this when `SSC_TOKEN` / `SSC_USERNAME`+`SSC_PASSWORD` are not available in the environment. Do not paste the JWT into logs or chat.
+
+1. Log in at <https://ssc.mengfei.tech/super-supply-chain/> and copy the JWT from the app's stored user (or mint one with the `ssc login` CLI). Export it as `SSC_TOKEN` in a shell that is not recorded.
+2. Export an existing row (no database write):
+
+```bash
+cd /workspace/ssc-mcp
+export SSC_BASE_URL=https://ssc.mengfei.tech
+# export SSC_TOKEN=...   # do not echo it
+npx tsx -e '
+import { SscClient, loadConfigFromEnv } from "./src/client.ts";
+const file = await new SscClient(loadConfigFromEnv()).exportExcel({
+  tableName: "dynamic_settlement_statement_suqian",
+  ids: "896",
+  type: "shortHaulInvoice",
+});
+console.log(JSON.stringify({ path: file.path, bytes: file.bytes, fileName: file.fileName, xlsx: file.xlsx }));
+'
+```
+
+3. Confirm the printed `path` is a non-empty `.xlsx` (`xlsx: true`).
+4. Upload only against a table you mean to change:
+
+```bash
+npx tsx -e '
+import { SscClient, loadConfigFromEnv } from "./src/client.ts";
+const uploaded = await new SscClient(loadConfigFromEnv()).uploadExcel({
+  tableName: "dynamic_settlement_statement_suqian",
+  filePath: "/absolute/path/to/file.xlsx",
+  name: "file.xlsx",
+});
+console.log(JSON.stringify({ fileName: uploaded.fileName, bytes: uploaded.bytes, ok: true }));
+'
+```
+
 ## Auth notes
 
-- JWT is HS256, 24h expiry, header `Authorization: Bearer <token>`.
+- No MCP login tool. Put a JWT in `SSC_TOKEN`, or set `SSC_USERNAME` and `SSC_PASSWORD` so the server can call `POST /api/login`.
+- JWT is HS256, 24h expiry, header `Authorization: Bearer <token>`. Do not print it.
 - Existing DB account: `testuser` (password not stored in this repo).
-- Project CLI: `/opt/super-supply-chain/cli` (`ssc login` / `ssc status`) can mint a local token file.
+- Project CLI: `/opt/super-supply-chain/cli` (`ssc login`) can mint a local token to place in `SSC_TOKEN`.
 
 ## API catalog
 

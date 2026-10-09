@@ -1,7 +1,7 @@
 {
   "name": "ssc-mcp",
-  "version": "1.0.0",
-  "description": "MCP server for Super Supply Chain (SSC) backend APIs",
+  "version": "1.1.0",
+  "description": "MCP server for commonly used SSC excel upload, delete, and export APIs",
   "type": "module",
   "bin": {
     "ssc-mcp": "./dist/index.js"
@@ -11,7 +11,8 @@
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
     "smoke": "tsx scripts/smoke.ts",
-    "smoke:http": "tsx scripts/smoke-http.ts"
+    "smoke:http": "tsx scripts/smoke-http.ts",
+    "test": "tsx --test test/*.test.ts"
   },
   "engines": {
     "node": ">=18"
