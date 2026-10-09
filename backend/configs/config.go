@@ -44,8 +44,8 @@ func LoadConfigFile() {
 	ENVIRONMENT = os.Getenv("ENVIRONMENT")
 	fmt.Println("ENVIRONMENT", ENVIRONMENT)
 	fmt.Println("WEB_DAV_URL", WEB_DAV_URL)
-	fmt.Println("WEB_DAV_USER", WEB_DAV_USER)
-	fmt.Println("WEB_DAV_PASSWORD", WEB_DAV_PASSWORD)
+	fmt.Println("WEB_DAV_USER_SET", WEB_DAV_USER != "")
+	fmt.Println("WEB_DAV_PASSWORD_SET", WEB_DAV_PASSWORD != "")
 	fmt.Println("PORT", PORT)
 	
 }

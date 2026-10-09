@@ -1,0 +1,54 @@
+services:
+  ssc-mysql:
+    image: mysql:8.0
+    container_name: ssc-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ssc-mysql-data:/var/lib/mysql
+    command: ["mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci", "--default-authentication-plugin=mysql_native_password"]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    networks:
+      - ssc-net
+
+  ssc-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ssc-app:local
+    container_name: ssc-app
+    restart: unless-stopped
+    depends_on:
+      ssc-mysql:
+        condition: service_healthy
+    environment:
+      ENVIRONMENT: production
+      PORT: "8081"
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_SERVER: ssc-mysql:3306
+      UPLOAD_USER: ${UPLOAD_USER}
+      UPLOAD_PASSWORD: ${UPLOAD_PASSWORD}
+      UPLOAD_SERVER: ${UPLOAD_SERVER}
+    volumes:
+      - ssc-uploads:/data/ssc-uploads
+    ports:
+      - "8088:8081"
+    networks:
+      - ssc-net
+
+volumes:
+  ssc-mysql-data:
+  ssc-uploads:
+
+networks:
+  ssc-net:
+    driver: bridge

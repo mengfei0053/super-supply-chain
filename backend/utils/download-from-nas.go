@@ -2,13 +2,14 @@ package utils
 
 import (
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/studio-b12/gowebdav"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
 	"super-supply-chain/configs"
+
+	"github.com/google/uuid"
+	"github.com/studio-b12/gowebdav"
 )
 
 func DownloadFromNas(fileName string) (string, error) {
@@ -17,6 +18,18 @@ func DownloadFromNas(fileName string) (string, error) {
 	extension := filepath.Ext(fileName)
 	newFileName := uuidFileName + extension
 	localFilePath := filepath.Join(uploadDir, newFileName)
+
+	if isLocalUploadStore() {
+		dir, err := localUploadStoreDir()
+		if err != nil {
+			return "", err
+		}
+		src := filepath.Join(dir, fileName)
+		if err := copyFile(src, localFilePath); err != nil {
+			return "", err
+		}
+		return localFilePath, nil
+	}
 
 	c := gowebdav.NewClient(configs.WEB_DAV_URL, configs.WEB_DAV_USER, configs.WEB_DAV_PASSWORD)
 	reader, err := c.ReadStream(fileName)
