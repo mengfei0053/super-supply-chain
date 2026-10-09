@@ -24,13 +24,18 @@ slug: /mcp
 
 只支持 SSE 的客户端在拿到 `sessionId` 之后，把后续消息 `POST` 到 `https://ssc.mengfei.tech/messages?sessionId=...`。Cursor 这类只填一个 URL 的客户端填 `https://ssc.mengfei.tech/sse` 即可，由客户端按协议访问 `/messages`。
 
+先在管理后台侧栏 **工具 → 个人访问令牌** 创建一把令牌（明文只显示一次），再替换下面的 `ssc_pat_你的令牌`。不要把真实令牌提交进仓库、聊天或本文。创建、权限范围和撤销见 [个人访问令牌](/personal-access-tokens)。
+
 ### Cursor：Streamable HTTP
 
 ```json
 {
   "mcpServers": {
     "ssc": {
-      "url": "https://ssc.mengfei.tech/mcp"
+      "url": "https://ssc.mengfei.tech/mcp",
+      "headers": {
+        "Authorization": "Bearer ssc_pat_你的令牌"
+      }
     }
   }
 }
@@ -42,7 +47,25 @@ slug: /mcp
 {
   "mcpServers": {
     "ssc": {
-      "url": "https://ssc.mengfei.tech/sse"
+      "url": "https://ssc.mengfei.tech/sse",
+      "headers": {
+        "Authorization": "Bearer ssc_pat_你的令牌"
+      }
+    }
+  }
+}
+```
+
+`Authorization` 的值要带 `Bearer ` 前缀（含空格）。也可以改用 `X-API-Key`，这时不要加 `Bearer `，值仍是同一串令牌。`/mcp` 和 `/sse` 只换 `url`：
+
+```json
+{
+  "mcpServers": {
+    "ssc": {
+      "url": "https://ssc.mengfei.tech/mcp",
+      "headers": {
+        "X-API-Key": "ssc_pat_你的令牌"
+      }
     }
   }
 }
@@ -52,8 +75,8 @@ slug: /mcp
 
 凭证仍是个人访问令牌（PAT）或登录 JWT。不要把真实令牌写进仓库、聊天或本文。
 
-- **配在服务端。** 生产上的 MCP 服务读取 `SSC_TOKEN`（PAT 或 JWT），或 `SSC_USERNAME` 与 `SSC_PASSWORD`。它访问源站时带请求头 `Authorization: Bearer`。令牌已经配在服务端时，Cursor 只填上面的 `url`。
-- **由远程连接器附带。** 连接器要求自己带请求头时，使用 `Authorization: Bearer <token>`（headers 里的同名字段）。`<token>` 是占位符。
+- **写进 Cursor。** 上面的配置要同时有 `url` 和 `headers`。优先 `"Authorization": "Bearer ssc_pat_你的令牌"`。也可以改用 `"X-API-Key": "ssc_pat_你的令牌"`（不要 `Bearer ` 前缀）。
+- **配在服务端。** 生产上的 MCP 服务读取 `SSC_TOKEN`（PAT 或 JWT），或 `SSC_USERNAME` 与 `SSC_PASSWORD`。它访问源站时带请求头 `Authorization: Bearer`。服务端环境变量不能代替客户端的 `headers`。
 
 JWT 为 HS256，有效期 24 小时。个人访问令牌在撤销或到期前一直有效，创建方式见 [个人访问令牌](/personal-access-tokens)。没有单独的登录工具。
 
@@ -81,6 +104,6 @@ JWT 为 HS256，有效期 24 小时。个人访问令牌在撤销或到期前一
 MCP 地址是 `https://ssc.mengfei.tech/mcp` 或 `https://ssc.mengfei.tech/sse`。`/super-supply-chain` 只提供管理后台页面，不是 MCP，也不是 JSON API。
 :::
 
-**不要把令牌写进 URL。** 令牌放在服务端的 `SSC_TOKEN`，或放在连接器 headers 的 `Authorization: Bearer <token>` 里。
+**不要把令牌写进 URL。** 令牌放在 `headers` 里：`"Authorization": "Bearer ssc_pat_你的令牌"`，或 `"X-API-Key": "ssc_pat_你的令牌"`（不要 `Bearer ` 前缀）。在管理后台 **工具 → 个人访问令牌** 创建，见 [个人访问令牌](/personal-access-tokens)。
 
 **网页上传和 MCP 上传走同一条接口。** 生产机访问不到家里局域网的 NAS（WebDAV）。当前部署把 `UPLOAD_SERVER` 设为 `file://` 或 `local://`（例如 `file:///data/ssc-uploads`），Excel 上传写到本机目录或对应的 Docker 卷。`ssc_upload_excel` 调用的也是这条 `POST /api/admin/excel/{tableName}`。结算单文件上传（`POST /api/admin/settlement-form-entries`）仍然没有 MCP 工具。

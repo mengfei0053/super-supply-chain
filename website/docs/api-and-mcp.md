@@ -29,7 +29,7 @@ JSON API 在站点源站的 `/api` 下，**不是** `/super-supply-chain` 下面
 
 `ssc-mcp/` 把下面的常用接口包成 MCP 工具，供 Cursor 等客户端调用。连接只用两个公网地址：Streamable HTTP 是 `https://ssc.mengfei.tech/mcp`，旧版 SSE 是 `https://ssc.mengfei.tech/sse`。
 
-认证用服务端的个人访问令牌或 JWT（请求头 `Authorization: Bearer`），或由远程连接器在 headers 里带同一请求头。不要把真实令牌写进仓库。Cursor 配置见 [MCP 接入与使用](/mcp)。
+认证用服务端的个人访问令牌或 JWT（请求头 `Authorization: Bearer`）。Cursor 的远程配置同时写 `url` 和 `headers`：`"Authorization": "Bearer ssc_pat_你的令牌"`，或改用 `X-API-Key`。不要把真实令牌写进仓库。完整示例见 [MCP 接入与使用](/mcp)。
 
 ## 工具一览 \{#tools}
 

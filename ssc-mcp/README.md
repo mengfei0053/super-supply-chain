@@ -128,33 +128,54 @@ Binding to `0.0.0.0` or `::` without `SSC_MCP_ALLOWED_HOSTS` disables the SDK's 
 
 ### Cursor HTTP config
 
-Production (recommended) — MCP is already behind `ssc.mengfei.tech`:
+Production (recommended). MCP is already behind `ssc.mengfei.tech`. Create a personal access token in the admin UI (**工具 → 个人访问令牌**) and put it in `headers` together with `url`. Replace `ssc_pat_你的令牌`; do not commit a real token. See `website/docs/personal-access-tokens.md`.
+
+Streamable HTTP:
 
 ```json
 {
   "mcpServers": {
     "ssc": {
-      "url": "https://ssc.mengfei.tech/mcp"
+      "url": "https://ssc.mengfei.tech/mcp",
+      "headers": {
+        "Authorization": "Bearer ssc_pat_你的令牌"
+      }
     }
   }
 }
 ```
 
-Older clients that only speak SSE:
+Older clients that only speak SSE. Same headers, other path:
 
 ```json
 {
   "mcpServers": {
     "ssc": {
-      "url": "https://ssc.mengfei.tech/sse"
+      "url": "https://ssc.mengfei.tech/sse",
+      "headers": {
+        "Authorization": "Bearer ssc_pat_你的令牌"
+      }
     }
   }
 }
 ```
 
-For local debug only, use `http://127.0.0.1:3100/mcp` (or `/sse`) after starting the process yourself.
+`Authorization` includes the `Bearer ` prefix. Optional alternative: `X-API-Key` with the same token and no `Bearer ` prefix. Either URL works; only `url` changes:
 
-`SSC_TOKEN` / `SSC_USERNAME` / `SSC_PASSWORD` belong in the server process environment (production: compose `.env.compose`), not in the URL snippet.
+```json
+{
+  "mcpServers": {
+    "ssc": {
+      "url": "https://ssc.mengfei.tech/mcp",
+      "headers": {
+        "X-API-Key": "ssc_pat_你的令牌"
+      }
+    }
+  }
+}
+```
+
+For local debug, point `url` at `http://127.0.0.1:3100/mcp` or `http://127.0.0.1:3100/sse` and keep `headers`. A self-hosted process still reads `SSC_TOKEN` or `SSC_USERNAME` + `SSC_PASSWORD` from its environment. That does not replace the client headers.
 
 ## Tools (5)
 
