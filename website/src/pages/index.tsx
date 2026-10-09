@@ -21,6 +21,9 @@ function HomepageHeader() {
           <Link className="button button--secondary button--lg" to="/intro">
             从概览开始
           </Link>
+          <Link className="button button--secondary button--lg" to="/mcp">
+            MCP 接入与使用
+          </Link>
         </div>
       </div>
     </header>

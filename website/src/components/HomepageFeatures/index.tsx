@@ -1,5 +1,6 @@
 import type {ReactNode} from 'react';
 import clsx from 'clsx';
+import Link from '@docusaurus/Link';
 import Heading from '@theme/Heading';
 import styles from './styles.module.css';
 
@@ -31,8 +32,9 @@ const FeatureList: FeatureItem[] = [
     title: 'MCP 与 CLI',
     description: (
       <>
-        <code>ssc-mcp/</code> 把同一套 API 暴露给编辑器。
-        <code>cli/</code> 负责登录和状态检查。
+        <code>ssc-mcp/</code> 把同一套 API 暴露给编辑器。接入见{' '}
+        <Link to="/mcp">MCP 接入与使用</Link>。<code>cli/</code>{' '}
+        负责登录和状态检查。
       </>
     ),
   },

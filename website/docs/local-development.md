@@ -82,3 +82,5 @@ go run . status
 ```
 
 也可以用环境变量 `SSC_BASE_URL`、`SSC_USERNAME`、`SSC_PASSWORD`。说明见仓库 `cli/README.md`。
+
+把同一套 API 接到 Cursor 时，见 [MCP 接入与使用](/mcp)。`SSC_BASE_URL` 同样不要带 `/super-supply-chain`。
