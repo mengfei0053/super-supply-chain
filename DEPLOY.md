@@ -2,8 +2,8 @@
 
 - Path: `/opt/super-supply-chain`
 - Secrets: `.env.compose` (mode 600); original Mac env also at `configs/.env` (mode 600)
-- URL: http://101.36.111.17:8088/super-supply-chain/
-- Port: host **8088** -> container 8081 (8317 is CLI Proxy — do not reuse)
+- URL: https://ssc.mengfei.tech/super-supply-chain/ (docs: https://ssc.mengfei.tech/docs/)
+- Port: **172.17.0.1:8088** -> container 8081 (not on public NIC; NPM uses docker0). 8317 is CLI Proxy — do not reuse
 - Stack: `ssc-mysql` + `ssc-app`, network `ssc-net`, restart unless-stopped
 - DB name: `super_supply_chain` (imported dump, 18 tables)
 - Dockerfile: public `node:22` + `golang:1.23.6-alpine` (Aliyun original saved as `Dockerfile.aliyun.bak`)
@@ -17,6 +17,8 @@ ssh ubuntu@101.36.111.17 'cd /opt/super-supply-chain && sudo docker compose --en
 ```
 
 ## Notes
+
+- Public `http://101.36.111.17:8088` is intentionally closed; use the domain via Nginx Proxy Manager (`172.17.0.1:8088`).
 
 - WebDAV/NAS (`UPLOAD_SERVER` points at home LAN 192.168.50.63) is unreachable from 101; uploads will fail until VPN/tunnel or new URL.
 - Production logs print UPLOAD_* via `configs.LoadConfigFile()` — avoid sharing raw `docker logs`.
