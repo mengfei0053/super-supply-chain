@@ -27,15 +27,9 @@ JSON API 在站点源站的 `/api` 下，**不是** `/super-supply-chain` 下面
 
 ## MCP 是什么
 
-`ssc-mcp/` 把下面的常用接口包成 MCP 工具，供 Cursor 等客户端调用。默认走 stdio；设置 `SSC_MCP_TRANSPORT=http` 后，Streamable HTTP 在 `/mcp`，旧版 SSE 在 `/sse`。
+`ssc-mcp/` 把下面的常用接口包成 MCP 工具，供 Cursor 等客户端调用。连接只用两个公网地址：Streamable HTTP 是 `https://ssc.mengfei.tech/mcp`，旧版 SSE 是 `https://ssc.mengfei.tech/sse`。
 
-配置时注意：
-
-- `SSC_BASE_URL` 填源站，例如 `https://ssc.mengfei.tech` 或 `http://localhost:8081`。不要带 `/super-supply-chain`。
-- 认证用 `SSC_TOKEN`，或用 `SSC_USERNAME` 加 `SSC_PASSWORD` 让服务自己登录。
-- 把 `.env.example` 复制为本地 `.env`。不要把 token 或密码提交进仓库。
-
-安装、两种传输、Cursor 的 `mcp.json` 示例和冒烟命令都写在 [MCP 接入与使用](/mcp)。
+认证用服务端的个人访问令牌或 JWT（请求头 `Authorization: Bearer`），或由远程连接器在 headers 里带同一请求头。不要把真实令牌写进仓库。Cursor 配置见 [MCP 接入与使用](/mcp)。
 
 ## 工具一览 \{#tools}
 

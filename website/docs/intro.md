@@ -44,6 +44,6 @@ Super Supply Chain（SSC）是一套供应链管理后台。它把结算录入�
 
 编辑器里登录、查菜单、读结算单或改动态表时，使用仓库里的 `ssc-mcp`。它调用源站的 `/api`。
 
-- [MCP 接入与使用](/mcp)：安装、环境变量、stdio 与 HTTP、Cursor 配置和常见错误。
+- [MCP 接入与使用](/mcp)：公网 Streamable HTTP 与旧版 SSE、认证和 Cursor 配置。
 - [API 与 MCP](/api-and-mcp)：源站路径，以及已经包装的工具清单。
 - [个人访问令牌](/personal-access-tokens)：在后台创建长期令牌，给脚本、HTTP 和 MCP 使用。
