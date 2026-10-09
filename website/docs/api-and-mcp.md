@@ -37,7 +37,7 @@ JSON API 在站点源站的 `/api` 下，**不是** `/super-supply-chain` 下面
 
 安装、两种传输、Cursor 的 `mcp.json` 示例和冒烟命令都写在 [MCP 接入与使用](/mcp)。
 
-## 工具一览 {#tools}
+## 工具一览 \{#tools}
 
 共 20 个工具。说明根据 `ssc-mcp/README.md` 与 `ssc-mcp/src/server.ts` 里的注册信息整理。
 
@@ -95,7 +95,7 @@ JSON API 在站点源站的 `/api` 下，**不是** `/super-supply-chain` 下面
 | `ssc_list_export_template_options` | 按关联表名列出导出模板的下拉选项（查询参数 `associated_table`）。 |
 | `ssc_get_export_rule` | 按表名和 id 读取一条导出模板。 |
 
-## 尚未包装的能力 {#not-wrapped}
+## 尚未包装的能力 \{#not-wrapped}
 
 下列接口在后端存在，MCP **还没有**对应工具。上传和四类发票下载的请求形状写在侧边栏 [常用接口](/common-apis)，不放在本页里展开：
 
