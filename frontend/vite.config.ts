@@ -57,6 +57,11 @@ export default defineConfig(({ mode }) => ({
             target: "http://localhost:8081",
             changeOrigin: true,
         },
+        // Docs site (website/) uses baseUrl /docs/ and listens on port 3000.
+        "/docs": {
+            target: "http://127.0.0.1:3000",
+            changeOrigin: true,
+        },
     }
   },
   build: {
