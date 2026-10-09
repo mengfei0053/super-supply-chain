@@ -1,7 +1,7 @@
 {
   "name": "ssc-mcp",
-  "version": "1.1.0",
-  "description": "MCP server for commonly used SSC excel upload, delete, and export APIs",
+  "version": "1.2.0",
+  "description": "MCP server for commonly used SSC excel list, upload, delete, export, and company lookup APIs",
   "type": "module",
   "bin": {
     "ssc-mcp": "./dist/index.js"

@@ -1,6 +1,6 @@
 # ssc-mcp
 
-MCP server for the commonly used **Super Supply Chain (SSC)** Excel upload, delete, and export APIs.
+MCP server for the commonly used **Super Supply Chain (SSC)** Excel list, upload, delete, and export APIs, plus company keyword search.
 
 - Project path: `/workspace/ssc-mcp`
 - Live UI: <https://ssc.mengfei.tech/super-supply-chain/>
@@ -156,30 +156,36 @@ For local debug only, use `http://127.0.0.1:3100/mcp` (or `/sse`) after starting
 
 `SSC_TOKEN` / `SSC_USERNAME` / `SSC_PASSWORD` belong in the server process environment (production: compose `.env.compose`), not in the URL snippet.
 
-## Tools (3)
+## Tools (5)
 
 These are the only tools. There is no login or status tool: set `SSC_TOKEN`, or `SSC_USERNAME` plus `SSC_PASSWORD`. With username and password, the process calls `POST /api/login` on the first tool call and keeps the JWT in memory. The token is never printed.
 
 ### 常用
 
-Upload, delete, and these four exports are the commonly used APIs:
+Upload, list, delete, these four exports, and company keyword search are the commonly used APIs:
 
 | 常用 | API | Tool |
 | --- | --- | --- |
 | 常用 | `POST /api/admin/excel/{tableName}` multipart `file` + `name` | `ssc_upload_excel` |
+| 常用 | `GET /api/admin/excel/{tableName}?filter={start,end}&range=0&range=50` | `ssc_list_excel` |
 | 常用 | `DELETE /api/admin/excel/{tableName}/{id}` | `ssc_delete_excel_row` |
 | 常用 | `GET /api/admin/excel-exports/{tableName}?ids={ids}&type=shortHaulInvoice` | `ssc_export_excel` |
 | 常用 | `GET /api/admin/excel-exports/{tableName}?ids={ids}&type=invoice_unpacking` | `ssc_export_excel` |
 | 常用 | `GET /api/admin/excel-exports/{tableName}?ids={ids}&type=invoice_clearance_only` | `ssc_export_excel` |
 | 常用 | `GET /api/admin/excel-exports/{tableName}?ids={ids}&type=invoice_freight` | `ssc_export_excel` |
+| 常用 | `GET /api/admin/companies?keyword={keyword}` | `ssc_search_companies` |
 
 `ssc_upload_excel` (常用) reads a local `.xlsx`/`.xls` path on the machine running the MCP server and posts it as multipart `file`, plus form field `name`. Example table: `dynamic_settlement_statement_suqian`. This inserts a row.
+
+`ssc_list_excel` (常用) lists rows from a dynamic table. `filterStart` / `filterEnd` are `YYYY-MM-DD` and are sent as `filter={"start","end"}` (`created_at` window; required for non-empty 宿迁结算 results). Optional `sort` is `{"field":"id","order":"ASC"}` or `["id","ASC"]`. `range` defaults to `[0, 50]` and is sent as repeated `range=0&range=50` (`range=[0,50]` also works on the API). The result includes the JSON rows and the `Content-Range` total when the API sends it. The list handler accepts `sort` but does not `ORDER BY` it.
 
 `ssc_delete_excel_row` (常用) hard-deletes one row. Example: `DELETE /api/admin/excel/dynamic_settlement_statement_suqian/896`.
 
 `ssc_export_excel` (常用) downloads a workbook and writes it under the OS temp directory (`ssc-mcp-exports`, or `SSC_EXPORT_DIR` / `outputPath`). The tool result is metadata plus `path` — read that file; the bytes are not inlined. `ids` may be `896`, `896,897`, or an array. Commonly used `type` values are `shortHaulInvoice`, `invoice_unpacking`, `invoice_clearance_only`, and `invoice_freight`.
 
-Orders, dictionaries, menus, read rules, row listing, and other export types are not exposed.
+`ssc_search_companies` (常用) searches `base_companies_infos` by a literal substring of `name` or `alias` (`LIKE %keyword%`, with `%` and `_` escaped). The `rows` array includes every column: `id`, `created_at`, `updated_at`, `deleted_at`, `name`, `addr_country`, `addr_province`, `addr_city`, `addr_street`, `unified_social_credit_code`, `bank_code`, `phone_num`, `alias`, `target_addr`. Rows with `deleted_at` set are omitted unless `includeDeleted` is true.
+
+Orders, dictionaries, menus, read rules, and other export types are not exposed.
 
 ## Smoke test
 
@@ -190,7 +196,7 @@ npm test
 npm run build
 ```
 
-Transport smoke (no SSC credentials). Starts HTTP on an ephemeral port, handshakes Streamable HTTP and legacy SSE, lists the three tools, calls delete without credentials, checks CORS, then handshakes the default stdio server:
+Transport smoke (no SSC credentials). Starts HTTP on an ephemeral port, handshakes Streamable HTTP and legacy SSE, lists the five tools, calls delete without credentials, checks CORS, then handshakes the default stdio server:
 
 ```bash
 npm run smoke:http

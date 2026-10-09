@@ -7,7 +7,7 @@ SPA path: `/super-supply-chain/` (static only; not an API prefix).
 
 Auth: session JWT or personal access token via `Authorization: Bearer`, `X-API-Key`, or `?token=` (`middleware.AuthMiddleware`). Public endpoints do not require auth. PAT management is session-JWT only. See `website/docs/personal-access-tokens.md`.
 
-The MCP server exposes only three tools, all 常用: `ssc_upload_excel`, `ssc_delete_excel_row`, and `ssc_export_excel` (types `shortHaulInvoice`, `invoice_unpacking`, `invoice_clearance_only`, `invoice_freight`). Other routes below are not MCP tools. Auth is `SSC_TOKEN` or `SSC_USERNAME` + `SSC_PASSWORD` (no login tool).
+The MCP server exposes only five tools, all 常用: `ssc_upload_excel`, `ssc_list_excel`, `ssc_delete_excel_row`, `ssc_export_excel` (types `shortHaulInvoice`, `invoice_unpacking`, `invoice_clearance_only`, `invoice_freight`), and `ssc_search_companies`. Other routes below are not MCP tools. Auth is `SSC_TOKEN` or `SSC_USERNAME` + `SSC_PASSWORD` (no login tool).
 
 ## Public
 
@@ -53,7 +53,7 @@ The MCP server exposes only three tools, all 常用: `ssc_upload_excel`, `ssc_de
 
 | Method | Path | Purpose | Notes |
 | --- | --- | --- | --- |
-| GET | `/excel/:tableName` | List rows | `range` + `filter.start` / `filter.end` (created_at) |
+| GET | `/excel/:tableName` | List rows | `filter` JSON `{start,end}` (or `filter.start` / `filter.end`) on `created_at`; repeated `range=start&range=end` or JSON `range=[start,end]`; optional `sort` object or array (accepted, not applied as ORDER BY). `Content-Range` is the match count. MCP 常用: `ssc_list_excel` |
 | GET | `/excel/:tableName/:id` | Row detail | |
 | POST | `/excel/:tableName` | Upload Excel → parse → insert | multipart `file` + `name`. MCP 常用: `ssc_upload_excel` |
 | PUT | `/excel/:tableName/:id` | Update row | JSON `DynamicExcelTable` |
@@ -81,14 +81,12 @@ Known dynamic tables (from MySQL):
 | --- | --- | --- | --- |
 | GET | `/options/:key` | Select options | `key=export-templates` + `associated_table` |
 | GET | `/menus` | Dynamic menus | `{id, menuName, dynamicTableName}[]` |
-
-## Not mounted
-
-`controllers/companies.go` defines `GetCompanies` but it is **not** registered in `main.go`.
+| GET | `/companies` | Company keyword search | `keyword` required. `LIKE` on `name` and `alias`. Default `deleted_at IS NULL`; `includeDeleted=true` keeps soft-deleted rows. Returns all columns. MCP 常用: `ssc_search_companies` |
 
 ## List query convention
 
 Most list endpoints use React Admin params via `utils.GetListQueryParams`:
 
-- `range` **required** — JSON `[start, end]` or repeated `range=start&range=end` (end is exclusive limit end; limit = end - start, offset = start)
-- optional `filter` JSON `{start,end}` or `filter.start` / `filter.end` (used heavily by dynamic excel date window)
+- `range` **required** on React Admin lists — JSON `[start, end]` or repeated `range=start&range=end` (end is exclusive; limit = end - start, offset = start). The admin UI sends `range=0&range=50`.
+- optional `filter` JSON `{start,end}` or `filter.start` / `filter.end` (dynamic excel `created_at` window; empty dates yield no rows in practice)
+- optional `sort` JSON object `{"field":"id","order":"ASC"}` or array `["id","ASC"]`. `GetDynamicExcelTableList` stores the raw value and does not `ORDER BY` it.

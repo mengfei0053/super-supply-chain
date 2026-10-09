@@ -85,6 +85,7 @@ func main() {
 
 		protected.GET("/options/:key", controllers.GetOptions)
 		protected.GET("/menus", controllers.GetDynamicExcelMenus)
+		protected.GET("/companies", controllers.SearchCompanies)
 
 		sessionOnly := middleware.RequireSessionJWT()
 		protected.GET("/personal-access-tokens", sessionOnly, controllers.ListPersonalAccessTokens)

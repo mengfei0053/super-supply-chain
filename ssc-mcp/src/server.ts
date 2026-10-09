@@ -1,8 +1,8 @@
 /**
  * SSC MCP tools shared by stdio and Streamable HTTP.
  *
- * Only the commonly used Excel upload, delete, and export calls are exposed.
- * Auth is environment-only: SSC_TOKEN, or SSC_USERNAME + SSC_PASSWORD.
+ * Commonly used Excel upload, list, delete, and export calls, plus company
+ * keyword search. Auth is environment-only: SSC_TOKEN, or SSC_USERNAME + SSC_PASSWORD.
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -14,10 +14,24 @@ import {
   jsonResult,
 } from "./client.js";
 
+const excelSortSchema = z
+  .union([
+    z.object({
+      field: z
+        .string()
+        .describe("Sort field, e.g. id. Sent as {\"field\",\"order\"}."),
+      order: z.enum(["ASC", "DESC"]),
+    }),
+    z.tuple([z.string(), z.enum(["ASC", "DESC"])]).describe(
+      'Array form ["id","ASC"], also accepted by the list API.',
+    ),
+  ])
+  .optional();
+
 export function createSscMcpServer(client: SscClient): McpServer {
   const server = new McpServer({
     name: "ssc-mcp",
-    version: "1.1.0",
+    version: "1.2.0",
   });
 
   server.registerTool(
@@ -139,6 +153,89 @@ export function createSscMcpServer(client: SscClient): McpServer {
           fileName: file.fileName,
           contentDisposition: file.contentDisposition,
           xlsx: file.xlsx,
+        });
+      } catch (err) {
+        return errorResult(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "ssc_list_excel",
+    {
+      description:
+        "常用. List dynamic Excel rows (GET /api/admin/excel/:tableName). Sends filter={\"start\",\"end\"} (created_at; required for non-empty 宿迁结算 results), optional sort, and repeated range=start&range=end (default 0 and 50). Example tableName: dynamic_settlement_statement_suqian.",
+      inputSchema: {
+        tableName: z
+          .string()
+          .describe(
+            "Dynamic table name, e.g. dynamic_settlement_statement_suqian",
+          ),
+        filterStart: z
+          .string()
+          .describe("created_at start date YYYY-MM-DD, inclusive"),
+        filterEnd: z
+          .string()
+          .describe("created_at end date YYYY-MM-DD, inclusive"),
+        sort: excelSortSchema.describe(
+          'Optional React Admin sort. Object {"field":"id","order":"ASC"} or array ["id","ASC"]. The list handler accepts either and does not ORDER BY it.',
+        ),
+        range: z
+          .tuple([z.number().int().min(0), z.number().int().min(0)])
+          .optional()
+          .describe(
+            "Pagination [start, end). Sent as repeated range=start&range=end. Default [0, 50]. The API also accepts range=[start,end].",
+          ),
+      },
+    },
+    async ({ tableName, filterStart, filterEnd, sort, range }) => {
+      try {
+        const listed = await client.listExcel({
+          tableName,
+          filterStart,
+          filterEnd,
+          sort,
+          range,
+        });
+        return jsonResult({
+          ok: true,
+          tableName,
+          contentRange: listed.contentRange,
+          rows: listed.rows,
+        });
+      } catch (err) {
+        return errorResult(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "ssc_search_companies",
+    {
+      description:
+        "常用. Keyword search on base_companies_infos (GET /api/admin/companies?keyword=). Matches name or alias with a literal substring (LIKE %keyword%). Returns every column. Soft-deleted rows are omitted unless includeDeleted is true.",
+      inputSchema: {
+        keyword: z
+          .string()
+          .describe(
+            "Substring matched against name and alias, e.g. 南阳. % and _ are literal.",
+          ),
+        includeDeleted: z
+          .boolean()
+          .optional()
+          .describe(
+            "When true, include rows with deleted_at set. Default false (deleted_at IS NULL).",
+          ),
+      },
+    },
+    async ({ keyword, includeDeleted }) => {
+      try {
+        const rows = await client.searchCompanies({ keyword, includeDeleted });
+        return jsonResult({
+          ok: true,
+          keyword: keyword.trim(),
+          includeDeleted: includeDeleted === true,
+          rows,
         });
       } catch (err) {
         return errorResult(err);
