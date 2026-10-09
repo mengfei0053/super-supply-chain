@@ -21,7 +21,7 @@ Super Supply Chain（SSC）是一套供应链管理后台。它把结算录入�
 - `frontend/`：React 19 + Vite + React Admin。页面包括结算单、动态 Excel 表、字典、读取规则和翊帆费用计算。
 - `backend/`：Go 1.23 + Gin + GORM。负责登录、业务接口，以及生产环境下的静态文件。
 - `website/`：本 Docusaurus 站点。
-- `ssc-mcp/`：把后端 HTTP API 包成 MCP 工具，供 Cursor 等客户端调用。
+- `ssc-mcp/`：把后端 HTTP API 包成 MCP 工具，供 Cursor 等客户端调用。接入步骤见 [MCP 接入与使用](/mcp)，20 个工具见 [API 与 MCP](/api-and-mcp#tools)。
 - `cli/`：命令行登录和状态检查。
 - `ssc-sqls/`：数据库初始化脚本。
 
@@ -35,3 +35,14 @@ Super Supply Chain（SSC）是一套供应链管理后台。它把结算录入�
 - **工具**：字典管理、Excel 读取规则。
 
 顶栏的「文档」会打开本站首页 `/docs/`。
+
+## 常用接口
+
+宿迁结算表上最常调用的上传、四类发票导出和删除，写在侧边栏分组 [常用接口](/common-apis)。导出接口返回的是 Excel 文件。删除一行已经有 MCP 工具，上传和导出发票下载还没有。
+
+## 用 Cursor 调用同一套数据
+
+编辑器里登录、查菜单、读结算单或改动态表时，使用仓库里的 `ssc-mcp`。它调用源站的 `/api`。
+
+- [MCP 接入与使用](/mcp)：安装、环境变量、stdio 与 HTTP、Cursor 配置和常见错误。
+- [API 与 MCP](/api-and-mcp)：源站路径，以及已经包装的工具清单。

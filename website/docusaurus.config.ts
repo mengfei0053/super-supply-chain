@@ -81,7 +81,8 @@ const config: Config = {
           title: '文档',
           items: [
             {label: '概览', to: '/intro'},
-            {label: '本地运行', to: '/local-development'},
+            {label: '常用接口', to: '/common-apis'},
+            {label: 'MCP 接入与使用', to: '/mcp'},
             {label: 'API 与 MCP', to: '/api-and-mcp'},
             {label: '部署', to: '/deployment'},
           ],
