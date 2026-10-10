@@ -66,19 +66,7 @@ func GetCompanyInfo(c string) models.BaseCompaniesInfos {
 }
 
 func GetArrivalPort(c string) string {
-	var res []models.BaseDict
-	query := models.DB.Model(&models.BaseDict{}).Where("type = ?", "港口字典").Find(&res)
-	if query.Error != nil {
-		log.Fatal(query.Error)
-	}
-
-	dictMap := make(map[string]string)
-	for _, dict := range res {
-		dictMap[dict.Key] = dict.Value
-	}
-
-	return dictMap[c]
-
+	return GetPortInfo(c).Addr
 }
 
 func GetInvoiceTmpPath() string {

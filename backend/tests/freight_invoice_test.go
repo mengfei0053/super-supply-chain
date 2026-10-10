@@ -323,9 +323,26 @@ func TestGetChengxinInvoiceFileGeneratesWorkbook(t *testing.T) {
 func setupInvoiceGeneratorTest(t *testing.T) {
 	t.Helper()
 
-	setupTestDB(t, &models.BaseCompaniesInfos{}, &models.DynamicExcelTable{})
+	setupTestDB(t, &models.BaseCompaniesInfos{}, &models.DynamicExcelTable{}, &models.BaseDict{})
 	seedInvoiceCompanies(t)
+	seedPortDict(t)
 	chdirForInvoiceTemplate(t)
+}
+
+func seedPortDict(t *testing.T) {
+	t.Helper()
+	excelTemplateEngines.InvalidatePortDictCache()
+	ports := []models.BaseDict{
+		{Key: "上海洋山", Value: "上海", Type: "港口字典", PortName: "上海口岸", ExtraPay: "洋山补差"},
+		{Key: "上海洋山保税", Value: "上海", Type: "港口字典", PortName: "上海口岸", ExtraPay: "洋山补差"},
+		{Key: "广州黄埔", Value: "广州", Type: "港口字典", PortName: "广州口岸", ExtraPay: "补差"},
+	}
+	for _, row := range ports {
+		if err := models.DB.Create(&row).Error; err != nil {
+			t.Fatalf("seed port dict: %v", err)
+		}
+	}
+	excelTemplateEngines.InvalidatePortDictCache()
 }
 
 func chdirForInvoiceTemplate(t *testing.T) {

@@ -34,20 +34,14 @@ func GetProductName(name string) string {
 	return ""
 }
 
-var PortMap = map[string]string{
-	"上海洋山":  "上海口岸",
-	"天津东疆":  "天津口岸",
-	"天津新港":  "天津口岸",
-	"广州黄埔":  "广州口岸",
-	"上海外高桥": "上海口岸",
-}
+// PortMap removed: use GetPortInfo(port).PortName from 港口字典.
 
 const (
 	YEAR = "2025"
 )
 
 func GetClearanceFeeByPort(port string, costType models.CostType, containerType int) float64 {
-	portName := PortMap[port]
+	portName := GetPortInfo(port).PortName
 	var clearancePrice models.ClearancePriceBase
 
 	fmt.Println("port", port)
@@ -153,43 +147,7 @@ type PortInfo struct {
 	TargetBase string
 }
 
-var PortInfoMap = map[string]PortInfo{
-	"上海洋山": {
-		PortName: "上海口岸",
-		Addr:     "上海",
-		ExtraPay: "洋山补差",
-	},
-	"上海外高桥": {
-		PortName: "上海口岸",
-		ExtraPay: "",
-		Addr:     "上海",
-	},
-	"天津东疆": {
-		PortName: "天津口岸",
-		ExtraPay: "补差",
-		Addr:     "天津",
-	},
-	"天津新港": {
-		PortName: "天津口岸",
-		ExtraPay: "",
-		Addr:     "天津",
-	},
-	"广州黄埔": {
-		PortName: "广州口岸",
-		ExtraPay: "补差",
-		Addr:     "广州",
-	},
-	"重庆果园": {
-		PortName: "重庆口岸",
-		ExtraPay: "",
-		Addr:     "重庆",
-	},
-	"重庆果园港": {
-		PortName: "重庆口岸",
-		ExtraPay: "",
-		Addr:     "重庆",
-	},
-}
+// PortInfoMap removed: use GetPortInfo / LoadPortDict (base_dicts type=港口字典).
 
 func GetTrans(productInfo models.ProductInfoBase, containerCount string) string {
 	var trans string
@@ -216,7 +174,7 @@ func GetUnitFreight(port string, trans string, company_name string) FreightInfo 
 
 	companyInfo := GetCompanyInfo(company_name)
 
-	portInfo := PortInfoMap[port]
+	portInfo := GetPortInfo(port)
 
 	var targetAddr string
 	if companyInfo.TargetAddr == "海宁" {
