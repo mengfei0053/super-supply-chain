@@ -74,4 +74,6 @@ curl -G \
 
 对应工具 `ssc_search_companies`。参数是 `keyword`，可选 `includeDeleted`。工具请求本页的 `GET`，并把完整行数组放在结果的 `rows` 里。工具说明见 [API 与 MCP](/api-and-mcp#tools)。接入见 [MCP 接入与使用](/mcp)。
 
-新增一行见 [新增公司](/common-apis/companies-create)，修改名称、别名或发票目标地址见 [更新公司](/common-apis/companies-update)。
+不带 `keyword`、带 react-admin 的 `range` 时，同一路径返回分页列表，并写 `Content-Range`；`filter.q` / `filter.keyword` / `filter.name` 可按名称或别名筛选（管理后台「公司基本信息」用）。`GET /api/admin/companies/{id}` 取一行。
+
+新增一行见 [新增公司](/common-apis/companies-create)，修改见 [更新公司](/common-apis/companies-update)，软删除见 [删除公司](/common-apis/companies-delete)。

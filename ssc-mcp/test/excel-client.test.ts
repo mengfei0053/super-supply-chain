@@ -549,6 +549,32 @@ test("createCompany and updateCompany send name, alias, and target_addr", async 
   }
 });
 
+test("deleteCompany soft-deletes by id", async () => {
+  let seenUrl = "";
+  let seenMethod = "";
+  const server = createServer((_req, res) => {
+    seenUrl = _req.url ?? "";
+    seenMethod = _req.method ?? "";
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ message: "Delete company successfully", id: 12 }));
+  });
+  await once(server.listen(0), "listening");
+  const { port } = server.address() as { port: number };
+  const client = new SscClient({
+    baseUrl: `http://127.0.0.1:${port}`,
+    token: "test-token",
+  });
+  try {
+    const result = await client.deleteCompany(12);
+    assert.equal(seenMethod, "DELETE");
+    assert.equal(seenUrl, "/api/admin/companies/12");
+    assert.equal((result as { id: number }).id, 12);
+    await assert.rejects(() => client.deleteCompany(0), /id must be a positive integer/);
+  } finally {
+    server.close();
+  }
+});
+
 test("deleteExcelRow sends one id and rejects extra export types", async () => {
   let seenUrl = "";
   let seenMethod = "";

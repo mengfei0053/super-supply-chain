@@ -6,7 +6,7 @@ slug: /common-apis
 
 # 常用接口
 
-宿迁结算表上最常调用的是：上传 Excel、按日期查询列表、按类型下载四类发票，以及按 id 删除一行。公司基础表可以按关键字查询，也可以新增公司、修改名称、别名和发票目标地址。下面每条都是独立说明，侧边栏「常用接口」可以直接点开。
+宿迁结算表上最常调用的是：上传 Excel、按日期查询列表、按类型下载四类发票，以及按 id 删除一行。公司基础表可以按关键字查询，也可以新增、修改和软删除公司基本信息。下面每条都是独立说明，侧边栏「常用接口」可以直接点开。
 
 源站是 `https://ssc.mengfei.tech`。路径在 `/api/admin` 下，不要写成 `/super-supply-chain/...`。都要：
 
@@ -28,11 +28,12 @@ Authorization: Bearer <token>
 | [运费发票](/common-apis/export-freight) | `GET /api/admin/excel-exports/{tableName}?ids={id}&type=invoice_freight` | xlsx 文件下载 |
 | [删除一行](/common-apis/delete-row) | `DELETE /api/admin/excel/{tableName}/{id}` | JSON |
 | [公司查询](/common-apis/companies) | `GET /api/admin/companies?keyword={keyword}` | JSON 数组。匹配 `name` 或 `alias` |
-| [新增公司](/common-apis/companies-create) | `POST /api/admin/companies` | JSON 对象。必填 `name`、`unified_social_credit_code`，可选 `alias`、`target_addr` |
-| [更新公司](/common-apis/companies-update) | `PUT /api/admin/companies/{id}` | JSON 对象。可改 `name`、`alias`、`target_addr` |
+| [新增公司](/common-apis/companies-create) | `POST /api/admin/companies` | JSON 对象。必填 `name`、`unified_social_credit_code`，可选别名/地址等 |
+| [更新公司](/common-apis/companies-update) | `PUT /api/admin/companies/{id}` | JSON 对象。可改名称、别名、目标地址、地址、银行、电话 |
+| [删除公司](/common-apis/companies-delete) | `DELETE /api/admin/companies/{id}` | 软删除。写入 `deleted_at` |
 
 四类导出的响应体是 Excel 文件，不是 JSON。浏览器或 HTTP 客户端应按附件保存。
 
 ## 和 MCP 的关系
 
-这几条都已经有 MCP 工具：上传是 `ssc_upload_excel`，查询列表是 `ssc_list_excel`，删除是 `ssc_delete_excel_row`，四类导出发票是 `ssc_export_excel`，公司查询是 `ssc_search_companies`，新增公司是 `ssc_create_company`，更新公司是 `ssc_update_company`。工具使用本分组里的路径和参数。接入步骤见 [MCP 接入与使用](/mcp)，工具说明见 [API 与 MCP](/api-and-mcp#tools)。
+这几条都已经有 MCP 工具：上传是 `ssc_upload_excel`，查询列表是 `ssc_list_excel`，删除是 `ssc_delete_excel_row`，四类导出发票是 `ssc_export_excel`，公司查询是 `ssc_search_companies`，新增公司是 `ssc_create_company`，更新公司是 `ssc_update_company`，删除公司是 `ssc_delete_company`。工具使用本分组里的路径和参数。接入步骤见 [MCP 接入与使用](/mcp)，工具说明见 [API 与 MCP](/api-and-mcp#tools)。

@@ -6,7 +6,7 @@ slug: /common-apis/companies-update
 
 # 更新公司
 
-修改公司基础表 `base_companies_infos` 里一行的名称、别名或发票目标地址。其它列保持原值。已软删除的行不能改。
+修改公司基础表 `base_companies_infos` 里一行的基本信息（名称、别名、发票目标地址，以及地址、银行代码、电话）。统一社会信用代码不能改。已软删除的行不能改。
 
 | 项 | 值 |
 | --- | --- |
@@ -84,3 +84,5 @@ JSON 对象。至少要有 `name`、`alias`、`target_addr` 之一。未出现�
 ## MCP
 
 对应工具 `ssc_update_company`。参数是 `id`，以及可选的 `name`、`alias`、`targetAddr`。工具请求本页的 `PUT`，只提交调用时给出的字段，并把更新后的行放在结果的 `company` 里。工具说明见 [API 与 MCP](/api-and-mcp#tools)。接入见 [MCP 接入与使用](/mcp)。
+
+软删除见 [删除公司](/common-apis/companies-delete)。

@@ -11,6 +11,7 @@ import dictManage from "./pages/tool-pages/dict-manage";
 import ExcelEditPage from "./pages/excels/Edit";
 import YifanCostCalculation from "./pages/yifan/cost-calculation";
 import PersonalAccessTokens from "./pages/personal-access-tokens";
+import Companies from "./pages/companies";
 
 export const App = () => (
   <Admin
@@ -26,6 +27,11 @@ export const App = () => (
       name="personal-access-tokens"
       options={{ label: "个人访问令牌" }}
       {...PersonalAccessTokens}
+    ></Resource>
+    <Resource
+      name="companies"
+      options={{ label: "公司基本信息" }}
+      {...Companies}
     ></Resource>
     <Resource
       name="yifan/cost-calculation"

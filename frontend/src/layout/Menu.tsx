@@ -10,6 +10,7 @@ import { Box } from "@mui/material";
 import ProductIcon from "@mui/icons-material/Collections";
 import OrderIcon from "@mui/icons-material/AttachMoney";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
+import BusinessIcon from "@mui/icons-material/Business";
 import * as React from "react";
 import SubMenu from "./SubMenu";
 import { httpClient } from "../dataProvider";
@@ -131,6 +132,15 @@ const Menu: React.FunctionComponent<IMenuProps> = ({ dense = false }) => {
             smart_count: 2,
           })}
           leftIcon={<VpnKeyIcon />}
+          dense={dense}
+        />
+        <MenuItemLink
+          to="/companies"
+          state={{ _scrollToTop: true }}
+          primaryText={translate(`公司基本信息`, {
+            smart_count: 2,
+          })}
+          leftIcon={<BusinessIcon />}
           dense={dense}
         />
       </SubMenu>

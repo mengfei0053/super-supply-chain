@@ -501,6 +501,30 @@ export class SscClient {
     );
   }
 
+  /**
+   * DELETE /api/admin/companies/:id
+   * Soft-deletes one active company (sets deleted_at).
+   */
+  async deleteCompany(id: string | number): Promise<unknown> {
+    const companyId = assertCompanyID(id);
+    return this.requestJson(
+      "DELETE",
+      `/api/admin/companies/${encodeURIComponent(companyId)}`,
+    );
+  }
+
+  /**
+   * GET /api/admin/companies/:id
+   * One active company row.
+   */
+  async getCompany(id: string | number): Promise<unknown> {
+    const companyId = assertCompanyID(id);
+    return this.requestJson(
+      "GET",
+      `/api/admin/companies/${encodeURIComponent(companyId)}`,
+    );
+  }
+
   async deleteExcelRow(
     tableName: string,
     id: string | number,

@@ -191,7 +191,7 @@ These are the only tools. There is no login or status tool: set `SSC_TOKEN`, or 
 
 ### 常用
 
-Upload, list, delete, these four exports, and company keyword search, create, and update are the commonly used APIs:
+Upload, list, delete, these four exports, and company keyword search, create, update, and delete are the commonly used APIs:
 
 | 常用 | API | Tool |
 | --- | --- | --- |
@@ -205,6 +205,7 @@ Upload, list, delete, these four exports, and company keyword search, create, an
 | 常用 | `GET /api/admin/companies?keyword={keyword}` | `ssc_search_companies` |
 | 常用 | `POST /api/admin/companies` | `ssc_create_company` |
 | 常用 | `PUT /api/admin/companies/{id}` | `ssc_update_company` |
+| 常用 | `DELETE /api/admin/companies/{id}` | `ssc_delete_company` |
 
 `ssc_upload_excel` (常用) reads a local `.xlsx`/`.xls` path on the machine running the MCP server and posts it as multipart `file`, plus form field `name`. Example table: `dynamic_settlement_statement_suqian`. This inserts a row.
 
@@ -218,7 +219,9 @@ Upload, list, delete, these four exports, and company keyword search, create, an
 
 `ssc_create_company` (常用) inserts one company (`POST /api/admin/companies`). `name` and `unifiedSocialCreditCode` (统一社会信用代码, sent as `unified_social_credit_code`) are required and unique. `alias` and `targetAddr` (发票目标地址, sent as `target_addr`) are optional. The result's `company` object is the stored row.
 
-`ssc_update_company` (常用) updates one active company (`PUT /api/admin/companies/{id}`). Send `id` plus any of `name`, `alias`, and `targetAddr`. Omitted fields stay unchanged. An empty `alias` or `targetAddr` clears that column. `unified_social_credit_code` and the address, bank, and phone columns are not modified. Soft-deleted rows return 404.
+`ssc_update_company` (常用) updates one active company (`PUT /api/admin/companies/{id}`). Send `id` plus any of `name`, `alias`, and `targetAddr`. Omitted fields stay unchanged. An empty `alias` or `targetAddr` clears that column. `unified_social_credit_code` is not modified by this tool. Soft-deleted rows return 404.
+
+`ssc_delete_company` (常用) soft-deletes one active company (`DELETE /api/admin/companies/{id}`). Sets `deleted_at`. Missing or already deleted ids return 404.
 
 Orders, dictionaries, menus, read rules, and other export types are not exposed.
 
@@ -231,7 +234,7 @@ npm test
 npm run build
 ```
 
-Transport smoke (no SSC credentials). Starts HTTP on an ephemeral port, handshakes Streamable HTTP and legacy SSE, lists the seven tools, calls delete without credentials, checks CORS, then handshakes the default stdio server:
+Transport smoke (no SSC credentials). Starts HTTP on an ephemeral port, handshakes Streamable HTTP and legacy SSE, lists the eight tools, calls delete without credentials, checks CORS, then handshakes the default stdio server:
 
 ```bash
 npm run smoke:http

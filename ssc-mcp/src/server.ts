@@ -2,7 +2,7 @@
  * SSC MCP tools shared by stdio and Streamable HTTP.
  *
  * Commonly used Excel upload, list, delete, and export calls, plus company
- * keyword search, create, and update. Auth is environment-only: SSC_TOKEN, or
+ * keyword search, create, update, and delete. Auth is environment-only: SSC_TOKEN, or
  * SSC_USERNAME + SSC_PASSWORD.
  */
 
@@ -327,6 +327,31 @@ export function createSscMcpServer(client: SscClient): McpServer {
           ok: true,
           id: String(id).trim(),
           company,
+        });
+      } catch (err) {
+        return errorResult(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "ssc_delete_company",
+    {
+      description:
+        "常用. Soft-delete one active company (DELETE /api/admin/companies/:id). Sets deleted_at. Invoice export will no longer match this row. Already deleted or missing ids return 404.",
+      inputSchema: {
+        id: z
+          .union([z.string(), z.number()])
+          .describe("Company id from ssc_search_companies, e.g. 12."),
+      },
+    },
+    async ({ id }) => {
+      try {
+        const result = await client.deleteCompany(id);
+        return jsonResult({
+          ok: true,
+          id: String(id).trim(),
+          result,
         });
       } catch (err) {
         return errorResult(err);

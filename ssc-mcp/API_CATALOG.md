@@ -7,7 +7,7 @@ SPA path: `/super-supply-chain/` (static only; not an API prefix).
 
 Auth: session JWT or personal access token via `Authorization: Bearer`, `X-API-Key`, or `?token=` (`middleware.AuthMiddleware`). Public endpoints do not require auth. PAT management is session-JWT only. See `website/docs/personal-access-tokens.md`.
 
-The MCP server exposes only seven tools, all 常用: `ssc_upload_excel`, `ssc_list_excel`, `ssc_delete_excel_row`, `ssc_export_excel` (types `shortHaulInvoice`, `invoice_unpacking`, `invoice_clearance_only`, `invoice_freight`), `ssc_search_companies`, `ssc_create_company`, and `ssc_update_company`. Other routes below are not MCP tools. Auth is `SSC_TOKEN` or `SSC_USERNAME` + `SSC_PASSWORD` (no login tool).
+The MCP server exposes eight tools, all 常用: `ssc_upload_excel`, `ssc_list_excel`, `ssc_delete_excel_row`, `ssc_export_excel` (types `shortHaulInvoice`, `invoice_unpacking`, `invoice_clearance_only`, `invoice_freight`), `ssc_search_companies`, `ssc_create_company`, `ssc_update_company`, and `ssc_delete_company`. Other routes below are not MCP tools. Auth is `SSC_TOKEN` or `SSC_USERNAME` + `SSC_PASSWORD` (no login tool).
 
 ## Public
 
@@ -81,9 +81,11 @@ Known dynamic tables (from MySQL):
 | --- | --- | --- | --- |
 | GET | `/options/:key` | Select options | `key=export-templates` + `associated_table` |
 | GET | `/menus` | Dynamic menus | `{id, menuName, dynamicTableName}[]` |
-| GET | `/companies` | Company keyword search | `keyword` required. `LIKE` on `name` and `alias`. Default `deleted_at IS NULL`; `includeDeleted=true` keeps soft-deleted rows. Returns all columns. MCP 常用: `ssc_search_companies` |
-| POST | `/companies` | Create company | JSON `name` and `unified_social_credit_code` required and unique. Optional `alias`, `target_addr`. Other columns stored empty. `200` returns the row. `409` on duplicate name or credit code. MCP 常用: `ssc_create_company` |
-| PUT | `/companies/:id` | Update company name, alias, target_addr | JSON may include any of those three fields. Omitted fields stay unchanged. Empty `alias` or `target_addr` clears it. Does not change credit code or other columns. Active rows only (`404` if missing or soft-deleted). MCP 常用: `ssc_update_company` |
+| GET | `/companies` | Company search or list | With `keyword`: search (`LIKE` on `name`/`alias`). Without `keyword`: react-admin list (`range` required, optional `filter.q`/`keyword`/`name`, `Content-Range`). Soft-deleted omitted unless `includeDeleted=true` on keyword search. MCP 常用: `ssc_search_companies` |
+| GET | `/companies/:id` | Company detail | Active row only (`404` if missing or soft-deleted). |
+| POST | `/companies` | Create company | JSON `name` and `unified_social_credit_code` required and unique. Optional `alias`, `target_addr`, address, `bank_code`, `phone_num`. `200` returns the row. `409` on duplicate. MCP 常用: `ssc_create_company` |
+| PUT | `/companies/:id` | Update company basic info | JSON may include `name`, `alias`, `target_addr`, address, `bank_code`, `phone_num`. Omitted fields stay unchanged. Empty optional strings clear. Does not change credit code. Active only. MCP 常用: `ssc_update_company` |
+| DELETE | `/companies/:id` | Soft-delete company | Sets `deleted_at`. `404` if missing or already deleted. MCP 常用: `ssc_delete_company` |
 
 ## List query convention
 

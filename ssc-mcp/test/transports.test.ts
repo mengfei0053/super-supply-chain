@@ -21,6 +21,7 @@ const expectedTools = [
   "ssc_search_companies",
   "ssc_create_company",
   "ssc_update_company",
+  "ssc_delete_company",
 ];
 
 test("streamable HTTP exposes upload and export tools", async () => {
