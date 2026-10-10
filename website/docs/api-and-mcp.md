@@ -33,7 +33,7 @@ JSON API 在站点源站的 `/api` 下，**不是** `/super-supply-chain` 下面
 
 ## 工具一览 \{#tools}
 
-共 7 个工具，都是常用接口。说明根据 `ssc-mcp/README.md` 与 `ssc-mcp/src/server.ts` 里的注册信息整理。
+共 8 个工具，都是常用接口。说明根据 `ssc-mcp/README.md` 与 `ssc-mcp/src/server.ts` 里的注册信息整理。
 
 | 工具 | 说明 |
 | --- | --- |
@@ -44,6 +44,7 @@ JSON API 在站点源站的 `/api` 下，**不是** `/super-supply-chain` 下面
 | `ssc_search_companies` | 常用。`GET /api/admin/companies?keyword=`，在 `name` 与 `alias` 上做包含匹配，返回全部列。对应 [公司查询](/common-apis/companies)。 |
 | `ssc_create_company` | 常用。`POST /api/admin/companies`。必填 `name` 与 `unified_social_credit_code`，可选 `alias`、`target_addr`。对应 [新增公司](/common-apis/companies-create)。 |
 | `ssc_update_company` | 常用。`PUT /api/admin/companies/{id}`。可改 `name`、`alias`、`target_addr`，其它列保持原值。对应 [更新公司](/common-apis/companies-update)。 |
+| `ssc_delete_company` | 常用。`DELETE /api/admin/companies/{id}`。软删除一行公司。对应 [删除公司](/common-apis/companies-delete)。 |
 
 表名示例：`dynamic_settlement_statement_suqian`。登录、菜单、结算单、字典和读取规则没有 MCP 工具。
 

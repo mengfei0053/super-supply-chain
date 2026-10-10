@@ -22,6 +22,7 @@ const EXPECTED_TOOLS = [
   "ssc_search_companies",
   "ssc_create_company",
   "ssc_update_company",
+  "ssc_delete_company",
 ] as const;
 
 const root = fileURLToPath(new URL("..", import.meta.url));

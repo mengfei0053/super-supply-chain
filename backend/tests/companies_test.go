@@ -104,7 +104,7 @@ func TestSearchCompaniesTreatsLikeWildcardsAsLiterals(t *testing.T) {
 	}
 }
 
-func TestSearchCompaniesRequiresKeyword(t *testing.T) {
+func TestCompaniesIndexWithoutKeywordRequiresRange(t *testing.T) {
 	setupTestDB(t, &models.BaseCompaniesInfos{})
 	router := setupProtectedAPIRouter()
 	token := signedToken(t, "alice", time.Now().Add(time.Hour))
@@ -114,6 +114,9 @@ func TestSearchCompaniesRequiresKeyword(t *testing.T) {
 	router.ServeHTTP(w, req)
 	if w.Code != http.StatusBadRequest {
 		t.Fatalf("status = %d, body = %s; want 400", w.Code, w.Body.String())
+	}
+	if !strings.Contains(w.Body.String(), "range") {
+		t.Fatalf("body = %s; want range error", w.Body.String())
 	}
 }
 
@@ -273,7 +276,7 @@ func TestCreateCompanyRejectsDuplicateNameOrCreditCode(t *testing.T) {
 	}
 }
 
-func TestUpdateCompanyChangesNameAliasAndTargetAddrOnly(t *testing.T) {
+func TestUpdateCompanyChangesBasicInfoAndIgnoresCreditCode(t *testing.T) {
 	setupTestDB(t, &models.BaseCompaniesInfos{})
 	token := signedToken(t, "alice", time.Now().Add(time.Hour))
 	seedCompany(t, companySeed{
@@ -310,7 +313,8 @@ func TestUpdateCompanyChangesNameAliasAndTargetAddrOnly(t *testing.T) {
 		"alias":                      "",
 		"target_addr":                "嘉兴",
 		"unified_social_credit_code": "SHOULD-IGNORE",
-		"addr_city":                  "SHOULD-IGNORE",
+		"addr_city":                  "嘉兴市",
+		"phone_num":                  "0573-1111111",
 	}, token)
 	if full.Code != http.StatusOK {
 		t.Fatalf("update status = %d, body = %s", full.Code, full.Body.String())
@@ -319,8 +323,11 @@ func TestUpdateCompanyChangesNameAliasAndTargetAddrOnly(t *testing.T) {
 	if updated["name"] != "杭州测试公司（更新）" || updated["alias"] != "" || updated["target_addr"] != "嘉兴" {
 		t.Fatalf("updated = %s", full.Body.String())
 	}
-	if updated["unified_social_credit_code"] != "91330100TEST" || updated["addr_city"] != "杭州" || updated["phone_num"] != "0571-0000000" {
-		t.Fatalf("updated changed other fields: %s", full.Body.String())
+	if updated["unified_social_credit_code"] != "91330100TEST" {
+		t.Fatalf("credit code changed: %s", full.Body.String())
+	}
+	if updated["addr_city"] != "嘉兴市" || updated["phone_num"] != "0573-1111111" || updated["bank_code"] != "BANK001" {
+		t.Fatalf("updated basic fields = %s", full.Body.String())
 	}
 
 	if got := getCompanies(t, "仓储备注", false); len(got) != 0 {
@@ -368,12 +375,140 @@ func TestUpdateCompanyRejectsMissingAndDeletedRows(t *testing.T) {
 	}
 
 	empty := doCompanyJSON(t, http.MethodPut, "/api/admin/companies/"+id, map[string]any{}, token)
-	if empty.Code != http.StatusBadRequest || !strings.Contains(empty.Body.String(), "name, alias, or target_addr is required") {
+	if empty.Code != http.StatusBadRequest || !strings.Contains(empty.Body.String(), "at least one updatable field is required") {
 		t.Fatalf("empty update = %d %s", empty.Code, empty.Body.String())
 	}
 	badID := doCompanyJSON(t, http.MethodPut, "/api/admin/companies/abc", map[string]any{"name": "x"}, token)
 	if badID.Code != http.StatusBadRequest {
 		t.Fatalf("bad id = %d %s", badID.Code, badID.Body.String())
+	}
+}
+
+func TestListCompaniesReturnsContentRangeAndSupportsFilterQ(t *testing.T) {
+	setupTestDB(t, &models.BaseCompaniesInfos{})
+	seedCompany(t, companySeed{
+		Name: "杭州测试公司A", Alias: "杭测A", UnifiedSocialCreditCode: "CODE-A",
+	})
+	seedCompany(t, companySeed{
+		Name: "南阳食品有限公司", Alias: "南阳", UnifiedSocialCreditCode: "CODE-B",
+	})
+	seedCompany(t, companySeed{
+		Name: "南阳已删除公司", Alias: "已删", UnifiedSocialCreditCode: "CODE-C", DeletedAt: "2020-01-02 03:04:05",
+	})
+
+	router := setupProtectedAPIRouter()
+	token := signedToken(t, "alice", time.Now().Add(time.Hour))
+	req := httptest.NewRequest(http.MethodGet, "/api/admin/companies?range=%5B0%2C10%5D&filter=%7B%7D", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("list status = %d %s", w.Code, w.Body.String())
+	}
+	if got := w.Header().Get("Content-Range"); got != "2" {
+		t.Fatalf("Content-Range = %q, want 2", got)
+	}
+	var rows []map[string]any
+	if err := json.Unmarshal(w.Body.Bytes(), &rows); err != nil {
+		t.Fatalf("decode list: %v", err)
+	}
+	if len(rows) != 2 {
+		t.Fatalf("list rows = %s", mustJSON(t, rows))
+	}
+
+	filtered := httptest.NewRequest(http.MethodGet, "/api/admin/companies?range=%5B0%2C10%5D&filter="+url.QueryEscape(`{"q":"南阳"}`), nil)
+	filtered.Header.Set("Authorization", "Bearer "+token)
+	fw := httptest.NewRecorder()
+	router.ServeHTTP(fw, filtered)
+	if fw.Code != http.StatusOK {
+		t.Fatalf("filtered status = %d %s", fw.Code, fw.Body.String())
+	}
+	if got := fw.Header().Get("Content-Range"); got != "1" {
+		t.Fatalf("filtered Content-Range = %q, want 1", got)
+	}
+	var matched []map[string]any
+	if err := json.Unmarshal(fw.Body.Bytes(), &matched); err != nil {
+		t.Fatalf("decode filtered: %v", err)
+	}
+	if len(matched) != 1 || matched[0]["name"] != "南阳食品有限公司" {
+		t.Fatalf("filtered rows = %s", mustJSON(t, matched))
+	}
+}
+
+func TestGetCompanyByID(t *testing.T) {
+	setupTestDB(t, &models.BaseCompaniesInfos{})
+	token := signedToken(t, "alice", time.Now().Add(time.Hour))
+	seedCompany(t, companySeed{
+		Name: "杭州测试公司", Alias: "杭测", UnifiedSocialCreditCode: "CODE-GET", TargetAddr: "杭州",
+	})
+	found := getCompanies(t, "杭州测试公司", false)
+	id := companyIDString(t, found[0]["id"])
+
+	ok := doCompanyJSON(t, http.MethodGet, "/api/admin/companies/"+id, nil, token)
+	if ok.Code != http.StatusOK {
+		t.Fatalf("get = %d %s", ok.Code, ok.Body.String())
+	}
+	body := decodeCompanyObject(t, ok.Body.Bytes())
+	if body["name"] != "杭州测试公司" || body["target_addr"] != "杭州" {
+		t.Fatalf("get body = %s", ok.Body.String())
+	}
+
+	missing := doCompanyJSON(t, http.MethodGet, "/api/admin/companies/99999", nil, token)
+	if missing.Code != http.StatusNotFound {
+		t.Fatalf("missing get = %d %s", missing.Code, missing.Body.String())
+	}
+}
+
+func TestDeleteCompanySoftDeletes(t *testing.T) {
+	setupTestDB(t, &models.BaseCompaniesInfos{})
+	token := signedToken(t, "alice", time.Now().Add(time.Hour))
+	seedCompany(t, companySeed{
+		Name: "杭州待删公司", Alias: "待删", UnifiedSocialCreditCode: "CODE-DEL",
+	})
+	found := getCompanies(t, "杭州待删公司", false)
+	id := companyIDString(t, found[0]["id"])
+
+	deleted := doCompanyJSON(t, http.MethodDelete, "/api/admin/companies/"+id, nil, token)
+	if deleted.Code != http.StatusOK {
+		t.Fatalf("delete = %d %s", deleted.Code, deleted.Body.String())
+	}
+	if got := getCompanies(t, "杭州待删公司", false); len(got) != 0 {
+		t.Fatalf("active after delete = %s", mustJSON(t, got))
+	}
+	if got := getCompanies(t, "杭州待删公司", true); len(got) != 1 {
+		t.Fatalf("includeDeleted after delete = %s", mustJSON(t, got))
+	}
+	again := doCompanyJSON(t, http.MethodDelete, "/api/admin/companies/"+id, nil, token)
+	if again.Code != http.StatusNotFound {
+		t.Fatalf("second delete = %d %s", again.Code, again.Body.String())
+	}
+	getGone := doCompanyJSON(t, http.MethodGet, "/api/admin/companies/"+id, nil, token)
+	if getGone.Code != http.StatusNotFound {
+		t.Fatalf("get after delete = %d %s", getGone.Code, getGone.Body.String())
+	}
+}
+
+func TestCreateCompanyAcceptsAddressBankPhone(t *testing.T) {
+	setupTestDB(t, &models.BaseCompaniesInfos{})
+	token := signedToken(t, "alice", time.Now().Add(time.Hour))
+	w := doCompanyJSON(t, http.MethodPost, "/api/admin/companies", map[string]any{
+		"name":                         "杭州完整公司",
+		"unified_social_credit_code":   "CODE-FULL",
+		"alias":                        "完整",
+		"target_addr":                  "海宁",
+		"addr_country":                 "中国",
+		"addr_province":                "浙江",
+		"addr_city":                    "杭州",
+		"addr_street":                  "示例路 1 号",
+		"bank_code":                    "BANK001",
+		"phone_num":                    "0571-0000000",
+	}, token)
+	if w.Code != http.StatusOK {
+		t.Fatalf("create full = %d %s", w.Code, w.Body.String())
+	}
+	body := decodeCompanyObject(t, w.Body.Bytes())
+	if body["addr_city"] != "杭州" || body["bank_code"] != "BANK001" || body["phone_num"] != "0571-0000000" {
+		t.Fatalf("create full body = %s", w.Body.String())
 	}
 }
 

@@ -1,6 +1,6 @@
 ---
 name: SSC MCP
-description: When connecting to or calling Super Supply Chain via remote MCP for 娃哈哈发票模板导出 (Wahaha invoice template export: upload/list/delete/export Excel, search, create, and update companies).
+description: When connecting to or calling Super Supply Chain via remote MCP for 娃哈哈发票模板导出 (Wahaha invoice template export: upload/list/delete/export Excel, search, create, update, and delete companies).
 ---
 
 # SSC MCP
@@ -11,7 +11,7 @@ This MCP and this skill belong to the **娃哈哈发票模板导出流程** (Wah
 
 Super Supply Chain (SSC) is used for Wahaha settlement Excel upload and four invoice template exports: `shortHaulInvoice`, `invoice_unpacking`, `invoice_clearance_only`, and `invoice_freight`.
 
-The remote MCP tools `ssc_upload_excel`, `ssc_list_excel`, `ssc_delete_excel_row`, `ssc_export_excel`, `ssc_search_companies`, `ssc_create_company`, and `ssc_update_company` are the agent-facing surface of that same Wahaha invoice-export pipeline.
+The remote MCP tools `ssc_upload_excel`, `ssc_list_excel`, `ssc_delete_excel_row`, `ssc_export_excel`, `ssc_search_companies`, `ssc_create_company`, `ssc_update_company`, and `ssc_delete_company` are the agent-facing surface of that same Wahaha invoice-export pipeline.
 
 Use this skill when connecting to that public MCP, or when calling those tools for 娃哈哈发票模板导出.
 
@@ -78,7 +78,7 @@ Save this in `~/.cursor/mcp.json`, or in the project file `.cursor/mcp.json`.
 
 ## Tools
 
-Seven tools. Example table name: `dynamic_settlement_statement_suqian`.
+Eight tools. Example table name: `dynamic_settlement_statement_suqian`.
 
 ### `ssc_upload_excel`
 
@@ -137,12 +137,18 @@ Use when a company is missing from invoice export (`POST /api/admin/companies`).
 
 ### `ssc_update_company`
 
-Use when fixing a company's 名称, alias, or 发票目标地址 (`PUT /api/admin/companies/{id}`). Other columns, including the credit code, stay as stored. At least one of `name`, `alias`, or `targetAddr` is required. An empty `alias` or `targetAddr` clears that column.
+Use when fixing a company's 名称, alias, or 发票目标地址 (`PUT /api/admin/companies/{id}`). Other columns, including the credit code, stay as stored unless the admin API is given address/bank/phone fields. At least one of `name`, `alias`, or `targetAddr` is required for this MCP tool. An empty `alias` or `targetAddr` clears that column.
 
 - `id` — company id from `ssc_search_companies`
 - `name` — optional
 - `alias` — optional
 - `targetAddr` — optional
+
+### `ssc_delete_company`
+
+Use when soft-deleting a company that should no longer match invoice export (`DELETE /api/admin/companies/{id}`). Sets `deleted_at`. Missing or already deleted ids return 404.
+
+- `id` — company id from `ssc_search_companies`
 
 ## Auth
 

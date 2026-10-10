@@ -14,7 +14,7 @@ description: 给 AI Agent 的娃哈哈发票模板导出 MCP 安装清单。
 这是 **娃哈哈发票模板导出流程**（Wahaha invoice template export）的一部分。
 
 - Super Supply Chain（SSC）负责娃哈哈结算 Excel 上传，以及四类发票模板导出：`shortHaulInvoice`、`invoice_unpacking`、`invoice_clearance_only`、`invoice_freight`。
-- 远程 MCP 的 `ssc_upload_excel`、`ssc_list_excel`、`ssc_delete_excel_row`、`ssc_export_excel`、`ssc_search_companies`、`ssc_create_company`、`ssc_update_company` 是这条流水线面向 Agent 的入口。
+- 远程 MCP 的 `ssc_upload_excel`、`ssc_list_excel`、`ssc_delete_excel_row`、`ssc_export_excel`、`ssc_search_companies`、`ssc_create_company`、`ssc_update_company`、`ssc_delete_company` 是这条流水线面向 Agent 的入口。
 - 公网地址用 `https://ssc.mengfei.tech/mcp`。
 
 ## 2. 取得并安装 Skill
@@ -73,5 +73,5 @@ description: 给 AI Agent 的娃哈哈发票模板导出 MCP 安装清单。
 ## 5. 核对工具后停止
 
 1. 用上一步的配置连接 MCP。
-2. 列出工具。确认有 `ssc_upload_excel`、`ssc_list_excel`、`ssc_delete_excel_row`、`ssc_export_excel`、`ssc_search_companies`、`ssc_create_company`、`ssc_update_company`。
-3. 停。在用户下一步明确要求之前，不要上传、列表查询、删除、导出、搜索公司、新增公司或更新公司。
+2. 列出工具。确认有 `ssc_upload_excel`、`ssc_list_excel`、`ssc_delete_excel_row`、`ssc_export_excel`、`ssc_search_companies`、`ssc_create_company`、`ssc_update_company`、`ssc_delete_company`。
+3. 停。在用户下一步明确要求之前，不要上传、列表查询、删除、导出、搜索公司、新增公司、更新公司或删除公司。
