@@ -17,12 +17,15 @@ const ListPage: React.FunctionComponent = () => {
   return (
     <List actions={<ListActions></ListActions>}>
       <Datagrid>
-        <TextField source="id"></TextField>
-        <TextField source="key"></TextField>
-        <TextField source="value"></TextField>
+        <TextField source="id" />
+        <TextField source="type" label="类型" />
+        <TextField source="key" label="港口原文" />
+        <TextField source="value" label="起始地" />
+        <TextField source="port_name" label="口岸" />
+        <TextField source="extra_pay" label="补差" />
         <>
-          <DeleteButton></DeleteButton>
-          <EditButton></EditButton>
+          <DeleteButton />
+          <EditButton />
         </>
       </Datagrid>
     </List>

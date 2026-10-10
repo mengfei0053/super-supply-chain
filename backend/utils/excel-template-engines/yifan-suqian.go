@@ -104,7 +104,7 @@ func GetFreightInvoiceFile(datas []models.DynamicExcelTable, newFilePath string)
 					"",
 					"",
 					"",
-					PortInfoMap[arrivalPort].Addr,
+					GetPortInfo(arrivalPort).Addr,
 					itemCompanyInifo.TargetAddr,
 					"公路运输",
 					car_num,
@@ -376,8 +376,8 @@ func GetShortHaulInvoce(datas []models.DynamicExcelTable, newFilePath string) er
 					"",
 					"",
 					"",
-					PortInfoMap[arrival_port].Addr,
-					PortInfoMap[arrival_port].Addr,
+					GetPortInfo(arrival_port).Addr,
+					GetPortInfo(arrival_port).Addr,
 					"公路运输",
 					short_car_num,
 					product_name,
@@ -392,7 +392,7 @@ func GetShortHaulInvoce(datas []models.DynamicExcelTable, newFilePath string) er
 
 		for index, detail := range base_details {
 			port := detail[5]
-			portInfo := PortInfoMap[port]
+			portInfo := GetPortInfo(port)
 			rowIndex := index + 4
 			companyInfo := GetCompanyInfo(detail[0])
 
@@ -454,7 +454,7 @@ func GetShortHaulAndFeiChangFile(datas []models.DynamicExcelTable, newFilePath s
 		List := data.Datas.List
 		productName := BaseData["product_name"]
 		arrivalPort := BaseData["arrival_port"]
-		arrivalPortInfo := PortInfoMap[arrivalPort]
+		arrivalPortInfo := GetPortInfo(arrivalPort)
 
 		baseInfo := []string{
 			BaseData["invoice_company"],

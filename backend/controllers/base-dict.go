@@ -1,10 +1,13 @@
 package controllers
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+
 	"super-supply-chain/models"
 	"super-supply-chain/utils"
+	excel_template_engines "super-supply-chain/utils/excel-template-engines"
 )
 
 func CreateDict(c *gin.Context) {
@@ -18,6 +21,7 @@ func CreateDict(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": query.Error})
 		return
 	}
+	excel_template_engines.InvalidatePortDictCache()
 	c.JSON(http.StatusOK, dict)
 }
 
@@ -60,8 +64,8 @@ func UpdateDict(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": query.Error})
 		return
 	}
+	excel_template_engines.InvalidatePortDictCache()
 	c.JSON(http.StatusOK, dict)
-
 }
 
 func DeleteDict(c *gin.Context) {
@@ -71,6 +75,7 @@ func DeleteDict(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": query.Error})
 		return
 	}
+	excel_template_engines.InvalidatePortDictCache()
 	c.JSON(http.StatusOK, gin.H{"message": "Delete dict successfully"})
 }
 
